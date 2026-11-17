@@ -313,6 +313,7 @@ export function NoiseMap() {
             10,
             1.9,
           ],
+          'line-blur': 0,
         },
       })
 
@@ -433,6 +434,87 @@ export function NoiseMap() {
     else map.once('load', apply)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pointsForToggle, source, metric])
+
+  // Dim / desaturate other cities while one is hovered
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+
+    const apply = () => {
+      if (!map.getLayer(RINGS_LAYER)) return
+      const activeId = hoveredId ?? ''
+      const dimming = Boolean(hoveredId)
+
+      // Opacity drop reads as desaturation on the dark basemap
+      map.setPaintProperty(
+        RINGS_LAYER,
+        'line-opacity',
+        dimming
+          ? ([
+              'case',
+              ['==', ['get', 'id'], activeId],
+              1,
+              0.16,
+            ] as maplibregl.ExpressionSpecification)
+          : 0.9,
+      )
+
+      map.setPaintProperty(
+        RINGS_LAYER,
+        'line-color',
+        ['get', 'color'] as maplibregl.ExpressionSpecification,
+      )
+
+      map.setPaintProperty(
+        RINGS_LAYER,
+        'line-width',
+        dimming
+          ? ([
+              'case',
+              ['==', ['get', 'id'], activeId],
+              ['interpolate', ['linear'], ['zoom'], 3, 1.2, 6, 2.0, 10, 2.8],
+              ['interpolate', ['linear'], ['zoom'], 3, 0.45, 6, 0.7, 10, 1.0],
+            ] as maplibregl.ExpressionSpecification)
+          : ([
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              3,
+              0.7,
+              6,
+              1.2,
+              10,
+              1.9,
+            ] as maplibregl.ExpressionSpecification),
+      )
+
+      if (map.getLayer(LABEL_LAYER)) {
+        map.setPaintProperty(
+          LABEL_LAYER,
+          'text-opacity',
+          dimming
+            ? ([
+                'case',
+                ['==', ['get', 'id'], activeId],
+                1,
+                0.2,
+              ] as maplibregl.ExpressionSpecification)
+            : ([
+                'interpolate',
+                ['linear'],
+                ['zoom'],
+                5.5,
+                0,
+                6.5,
+                0.9,
+              ] as maplibregl.ExpressionSpecification),
+        )
+      }
+    }
+
+    if (map.isStyleLoaded() && map.getLayer(RINGS_LAYER)) apply()
+    else map.once('load', apply)
+  }, [hoveredId])
 
   // Hover
   useEffect(() => {
