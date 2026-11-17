@@ -50,13 +50,6 @@
   color: #7f92b0;
 }
 
-.noise-sub {
-  margin: 0.25rem 0 0;
-  max-width: 34rem;
-  color: #9db0cc;
-  font-size: 1.05rem;
-}
-
 .noise-controls {
   display: flex;
   flex-wrap: wrap;
@@ -134,9 +127,15 @@
 }
 
 .noise-legend__note {
-  margin: 0.35rem 0 0;
+  margin: 0.45rem 0 0;
+  max-width: 14rem;
   color: #7f92b0;
   font-size: 0.95rem;
+  line-height: 1.25;
+}
+
+.noise-legend__note + .noise-legend__note {
+  margin-top: 0.2rem;
 }
 
 .swatch {

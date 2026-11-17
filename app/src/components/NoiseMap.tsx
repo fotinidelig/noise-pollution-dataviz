@@ -658,9 +658,6 @@ export function NoiseMap() {
         <div className="noise-brand">
           <p className="noise-eyebrow">EEA END 2022</p>
           <h1>Europe environmental noise</h1>
-          <p className="noise-sub">
-            Agglomerations · 1 ring ≈ 10k people · equal ring spacing · clusters when zoomed out
-          </p>
         </div>
         <div className="noise-controls" role="group" aria-label="Noise layer controls">
           <div className="seg" role="radiogroup" aria-label="Source">
@@ -711,6 +708,9 @@ export function NoiseMap() {
               <span>{b.label}</span>
             </div>
           ))}
+          <p className="noise-legend__note">
+            1 ring = 10k people exposed to these dBs
+          </p>
           <p className="noise-legend__note">Outer rings = louder</p>
         </div>
         <p className="noise-status">{status}</p>
