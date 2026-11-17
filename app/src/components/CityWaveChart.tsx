@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { max } from 'd3-array'
 import { scaleLinear, scalePoint } from 'd3-scale'
-import { area as d3Area, curveBasis, line as d3Line } from 'd3-shape'
+import { curveCatmullRom, line as d3Line } from 'd3-shape'
 import {
   LDEN_BANDS,
   LNIGHT_BANDS,
@@ -40,23 +39,81 @@ type Props = {
   onHoverCity: (id: string | null) => void
 }
 
-type Row = {
-  id: string
-  name: string
-  total: number
-  values: number[]
-  colors: string[]
-}
+type Pt = { x: number; y: number; color: string; t: number }
 
 const LDEN_KEYS = ['55-59', '60-64', '65-69', '70-74', '>75'] as const
 const LNIGHT_KEYS = ['50-54', '55-59', '60-64', '65-69', '>70'] as const
+
+function formatPeople(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
+  if (n >= 10_000) return `${Math.round(n / 1000)}k`
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`
+  return String(Math.round(n))
+}
+
+function lerpColor(a: string, b: string, t: number): string {
+  const parse = (hex: string) => {
+    const h = hex.replace('#', '')
+    return [
+      Number.parseInt(h.slice(0, 2), 16),
+      Number.parseInt(h.slice(2, 4), 16),
+      Number.parseInt(h.slice(4, 6), 16),
+    ]
+  }
+  const ca = parse(a)
+  const cb = parse(b)
+  const mix = ca.map((v, i) => Math.round(v + (cb[i] - v) * t))
+  return `rgb(${mix[0]}, ${mix[1]}, ${mix[2]})`
+}
+
+/** Catmull-Rom → densely sampled polyline for gradient stroke. */
+function sampleCatmullRom(
+  anchors: { x: number; y: number; color: string }[],
+  segmentsPerSpan = 18,
+): Pt[] {
+  if (anchors.length < 2) return []
+  const line = d3Line<{ x: number; y: number }>()
+    .x((d) => d.x)
+    .y((d) => d.y)
+    .curve(curveCatmullRom.alpha(0.9))
+  // Build path then sample via SVG path element
+  const d = line(anchors)
+  if (!d || typeof document === 'undefined') {
+    // fallback: linear
+    const out: Pt[] = []
+    for (let i = 0; i < anchors.length; i++) {
+      out.push({ ...anchors[i], t: i / (anchors.length - 1) })
+    }
+    return out
+  }
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+  path.setAttribute('d', d)
+  const len = path.getTotalLength()
+  const n = Math.max(2, (anchors.length - 1) * segmentsPerSpan)
+  const samples: Pt[] = []
+  for (let i = 0; i <= n; i++) {
+    const u = i / n
+    const p = path.getPointAtLength(u * len)
+    // colour by progress across band anchors
+    const f = u * (anchors.length - 1)
+    const i0 = Math.floor(f)
+    const i1 = Math.min(anchors.length - 1, i0 + 1)
+    const local = f - i0
+    samples.push({
+      x: p.x,
+      y: p.y,
+      t: u,
+      color: lerpColor(anchors[i0].color, anchors[i1].color, local),
+    })
+  }
+  return samples
+}
 
 export function CityWaveChart({
   cities,
   source,
   metric,
   hoveredId,
-  onHoverCity,
 }: Props) {
   const plotRef = useRef<HTMLDivElement | null>(null)
   const [size, setSize] = useState({ w: 220, h: 640 })
@@ -78,149 +135,194 @@ export function CityWaveChart({
 
   const bandMeta = metric === 'Lden' ? LDEN_BANDS : LNIGHT_BANDS
   const bandKeys = metric === 'Lden' ? [...LDEN_KEYS] : [...LNIGHT_KEYS]
+  const seriesKey = `${source}__${metric}`
 
-  const rows: Row[] = useMemo(() => {
-    const key = `${source}__${metric}`
-    const out: Row[] = []
+  const peopleCeiling = useMemo(() => {
+    let m = 1
     for (const c of cities) {
-      const tip = c.series[key]
-      if (!tip || !(tip.total > 0)) continue
-      const byBand = new Map(tip.bands.map((b) => [b.band, b]))
-      out.push({
-        id: c.id,
-        name: c.agglomeration,
-        total: tip.total,
-        values: bandKeys.map((b) => byBand.get(b)?.people ?? 0),
-        colors: bandKeys.map(
-          (b, i) => byBand.get(b)?.color ?? bandMeta[i]?.color ?? '#88a',
-        ),
-      })
+      const tip = c.series[seriesKey]
+      if (!tip) continue
+      for (const b of tip.bands) m = Math.max(m, b.people || 0)
     }
-    out.sort((a, b) => b.total - a.total)
-    return out
-  }, [cities, source, metric, bandKeys, bandMeta])
+    return m
+  }, [cities, seriesKey])
 
-  const pad = { top: 8, right: 8, bottom: 20, left: 8 }
-  const innerW = size.w - pad.left - pad.right
+  const active = useMemo(() => {
+    if (!hoveredId) return null
+    const city = cities.find((c) => c.id === hoveredId)
+    if (!city) return null
+    const tip = city.series[seriesKey]
+    if (!tip || !(tip.total > 0)) return null
+    const byBand = new Map(tip.bands.map((b) => [b.band, b]))
+    return {
+      id: city.id,
+      name: city.agglomeration,
+      total: tip.total,
+      points: bandKeys.map((b, i) => {
+        const hit = byBand.get(b)
+        return {
+          band: b,
+          label: bandMeta[i]?.label ?? b,
+          color: hit?.color ?? bandMeta[i]?.color ?? '#88aaaa',
+          people: hit?.people ?? 0,
+        }
+      }),
+    }
+  }, [hoveredId, cities, seriesKey, bandKeys, bandMeta])
+
+  const pad = { top: 12, right: 14, bottom: 28, left: 52 }
+  const innerW = Math.max(40, size.w - pad.left - pad.right)
   const innerH = Math.max(80, size.h - pad.top - pad.bottom)
 
-  const x = scalePoint<string>()
-    .domain(bandKeys)
-    .range([0, Math.max(innerW, 1)])
-    .padding(0.15)
-
+  // Quieter bands at top, louder at bottom
   const y = scalePoint<string>()
-    .domain(rows.map((r) => r.id))
-    .range([0, Math.max(innerH, 1)])
-    .padding(0.02)
+    .domain(bandKeys)
+    .range([0, innerH])
+    .padding(0.4)
 
-  const peopleMax = max(rows, (r) => max(r.values) ?? 0) ?? 1
-  const rowGap = rows.length > 1 ? innerH / Math.max(rows.length - 1, 1) : innerH
-  const amp = scaleLinear()
-    .domain([0, peopleMax])
-    .range([0, Math.min(18, Math.max(3.5, rowGap * 0.85))])
+  const x = scaleLinear().domain([0, peopleCeiling]).nice().range([0, innerW])
 
-  const lineGen = d3Line<[number, number]>()
-    .x((d) => d[0])
-    .y((d) => d[1])
-    .curve(curveBasis)
+  const anchors = useMemo(() => {
+    if (!active) return []
+    return active.points.map((p) => ({
+      x: x(p.people),
+      y: y(p.band) ?? 0,
+      color: p.color,
+      people: p.people,
+      band: p.band,
+    }))
+  }, [active, x, y])
+
+  const samples = useMemo(() => sampleCatmullRom(anchors, 22), [anchors])
+
+  const glowPath = useMemo(() => {
+    if (anchors.length < 2) return null
+    return d3Line<(typeof anchors)[number]>()
+      .x((d) => d.x)
+      .y((d) => d.y)
+      .curve(curveCatmullRom.alpha(0.9))(anchors)
+  }, [anchors])
+
+  const xTicks = x.ticks(3)
 
   return (
     <div className="wave-panel" aria-label="People by dB band">
       <div className="wave-panel__head">
         <span className="wave-panel__title">people × dB</span>
-        <span className="wave-panel__meta">{rows.length} cities</span>
+        <span className="wave-panel__meta">
+          {active ? active.name : 'hover a city'}
+        </span>
       </div>
       <div className="wave-panel__plot" ref={plotRef}>
-      <svg
-        className="wave-svg"
-        width={size.w}
-        height={size.h}
-        role="img"
-        aria-label="Sound-wave profiles by agglomeration"
-      >
-        <g transform={`translate(${pad.left},${pad.top})`}>
-          {bandKeys.map((b, i) => {
-            const px = x(b)
-            if (px == null) return null
-            return (
-              <g key={b}>
+        <svg
+          className="wave-svg"
+          width={size.w}
+          height={size.h}
+          role="img"
+          aria-label="Sound-wave profile for hovered agglomeration"
+        >
+          <g transform={`translate(${pad.left},${pad.top})`}>
+            <line className="wave-axis" x1={0} x2={0} y1={0} y2={innerH} />
+            <line
+              className="wave-axis"
+              x1={0}
+              x2={innerW}
+              y1={innerH}
+              y2={innerH}
+            />
+
+            {bandKeys.map((b, i) => {
+              const py = y(b)
+              if (py == null) return null
+              return (
+                <g key={b}>
+                  <line
+                    className="wave-band-grid"
+                    x1={0}
+                    x2={innerW}
+                    y1={py}
+                    y2={py}
+                  />
+                  <text
+                    className="wave-band-label"
+                    x={-8}
+                    y={py}
+                    textAnchor="end"
+                    dominantBaseline="middle"
+                  >
+                    {bandMeta[i]?.label.replace(' dB', '') ?? b}
+                  </text>
+                </g>
+              )
+            })}
+
+            {xTicks.map((t) => (
+              <g key={t}>
                 <line
                   className="wave-band-grid"
-                  x1={px}
-                  x2={px}
+                  x1={x(t)}
+                  x2={x(t)}
                   y1={0}
                   y2={innerH}
                 />
                 <text
-                  className="wave-band-label"
-                  x={px}
-                  y={innerH + 14}
+                  className="wave-x-label"
+                  x={x(t)}
+                  y={innerH + 16}
                   textAnchor="middle"
                 >
-                  {bandMeta[i]?.label.replace(' dB', '') ?? b}
+                  {formatPeople(t)}
                 </text>
               </g>
-            )
-          })}
+            ))}
 
-          {rows.map((row) => {
-            const baseline = y(row.id) ?? 0
-            const pts: [number, number][] = row.values.map((v, i) => {
-              const bx = x(bandKeys[i]) ?? 0
-              return [bx, baseline - amp(v)]
-            })
-            const areaPath = d3Area<[number, number]>()
-              .x((d) => d[0])
-              .y0(baseline)
-              .y1((d) => d[1])
-              .curve(curveBasis)(pts)
-            const path = lineGen(pts)
-            const active = hoveredId === row.id
-            const dimmed = hoveredId != null && !active
-            return (
-              <g
-                key={row.id}
-                className={
-                  active
-                    ? 'wave-row is-active'
-                    : dimmed
-                      ? 'wave-row is-dim'
-                      : 'wave-row'
-                }
-                onMouseEnter={() => onHoverCity(row.id)}
-                onMouseLeave={() => onHoverCity(null)}
-              >
-                <rect
-                  className="wave-hit"
-                  x={-4}
-                  y={baseline - Math.max(amp.range()[1], 4)}
-                  width={innerW + 8}
-                  height={Math.max(amp.range()[1] * 1.4, 6)}
-                />
-                {areaPath ? <path className="wave-area" d={areaPath} /> : null}
-                {path ? <path className="wave-line" d={path} /> : null}
-                {pts.map((p, i) =>
-                  row.values[i] > 0 ? (
-                    <circle
-                      key={bandKeys[i]}
-                      className="wave-dot"
-                      cx={p[0]}
-                      cy={p[1]}
-                      r={active ? 2.4 : 1.2}
-                      fill={row.colors[i]}
+            {active && samples.length > 1 ? (
+              <g className="wave-active">
+                {glowPath ? <path className="wave-glow" d={glowPath} /> : null}
+                {samples.slice(0, -1).map((a, i) => {
+                  const b = samples[i + 1]
+                  return (
+                    <line
+                      key={`s-${i}`}
+                      className="wave-seg"
+                      x1={a.x}
+                      y1={a.y}
+                      x2={b.x}
+                      y2={b.y}
+                      stroke={a.color}
                     />
-                  ) : null,
-                )}
+                  )
+                })}
+                {anchors.map((p) => (
+                  <circle
+                    key={p.band}
+                    className="wave-dot"
+                    cx={p.x}
+                    cy={p.y}
+                    r={3.4}
+                    fill={p.color}
+                  />
+                ))}
               </g>
-            )
-          })}
-        </g>
-      </svg>
+            ) : (
+              <text
+                className="wave-empty"
+                x={innerW / 2}
+                y={innerH / 2}
+                textAnchor="middle"
+              >
+                hover a city
+              </text>
+            )}
+          </g>
+        </svg>
       </div>
-      {hoveredId ? (
+      {active ? (
         <div className="wave-hover-label">
-          {rows.find((r) => r.id === hoveredId)?.name}
+          {active.name}
+          <span className="wave-hover-total">
+            {formatPeople(active.total)} people
+          </span>
         </div>
       ) : null}
     </div>
