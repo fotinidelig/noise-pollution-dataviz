@@ -52,6 +52,8 @@ data/raw/**
 !data/raw/**/
 !data/raw/**/README.md
 !data/raw/**/download_manifest.json
+# Small Eurostat annex PDF (SILC sample sizes) — allow in git
+!data/raw/eurostat/ilc_sieusilc_an_Annex_5-SampSize_rotat_nonresp.pdf
 data/processed/**
 !data/processed/.gitkeep
 !data/processed/**/

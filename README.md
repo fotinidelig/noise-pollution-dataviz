@@ -11,7 +11,9 @@ noise-pollution-dataviz/
 ├── analysis/          # Python scripts + marimo notebooks
 ├── data/
 │   ├── raw/eea-end/   # END exposure Excel + contour GPKGs (large; gitignored)
+│   ├── raw/eurostat/  # SILC Annex 5 PDF, etc.
 │   └── processed/     # Small CSV summaries for EDA / later viz
+├── docs/              # Short sources note (Europe active resources)
 ├── app/               # Vite + React + TypeScript interactive viz
 └── README.md
 ```
@@ -56,16 +58,21 @@ Other scripts (from `app/`):
 
 ## Project store resources
 
-Curated source lists live in the Project Agent Store (not duplicated here):
+Curated source lists (Agent Store + short repo mirror):
 
-- Europe / EEA END + health: `/cursor/stores/self/docs/europe-noise-active-resources.md`  
-  (also `/cursor/stores/bc-36eb9549-bf41-46b2-908b-412b53810f5d/docs/europe-noise-active-resources.md`)
-- Asia city noise: `/cursor/stores/self/docs/asia-city-noise-resources.md`  
-  (also `/cursor/stores/bc-36eb9549-bf41-46b2-908b-412b53810f5d/docs/asia-city-noise-resources.md`)
+- Europe / EEA END + health + SILC + WHO HA/HSD: [`docs/europe-noise-active-resources.md`](docs/europe-noise-active-resources.md)  
+  (canonical store: `/cursor/stores/self/docs/europe-noise-active-resources.md`)
+- Asia city noise: `/cursor/stores/self/docs/asia-city-noise-resources.md`
+
+## Key processed tables
+
+- WHO HA/HSD people (agglomeration × source): `data/processed/eea-end/exposure_agglomeration_who_ha_hsd*.csv`
+- SILC noise perception 2023 + Annex 5 sample *n*: `data/processed/eurostat/ilc_mddw01_2023_noise_with_sample_size.csv`
 
 ## Data policy
 
 - **EEA END 2022** exposure + contours: download under `data/raw/eea-end/` (large contour packages stay local / gitignored).
+- **Eurostat SILC** Annex 5 PDF under `data/raw/eurostat/`; small processed CSV committed.
 - **Asia** and other extras: still wait for explicit approval before downloading.
 - Processed outputs committed only when small (CSV summaries).
 

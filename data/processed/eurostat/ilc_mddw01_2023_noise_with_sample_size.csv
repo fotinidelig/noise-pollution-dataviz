@@ -1,0 +1,37 @@
+geo,country,year,percent_noise_neighbours_or_street,value_flag,hhcomp,rskpovth,unit,achieved_sample_size_households_2023,sample_size_source,dataset
+AL,Albania,2023,2.4,,TOTAL,TOTAL,PC,,,ilc_mddw01
+AT,Austria,2023,20.0,,TOTAL,TOTAL,PC,6122,Eurostat Annex 5 Table 2 (EU-SILC Micro-database 2024 extraction Nov 2025),ilc_mddw01
+BE,Belgium,2023,14.3,,TOTAL,TOTAL,PC,6428,Eurostat Annex 5 Table 2 (EU-SILC Micro-database 2024 extraction Nov 2025),ilc_mddw01
+BG,Bulgaria,2023,8.7,,TOTAL,TOTAL,PC,8019,Eurostat Annex 5 Table 2 (EU-SILC Micro-database 2024 extraction Nov 2025),ilc_mddw01
+CH,Switzerland,2023,17.1,,TOTAL,TOTAL,PC,8829,Eurostat Annex 5 Table 2 (EU-SILC Micro-database 2024 extraction Nov 2025),ilc_mddw01
+CY,Cyprus,2023,18.8,,TOTAL,TOTAL,PC,4281,Eurostat Annex 5 Table 2 (EU-SILC Micro-database 2024 extraction Nov 2025),ilc_mddw01
+CZ,Czechia,2023,15.5,,TOTAL,TOTAL,PC,8520,Eurostat Annex 5 Table 2 (EU-SILC Micro-database 2024 extraction Nov 2025),ilc_mddw01
+DE,Germany,2023,25.2,u,TOTAL,TOTAL,PC,36563,Eurostat Annex 5 Table 2 (EU-SILC Micro-database 2024 extraction Nov 2025),ilc_mddw01
+DK,Denmark,2023,15.6,,TOTAL,TOTAL,PC,6213,Eurostat Annex 5 Table 2 (EU-SILC Micro-database 2024 extraction Nov 2025),ilc_mddw01
+EE,Estonia,2023,9.6,,TOTAL,TOTAL,PC,5564,Eurostat Annex 5 Table 2 (EU-SILC Micro-database 2024 extraction Nov 2025),ilc_mddw01
+EL,Greece,2023,21.2,,TOTAL,TOTAL,PC,10717,Eurostat Annex 5 Table 2 (EU-SILC Micro-database 2024 extraction Nov 2025),ilc_mddw01
+ES,Spain,2023,23.6,,TOTAL,TOTAL,PC,27227,Eurostat Annex 5 Table 2 (EU-SILC Micro-database 2024 extraction Nov 2025),ilc_mddw01
+FI,Finland,2023,23.0,,TOTAL,TOTAL,PC,8857,Eurostat Annex 5 Table 2 (EU-SILC Micro-database 2024 extraction Nov 2025),ilc_mddw01
+FR,France,2023,21.1,,TOTAL,TOTAL,PC,17041,Eurostat Annex 5 Table 2 (EU-SILC Micro-database 2024 extraction Nov 2025),ilc_mddw01
+HR,Croatia,2023,6.7,,TOTAL,TOTAL,PC,8623,Eurostat Annex 5 Table 2 (EU-SILC Micro-database 2024 extraction Nov 2025),ilc_mddw01
+HU,Hungary,2023,10.1,,TOTAL,TOTAL,PC,8548,Eurostat Annex 5 Table 2 (EU-SILC Micro-database 2024 extraction Nov 2025),ilc_mddw01
+IE,Ireland,2023,10.9,,TOTAL,TOTAL,PC,4191,Eurostat Annex 5 Table 2 (EU-SILC Micro-database 2024 extraction Nov 2025),ilc_mddw01
+IT,Italy,2023,11.2,,TOTAL,TOTAL,PC,29424,Eurostat Annex 5 Table 2 (EU-SILC Micro-database 2024 extraction Nov 2025),ilc_mddw01
+LT,Lithuania,2023,10.1,,TOTAL,TOTAL,PC,6377,Eurostat Annex 5 Table 2 (EU-SILC Micro-database 2024 extraction Nov 2025),ilc_mddw01
+LU,Luxembourg,2023,30.2,,TOTAL,TOTAL,PC,4492,Eurostat Annex 5 Table 2 (EU-SILC Micro-database 2024 extraction Nov 2025),ilc_mddw01
+LV,Latvia,2023,12.4,,TOTAL,TOTAL,PC,5835,Eurostat Annex 5 Table 2 (EU-SILC Micro-database 2024 extraction Nov 2025),ilc_mddw01
+ME,Montenegro,2023,5.2,,TOTAL,TOTAL,PC,,,ilc_mddw01
+MK,North Macedonia,2023,5.1,,TOTAL,TOTAL,PC,,,ilc_mddw01
+MT,Malta,2023,31.3,,TOTAL,TOTAL,PC,4515,Eurostat Annex 5 Table 2 (EU-SILC Micro-database 2024 extraction Nov 2025),ilc_mddw01
+NL,Netherlands,2023,28.2,,TOTAL,TOTAL,PC,12669,Eurostat Annex 5 Table 2 (EU-SILC Micro-database 2024 extraction Nov 2025),ilc_mddw01
+NO,Norway,2023,13.8,,TOTAL,TOTAL,PC,5531,Eurostat Annex 5 Table 2 (EU-SILC Micro-database 2024 extraction Nov 2025),ilc_mddw01
+PL,Poland,2023,9.3,,TOTAL,TOTAL,PC,17999,Eurostat Annex 5 Table 2 (EU-SILC Micro-database 2024 extraction Nov 2025),ilc_mddw01
+PT,Portugal,2023,28.7,,TOTAL,TOTAL,PC,14209,Eurostat Annex 5 Table 2 (EU-SILC Micro-database 2024 extraction Nov 2025),ilc_mddw01
+RO,Romania,2023,19.5,,TOTAL,TOTAL,PC,7269,Eurostat Annex 5 Table 2 (EU-SILC Micro-database 2024 extraction Nov 2025),ilc_mddw01
+RS,Serbia,2023,11.2,,TOTAL,TOTAL,PC,5324,Eurostat Annex 5 Table 2 (EU-SILC Micro-database 2024 extraction Nov 2025),ilc_mddw01
+SE,Sweden,2023,10.7,,TOTAL,TOTAL,PC,9194,Eurostat Annex 5 Table 2 (EU-SILC Micro-database 2024 extraction Nov 2025),ilc_mddw01
+SI,Slovenia,2023,13.9,,TOTAL,TOTAL,PC,8432,Eurostat Annex 5 Table 2 (EU-SILC Micro-database 2024 extraction Nov 2025),ilc_mddw01
+SK,Slovakia,2023,8.6,,TOTAL,TOTAL,PC,5730,Eurostat Annex 5 Table 2 (EU-SILC Micro-database 2024 extraction Nov 2025),ilc_mddw01
+TR,Türkiye,2023,16.5,,TOTAL,TOTAL,PC,24932,Eurostat Annex 5 Table 2 (EU-SILC Micro-database 2024 extraction Nov 2025),ilc_mddw01
+EA20,Euro area - 20 countries,2023,19.8,,TOTAL,TOTAL,PC,,,ilc_mddw01
+EU27_2020,European Union - 27 countries (from 2020),2023,18.1,,TOTAL,TOTAL,PC,,,ilc_mddw01
