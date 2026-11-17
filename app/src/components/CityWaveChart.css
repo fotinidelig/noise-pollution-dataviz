@@ -30,31 +30,26 @@
 
 .wave-panel__head {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: baseline;
   gap: 0.5rem;
   padding: 0.45rem 0.55rem 0.15rem;
   color: #9db0cc;
   font-size: 0.95rem;
   letter-spacing: 0.06em;
-  text-transform: uppercase;
   flex: 0 0 auto;
   pointer-events: none;
-}
-
-.wave-panel__title {
-  color: #c8d6ee;
 }
 
 .wave-panel__meta {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  opacity: 0.85;
-  font-size: 0.9rem;
+  color: #c8d6ee;
+  font-size: 1rem;
   text-transform: none;
   letter-spacing: 0.02em;
-  max-width: 60%;
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

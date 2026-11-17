@@ -247,19 +247,18 @@ export function CityWaveChart({
 
   const xTicks = x.ticks(3).filter((t) => t < (active?.localMax ?? 0) * 0.92)
 
+  if (!active) return null
+
   return (
     <div
-      className={`wave-panel${active ? ' has-series' : ''}${pinned ? ' is-pinned' : ''}`}
+      className={`wave-panel has-series${pinned ? ' is-pinned' : ''}`}
       aria-label="People by dB band"
     >
       <div className="wave-panel__head">
-        <span className="wave-panel__title">people × dB</span>
-        {active ? (
-          <span className="wave-panel__meta">
-            {active.name}
-            {pinned ? <span className="wave-pin-badge">pinned</span> : null}
-          </span>
-        ) : null}
+        <span className="wave-panel__meta">
+          {active.name}
+          {pinned ? <span className="wave-pin-badge">pinned</span> : null}
+        </span>
       </div>
       <div className="wave-panel__plot" ref={plotRef}>
         <svg
@@ -304,29 +303,27 @@ export function CityWaveChart({
               )
             })}
 
-            {active
-              ? xTicks.map((t) => (
-                  <g key={t}>
-                    <line
-                      className="wave-band-grid"
-                      x1={x(t)}
-                      x2={x(t)}
-                      y1={0}
-                      y2={innerH}
-                    />
-                    <text
-                      className="wave-x-label"
-                      x={x(t)}
-                      y={innerH + 16}
-                      textAnchor="middle"
-                    >
-                      {formatPeople(t)}
-                    </text>
-                  </g>
-                ))
-              : null}
+            {xTicks.map((t) => (
+              <g key={t}>
+                <line
+                  className="wave-band-grid"
+                  x1={x(t)}
+                  x2={x(t)}
+                  y1={0}
+                  y2={innerH}
+                />
+                <text
+                  className="wave-x-label"
+                  x={x(t)}
+                  y={innerH + 16}
+                  textAnchor="middle"
+                >
+                  {formatPeople(t)}
+                </text>
+              </g>
+            ))}
 
-            {active && samples.length > 1 ? (
+            {samples.length > 1 ? (
               <g className="wave-active">
                 {glowPath ? <path className="wave-glow" d={glowPath} /> : null}
                 {samples.slice(0, -1).map((a, i) => {
@@ -344,7 +341,6 @@ export function CityWaveChart({
                   )
                 })}
 
-                {/* Max annotation — sticks to the right edge */}
                 {maxAnchor ? (
                   <g className="wave-max">
                     <line
@@ -415,14 +411,12 @@ export function CityWaveChart({
           </div>
         ) : null}
       </div>
-      {active ? (
-        <div className="wave-hover-label">
-          {active.name}
-          <span className="wave-hover-total">
-            {formatPeople(active.total)} people
-          </span>
-        </div>
-      ) : null}
+      <div className="wave-hover-label">
+        {active.name}
+        <span className="wave-hover-total">
+          {formatPeople(active.total)} people
+        </span>
+      </div>
     </div>
   )
 }
