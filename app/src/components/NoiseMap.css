@@ -114,7 +114,7 @@
 
 .noise-legend {
   position: absolute;
-  left: 0.85rem;
+  right: 0.85rem;
   bottom: 0.85rem;
   z-index: 2;
   display: grid;

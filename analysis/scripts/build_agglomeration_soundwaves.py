@@ -24,6 +24,7 @@ ROOT = Path(__file__).resolve().parents[2]
 EXPOSURE = ROOT / "data/processed/eea-end/exposure_agglomeration_long.csv"
 GEONAMES = ROOT / "data/raw/geocode/cities5000.txt"
 OUT_GEOJSON = ROOT / "app/public/data/agglomeration_soundwaves.geojson"
+OUT_CHART = ROOT / "app/public/data/agglomeration_chart.json"
 OUT_META = ROOT / "data/processed/map/agglomeration_soundwaves_meta.json"
 CACHE = ROOT / "data/processed/map/agglomeration_geocode_cache.json"
 
@@ -431,14 +432,30 @@ def build(people_per_ring: int, max_rings: int) -> None:
     processed = ROOT / "data/processed/map/agglomeration_soundwaves.geojson"
     processed.write_text(OUT_GEOJSON.read_text())
 
+    chart_cities = []
+    for c in centers:
+        p = c["properties"]
+        chart_cities.append(
+            {
+                "id": f"{p['country']}|{p['agglomeration']}",
+                "agglomeration": p["agglomeration"],
+                "country": p["country"],
+                "inhabitants": p.get("inhabitants") or 0,
+                "series": json.loads(p.get("tooltip") or "{}"),
+            }
+        )
+    OUT_CHART.write_text(json.dumps({"cities": chart_cities}, separators=(",", ":")))
+
     meta_out = {
         "people_per_ring": PEOPLE_PER_RING,
         "max_rings_per_band": MAX_RINGS_PER_BAND,
         "agglomerations_total": len(meta),
         "agglomerations_geocoded": geocoded,
+        "agglomerations_with_data": len(centers),
         "agglomerations_unmatched": unmatched,
         "ring_features": sum(1 for f in features if f["properties"]["kind"] == "ring"),
         "output": str(OUT_GEOJSON.relative_to(ROOT)),
+        "chart": str(OUT_CHART.relative_to(ROOT)),
     }
     OUT_META.write_text(json.dumps(meta_out, indent=2, ensure_ascii=False))
     print(json.dumps(meta_out, indent=2, ensure_ascii=False))

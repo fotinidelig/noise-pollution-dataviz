@@ -10,6 +10,7 @@ import {
   type NoiseMetric,
   type NoiseSource,
 } from '../lib/noiseStyle'
+import { CityWaveChart, type ChartCity } from './CityWaveChart'
 import './NoiseMap.css'
 
 const RINGS_SOURCE = 'aggl-soundwaves'
@@ -17,6 +18,7 @@ const RINGS_LAYER = 'aggl-rings'
 const HIT_LAYER = 'aggl-hit'
 const LABEL_LAYER = 'aggl-labels'
 const DATA_URL = '/data/agglomeration_soundwaves.geojson'
+const CHART_URL = '/data/agglomeration_chart.json'
 const PEOPLE_PER_RING = 10_000
 
 let workerConfigured = false
@@ -115,6 +117,23 @@ export function NoiseMap() {
   const [source, setSource] = useState<NoiseSource>('road')
   const [metric, setMetric] = useState<NoiseMetric>('Lden')
   const [status, setStatus] = useState('Loading map…')
+  const [chartCities, setChartCities] = useState<ChartCity[]>([])
+  const [hoveredId, setHoveredId] = useState<string | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    fetch(CHART_URL)
+      .then((r) => r.json())
+      .then((data: { cities: ChartCity[] }) => {
+        if (!cancelled) setChartCities(data.cities ?? [])
+      })
+      .catch(() => {
+        if (!cancelled) setChartCities([])
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return
@@ -124,7 +143,7 @@ export function NoiseMap() {
       container: containerRef.current,
       style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
       bounds: EUROPE_BOUNDS,
-      fitBoundsOptions: { padding: 48 },
+      fitBoundsOptions: { padding: { top: 72, bottom: 48, left: 260, right: 48 } },
       attributionControl: { compact: true },
     })
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: false }), 'bottom-right')
@@ -278,10 +297,13 @@ export function NoiseMap() {
       if (!feats.length) {
         map.getCanvas().style.cursor = ''
         popup.remove()
+        setHoveredId(null)
         return
       }
       map.getCanvas().style.cursor = 'pointer'
       const props = feats[0].properties ?? {}
+      const cityId = `${props.country ?? ''}|${props.agglomeration ?? ''}`
+      setHoveredId(cityId)
       let tip: TipPayload | null = null
       try {
         const all = JSON.parse(String(props.tooltip || '{}')) as Record<string, TipPayload>
@@ -303,6 +325,7 @@ export function NoiseMap() {
     const onLeave = () => {
       map.getCanvas().style.cursor = ''
       popup.remove()
+      setHoveredId(null)
     }
 
     const bind = () => {
@@ -363,6 +386,15 @@ export function NoiseMap() {
 
       <div className="noise-canvas-wrap">
         <div className="noise-canvas" ref={containerRef} />
+        {chartCities.length > 0 ? (
+          <CityWaveChart
+            cities={chartCities}
+            source={source}
+            metric={metric}
+            hoveredId={hoveredId}
+            onHoverCity={setHoveredId}
+          />
+        ) : null}
         <div className="noise-legend" aria-label="dB band legend">
           {bands.map((b) => (
             <div key={b.category} className="noise-legend__row">
