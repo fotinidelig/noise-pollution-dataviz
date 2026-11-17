@@ -58,10 +58,11 @@ function centerFilter(
   source: NoiseSource,
   metric: NoiseMetric,
 ): maplibregl.FilterSpecification {
+  // to-number: GeoJSON props can arrive as strings after round-trips
   return [
     'all',
     ['==', ['get', 'kind'], 'center'],
-    ['>', ['get', totalProp(source, metric)], 0],
+    ['>', ['to-number', ['get', totalProp(source, metric)]], 0],
   ]
 }
 
@@ -114,11 +115,16 @@ export function NoiseMap() {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<maplibregl.Map | null>(null)
   const popupRef = useRef<maplibregl.Popup | null>(null)
+  const sourceRef = useRef<NoiseSource>('road')
+  const metricRef = useRef<NoiseMetric>('Lden')
   const [source, setSource] = useState<NoiseSource>('road')
   const [metric, setMetric] = useState<NoiseMetric>('Lden')
   const [status, setStatus] = useState('Loading map…')
   const [chartCities, setChartCities] = useState<ChartCity[]>([])
   const [hoveredId, setHoveredId] = useState<string | null>(null)
+
+  sourceRef.current = source
+  metricRef.current = metric
 
   useEffect(() => {
     let cancelled = false
@@ -168,7 +174,10 @@ export function NoiseMap() {
         id: RINGS_LAYER,
         type: 'line',
         source: RINGS_SOURCE,
-        filter: ringFilter(source, metric),
+        filter: ringFilter(sourceRef.current, metricRef.current),
+        layout: {
+          visibility: 'visible',
+        },
         paint: {
           'line-color': ['get', 'color'],
           'line-opacity': 0.88,
@@ -185,38 +194,11 @@ export function NoiseMap() {
           ],
         },
       })
-
-      // Invisible hit target over city centers
-      map.addLayer({
-        id: HIT_LAYER,
-        type: 'circle',
-        source: RINGS_SOURCE,
-        filter: centerFilter(source, metric),
-        paint: {
-          'circle-radius': [
-            'interpolate',
-            ['linear'],
-            ['zoom'],
-            3,
-            10,
-            7,
-            16,
-            11,
-            22,
-          ],
-          'circle-color': '#00e5ff',
-          'circle-opacity': 0.05,
-          'circle-stroke-width': 1,
-          'circle-stroke-color': '#00e5ff',
-          'circle-stroke-opacity': 0.35,
-        },
-      })
-
       map.addLayer({
         id: LABEL_LAYER,
         type: 'symbol',
         source: RINGS_SOURCE,
-        filter: centerFilter(source, metric),
+        filter: centerFilter(sourceRef.current, metricRef.current),
         layout: {
           'text-field': ['get', 'agglomeration'],
           'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
@@ -251,7 +233,33 @@ export function NoiseMap() {
         },
       })
 
-      setStatus(`${source} · ${metric} · agglomerations`)
+      // Hit targets on top so hover keeps working after source toggles
+      map.addLayer({
+        id: HIT_LAYER,
+        type: 'circle',
+        source: RINGS_SOURCE,
+        filter: centerFilter(sourceRef.current, metricRef.current),
+        paint: {
+          'circle-radius': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            3,
+            14,
+            7,
+            20,
+            11,
+            28,
+          ],
+          'circle-color': '#00e5ff',
+          'circle-opacity': 0.08,
+          'circle-stroke-width': 1.2,
+          'circle-stroke-color': '#00e5ff',
+          'circle-stroke-opacity': 0.45,
+        },
+      })
+
+      setStatus(`${sourceRef.current} · ${metricRef.current} · agglomerations`)
     })
 
     map.on('error', () => {
@@ -278,6 +286,10 @@ export function NoiseMap() {
       map.setFilter(RINGS_LAYER, ringFilter(source, metric))
       if (map.getLayer(HIT_LAYER)) map.setFilter(HIT_LAYER, centerFilter(source, metric))
       if (map.getLayer(LABEL_LAYER)) map.setFilter(LABEL_LAYER, centerFilter(source, metric))
+      // Drop stale hover when the active layer changes
+      popupRef.current?.remove()
+      setHoveredId(null)
+      map.getCanvas().style.cursor = ''
       setStatus(`${source} · ${metric} · agglomerations`)
     }
 
@@ -285,62 +297,70 @@ export function NoiseMap() {
     else map.once('load', apply)
   }, [source, metric])
 
-  // Hover tooltip on city centers
+  // Stable map-level hover (survives source/metric filter changes)
   useEffect(() => {
     const map = mapRef.current
     const popup = popupRef.current
     if (!map || !popup) return
 
+    const clearHover = () => {
+      map.getCanvas().style.cursor = ''
+      popup.remove()
+      setHoveredId(null)
+    }
+
     const onMove = (e: maplibregl.MapMouseEvent) => {
       if (!map.getLayer(HIT_LAYER)) return
       const feats = map.queryRenderedFeatures(e.point, { layers: [HIT_LAYER] })
       if (!feats.length) {
-        map.getCanvas().style.cursor = ''
-        popup.remove()
-        setHoveredId(null)
+        clearHover()
         return
       }
+      const src = sourceRef.current
+      const met = metricRef.current
       map.getCanvas().style.cursor = 'pointer'
       const props = feats[0].properties ?? {}
       const cityId = `${props.country ?? ''}|${props.agglomeration ?? ''}`
       setHoveredId(cityId)
       let tip: TipPayload | null = null
       try {
-        const all = JSON.parse(String(props.tooltip || '{}')) as Record<string, TipPayload>
-        tip = all[`${source}__${metric}`] ?? null
+        const all = JSON.parse(String(props.tooltip || '{}')) as Record<
+          string,
+          TipPayload
+        >
+        tip = all[`${src}__${met}`] ?? null
       } catch {
         tip = null
+      }
+      // Skip empty tips for the active toggle (should already be filtered out)
+      if (!tip || !(tip.total > 0)) {
+        clearHover()
+        return
       }
       const html = buildTooltipHtml(
         String(props.agglomeration ?? ''),
         String(props.country ?? ''),
         Number(props.inhabitants ?? 0),
-        source,
-        metric,
+        src,
+        met,
         tip,
       )
       popup.setLngLat(e.lngLat).setHTML(html).addTo(map)
     }
 
-    const onLeave = () => {
-      map.getCanvas().style.cursor = ''
-      popup.remove()
-      setHoveredId(null)
-    }
-
     const bind = () => {
-      map.on('mousemove', HIT_LAYER, onMove)
-      map.on('mouseleave', HIT_LAYER, onLeave)
+      map.on('mousemove', onMove)
+      map.on('mouseout', clearHover)
     }
 
     if (map.isStyleLoaded() && map.getLayer(HIT_LAYER)) bind()
     else map.once('load', bind)
 
     return () => {
-      map.off('mousemove', HIT_LAYER, onMove)
-      map.off('mouseleave', HIT_LAYER, onLeave)
+      map.off('mousemove', onMove)
+      map.off('mouseout', clearHover)
     }
-  }, [source, metric])
+  }, [])
 
   const bands = metric === 'Lden' ? LDEN_BANDS : LNIGHT_BANDS
 
