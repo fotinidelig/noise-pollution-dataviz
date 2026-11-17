@@ -9,47 +9,48 @@
     "road__Lnight": {
       "pmtiles": "data/processed/map/end_road_lnight.pmtiles",
       "public": "app/public/data/end_road_lnight.pmtiles",
-      "bytes": 4430152,
-      "countries": 5
+      "bytes": 5924440,
+      "countries": 6
     },
     "rail__Lden": {
       "pmtiles": "data/processed/map/end_rail_lden.pmtiles",
       "public": "app/public/data/end_rail_lden.pmtiles",
-      "bytes": 866800,
-      "countries": 4
+      "bytes": 919727,
+      "countries": 5
     },
     "rail__Lnight": {
       "pmtiles": "data/processed/map/end_rail_lnight.pmtiles",
       "public": "app/public/data/end_rail_lnight.pmtiles",
-      "bytes": 791763,
-      "countries": 4
+      "bytes": 850435,
+      "countries": 5
     },
     "aircraft__Lden": {
       "pmtiles": "data/processed/map/end_aircraft_lden.pmtiles",
       "public": "app/public/data/end_aircraft_lden.pmtiles",
-      "bytes": 19337,
-      "countries": 5
+      "bytes": 18420,
+      "countries": 6
     },
     "aircraft__Lnight": {
       "pmtiles": "data/processed/map/end_aircraft_lnight.pmtiles",
       "public": "app/public/data/end_aircraft_lnight.pmtiles",
-      "bytes": 16677,
-      "countries": 5
+      "bytes": 21575,
+      "countries": 6
     },
     "industry__Lden": {
       "pmtiles": "data/processed/map/end_industry_lden.pmtiles",
       "public": "app/public/data/end_industry_lden.pmtiles",
-      "bytes": 386626,
-      "countries": 4
+      "bytes": 419801,
+      "countries": 5
     },
     "industry__Lnight": {
       "pmtiles": "data/processed/map/end_industry_lnight.pmtiles",
       "public": "app/public/data/end_industry_lnight.pmtiles",
-      "bytes": 384567,
-      "countries": 5
+      "bytes": 414512,
+      "countries": 6
     }
   },
   "countries": [
+    "CY",
     "EE",
     "LT",
     "LV",
