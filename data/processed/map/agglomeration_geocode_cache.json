@@ -1,0 +1,2602 @@
+{
+  "Austria|Graz": {
+    "lat": 47.06733,
+    "lon": 15.44197,
+    "matched": "Graz",
+    "pop": 303270
+  },
+  "Austria|Innsbruck": {
+    "lat": 47.26266,
+    "lon": 11.39454,
+    "matched": "Innsbruck",
+    "pop": 132493
+  },
+  "Austria|Linz": {
+    "lat": 48.30639,
+    "lon": 14.28611,
+    "matched": "Linz",
+    "pop": 204846
+  },
+  "Austria|Salzburg": {
+    "lat": 47.79941,
+    "lon": 13.04399,
+    "matched": "Salzburg",
+    "pop": 157245
+  },
+  "Austria|Vienna": {
+    "lat": 48.20849,
+    "lon": 16.37208,
+    "matched": "Vienna",
+    "pop": 1691468
+  },
+  "Belgium|Antwerp": {
+    "lat": 51.22047,
+    "lon": 4.40026,
+    "matched": "Antwerp",
+    "pop": 529247
+  },
+  "Belgium|Bruges": {
+    "lat": 51.20892,
+    "lon": 3.22424,
+    "matched": "Brugge",
+    "pop": 118509
+  },
+  "Belgium|Brussels": {
+    "lat": 50.85045,
+    "lon": 4.34878,
+    "matched": "Brussels",
+    "pop": 1019022
+  },
+  "Belgium|Charleroi": {
+    "lat": 50.41136,
+    "lon": 4.44448,
+    "matched": "Charleroi",
+    "pop": 200132
+  },
+  "Belgium|Ghent": {
+    "lat": 51.05,
+    "lon": 3.71667,
+    "matched": "Gent",
+    "pop": 265086
+  },
+  "Belgium|Leuven": {
+    "lat": 50.87959,
+    "lon": 4.70093,
+    "matched": "Leuven",
+    "pop": 101032
+  },
+  "Belgium|Liege": {
+    "lat": 50.63373,
+    "lon": 5.56749,
+    "matched": "Liège",
+    "pop": 195278
+  },
+  "Bulgaria|Burgas": {
+    "lat": 42.50651,
+    "lon": 27.46886,
+    "matched": "Burgas",
+    "pop": 210646
+  },
+  "Bulgaria|Pleven": {
+    "lat": 43.41791,
+    "lon": 24.61666,
+    "matched": "Pleven",
+    "pop": 90209
+  },
+  "Bulgaria|Plovdiv": {
+    "lat": 42.15387,
+    "lon": 24.75001,
+    "matched": "Plovdiv",
+    "pop": 329489
+  },
+  "Bulgaria|Ruse": {
+    "lat": 43.84872,
+    "lon": 25.9534,
+    "matched": "Ruse",
+    "pop": 121168
+  },
+  "Bulgaria|Sofia": {
+    "lat": 42.69751,
+    "lon": 23.32415,
+    "matched": "Sofia",
+    "pop": 1152556
+  },
+  "Bulgaria|Stara Zagora": {
+    "lat": 42.43205,
+    "lon": 25.64262,
+    "matched": "Stara Zagora",
+    "pop": 121582
+  },
+  "Bulgaria|Varna": {
+    "lat": 43.21912,
+    "lon": 27.91024,
+    "matched": "Varna",
+    "pop": 318737
+  },
+  "Croatia|Rijeka": {
+    "lat": 45.32673,
+    "lon": 14.44241,
+    "matched": "Rijeka",
+    "pop": 107964
+  },
+  "Croatia|Split": {
+    "lat": 43.50891,
+    "lon": 16.43915,
+    "matched": "Split",
+    "pop": 149830
+  },
+  "Croatia|Zagreb": {
+    "lat": 45.81444,
+    "lon": 15.97798,
+    "matched": "Zagreb",
+    "pop": 663592
+  },
+  "Cyprus|Larnaca": {
+    "lat": 34.9221,
+    "lon": 33.62794,
+    "matched": "Larnaca",
+    "pop": 72000
+  },
+  "Cyprus|Limassol": {
+    "lat": 34.68406,
+    "lon": 33.03794,
+    "matched": "Limassol",
+    "pop": 154000
+  },
+  "Cyprus|Nicosia": {
+    "lat": 35.17284,
+    "lon": 33.35397,
+    "matched": "Nicosia",
+    "pop": 200452
+  },
+  "Cyprus|Pafos": {
+    "lat": 34.77679,
+    "lon": 32.42451,
+    "matched": "Paphos",
+    "pop": 35961
+  },
+  "Czech Republic|Brno": {
+    "lat": 49.19522,
+    "lon": 16.60796,
+    "matched": "Brno",
+    "pop": 404296
+  },
+  "Czech Republic|Liberec": {
+    "lat": 50.76711,
+    "lon": 15.05619,
+    "matched": "Liberec",
+    "pop": 102951
+  },
+  "Czech Republic|Olomouc": {
+    "lat": 49.59552,
+    "lon": 17.25175,
+    "matched": "Olomouc",
+    "pop": 99496
+  },
+  "Czech Republic|Ostrava": {
+    "lat": 49.83465,
+    "lon": 18.28204,
+    "matched": "Ostrava",
+    "pop": 280853
+  },
+  "Czech Republic|Plzen": {
+    "lat": 49.74747,
+    "lon": 13.37759,
+    "matched": "Pilsen",
+    "pop": 187863
+  },
+  "Czech Republic|Prague": {
+    "lat": 50.08804,
+    "lon": 14.42076,
+    "matched": "Prague",
+    "pop": 1165581
+  },
+  "Czech Republic|Teplice": {
+    "lat": 50.6404,
+    "lon": 13.82451,
+    "matched": "Teplice",
+    "pop": 50856
+  },
+  "Denmark|Aalborg": {
+    "lat": 57.048,
+    "lon": 9.9187,
+    "matched": "Aalborg",
+    "pop": 142937
+  },
+  "Denmark|Aarhus": {
+    "lat": 56.15674,
+    "lon": 10.21076,
+    "matched": "Århus",
+    "pop": 285273
+  },
+  "Denmark|Copenhagen": {
+    "lat": 55.67594,
+    "lon": 12.56553,
+    "matched": "Copenhagen",
+    "pop": 1153615
+  },
+  "Denmark|Odense": {
+    "lat": 55.39594,
+    "lon": 10.38831,
+    "matched": "Odense",
+    "pop": 180863
+  },
+  "Estonia|Tallinn": {
+    "lat": 59.43696,
+    "lon": 24.75353,
+    "matched": "Tallinn",
+    "pop": 394024
+  },
+  "Estonia|Tartu": {
+    "lat": 58.38062,
+    "lon": 26.72509,
+    "matched": "Tartu",
+    "pop": 91407
+  },
+  "Finland|Espoo": {
+    "lat": 60.2052,
+    "lon": 24.6522,
+    "matched": "Espoo",
+    "pop": 323910
+  },
+  "Finland|Helsinki": {
+    "lat": 60.16952,
+    "lon": 24.93545,
+    "matched": "Helsinki",
+    "pop": 658864
+  },
+  "Finland|Jyvaskyla": {
+    "lat": 62.24147,
+    "lon": 25.72088,
+    "matched": "Jyväskylä",
+    "pop": 148744
+  },
+  "Finland|Kauniainen": {
+    "lat": 60.21209,
+    "lon": 24.72756,
+    "matched": "Kauniainen",
+    "pop": 10200
+  },
+  "Finland|Kuopio": {
+    "lat": 62.89238,
+    "lon": 27.67703,
+    "matched": "Kuopio",
+    "pop": 125462
+  },
+  "Finland|Lahti": {
+    "lat": 60.98267,
+    "lon": 25.66151,
+    "matched": "Lahti",
+    "pop": 121622
+  },
+  "Finland|Oulu": {
+    "lat": 65.01236,
+    "lon": 25.46816,
+    "matched": "Oulu",
+    "pop": 216066
+  },
+  "Finland|Tampere": {
+    "lat": 61.49911,
+    "lon": 23.78712,
+    "matched": "Tampere",
+    "pop": 260646
+  },
+  "Finland|Turku": {
+    "lat": 60.45148,
+    "lon": 22.26869,
+    "matched": "Turku",
+    "pop": 206655
+  },
+  "Finland|Vantaa": {
+    "lat": 60.29414,
+    "lon": 25.04099,
+    "matched": "Vantaa",
+    "pop": 252724
+  },
+  "France|Angers": {
+    "lat": 47.47156,
+    "lon": -0.55202,
+    "matched": "Angers",
+    "pop": 168279
+  },
+  "France|Arras": {
+    "lat": 50.29301,
+    "lon": 2.78186,
+    "matched": "Arras",
+    "pop": 47052
+  },
+  "France|Aubergenville": {
+    "lat": 48.95996,
+    "lon": 1.85467,
+    "matched": "Aubergenville",
+    "pop": 11934
+  },
+  "France|Beauchamp": {
+    "lat": 49.01667,
+    "lon": 2.2,
+    "matched": "Beauchamp",
+    "pop": 9532
+  },
+  "France|Besancon": {
+    "lat": 47.24878,
+    "lon": 6.01815,
+    "matched": "Besançon",
+    "pop": 128426
+  },
+  "France|Bordeaux": {
+    "lat": 44.84124,
+    "lon": -0.58046,
+    "matched": "Bordeaux",
+    "pop": 265328
+  },
+  "France|Brest": {
+    "lat": 48.39029,
+    "lon": -4.48628,
+    "matched": "Brest",
+    "pop": 144899
+  },
+  "France|Brunoy": {
+    "lat": 48.6942,
+    "lon": 2.49223,
+    "matched": "Brunoy",
+    "pop": 24096
+  },
+  "France|Caen": {
+    "lat": 49.18585,
+    "lon": -0.35912,
+    "matched": "Caen",
+    "pop": 110624
+  },
+  "France|Cannes": {
+    "lat": 43.55135,
+    "lon": 7.01275,
+    "matched": "Cannes",
+    "pop": 74545
+  },
+  "France|Cergy": {
+    "lat": 49.03645,
+    "lon": 2.07613,
+    "matched": "Cergy",
+    "pop": 57576
+  },
+  "France|Clermont-Ferrand": {
+    "lat": 45.77969,
+    "lon": 3.08682,
+    "matched": "Clermont-Ferrand",
+    "pop": 147865
+  },
+  "France|Courcouronnes": {
+    "lat": 48.61429,
+    "lon": 2.40762,
+    "matched": "Courcouronnes",
+    "pop": 14856
+  },
+  "France|Dijon": {
+    "lat": 47.31344,
+    "lon": 5.01391,
+    "matched": "Dijon",
+    "pop": 159941
+  },
+  "France|Dunkerque": {
+    "lat": 51.0344,
+    "lon": 2.37681,
+    "matched": "Dunkirk",
+    "pop": 86263
+  },
+  "France|Grenoble": {
+    "lat": 45.17869,
+    "lon": 5.71479,
+    "matched": "Grenoble",
+    "pop": 158552
+  },
+  "France|Henin-Beaumont": {
+    "lat": 50.41359,
+    "lon": 2.96485,
+    "matched": "Hénin-Beaumont",
+    "pop": 25371
+  },
+  "France|Le Havre": {
+    "lat": 49.49346,
+    "lon": 0.10785,
+    "matched": "Le Havre",
+    "pop": 185972
+  },
+  "France|Le Mans": {
+    "lat": 48.0021,
+    "lon": 0.20251,
+    "matched": "Le Mans",
+    "pop": 144515
+  },
+  "France|Le Pecq": {
+    "lat": 48.89317,
+    "lon": 2.10371,
+    "matched": "Le Pecq",
+    "pop": 16534
+  },
+  "France|Lens": {
+    "lat": 50.43302,
+    "lon": 2.82791,
+    "matched": "Lens",
+    "pop": 38265
+  },
+  "France|Lille": {
+    "lat": 50.63391,
+    "lon": 3.05512,
+    "matched": "Lille",
+    "pop": 238695
+  },
+  "France|Limoges": {
+    "lat": 45.83362,
+    "lon": 1.24759,
+    "matched": "Limoges",
+    "pop": 141176
+  },
+  "France|Lyon": {
+    "lat": 45.74906,
+    "lon": 4.84789,
+    "matched": "Lyon",
+    "pop": 520774
+  },
+  "France|Marseille": {
+    "lat": 43.29695,
+    "lon": 5.38107,
+    "matched": "Marseille",
+    "pop": 877215
+  },
+  "France|Metz": {
+    "lat": 49.11911,
+    "lon": 6.17269,
+    "matched": "Metz",
+    "pop": 123914
+  },
+  "France|Montmorency": {
+    "lat": 48.98826,
+    "lon": 2.3434,
+    "matched": "Montmorency",
+    "pop": 21156
+  },
+  "France|Montpellier": {
+    "lat": 43.61093,
+    "lon": 3.87635,
+    "matched": "Montpellier",
+    "pop": 248252
+  },
+  "France|Nancy": {
+    "lat": 48.68439,
+    "lon": 6.18496,
+    "matched": "Nancy",
+    "pop": 105058
+  },
+  "France|Nantes": {
+    "lat": 47.21725,
+    "lon": -1.55336,
+    "matched": "Nantes",
+    "pop": 325070
+  },
+  "France|Nice": {
+    "lat": 43.70313,
+    "lon": 7.26608,
+    "matched": "Nice",
+    "pop": 342669
+  },
+  "France|Orleans": {
+    "lat": 47.90248,
+    "lon": 1.90407,
+    "matched": "Orléans",
+    "pop": 116344
+  },
+  "France|Orsay": {
+    "lat": 48.69572,
+    "lon": 2.18727,
+    "matched": "Orsay",
+    "pop": 17817
+  },
+  "France|Paris": {
+    "lat": 48.85341,
+    "lon": 2.3488,
+    "matched": "Paris",
+    "pop": 2138551
+  },
+  "France|Perpignan": {
+    "lat": 42.69764,
+    "lon": 2.89541,
+    "matched": "Perpignan",
+    "pop": 110706
+  },
+  "France|Poitiers": {
+    "lat": 46.58261,
+    "lon": 0.34348,
+    "matched": "Poitiers",
+    "pop": 85960
+  },
+  "France|Reims": {
+    "lat": 49.26526,
+    "lon": 4.02853,
+    "matched": "Reims",
+    "pop": 196565
+  },
+  "France|Rennes": {
+    "lat": 48.11109,
+    "lon": -1.67431,
+    "matched": "Rennes",
+    "pop": 227830
+  },
+  "France|Roissy-en-France": {
+    "lat": 48.79159,
+    "lon": 2.64747,
+    "matched": "Roissy-en-Brie",
+    "pop": 20933
+  },
+  "France|Rouen": {
+    "lat": 49.44313,
+    "lon": 1.09932,
+    "matched": "Rouen",
+    "pop": 116331
+  },
+  "France|Saint-Etienne": {
+    "lat": 45.43389,
+    "lon": 4.39,
+    "matched": "Saint-Étienne",
+    "pop": 176280
+  },
+  "France|Sainte-Genevieve-des-Bois": {
+    "lat": 48.64682,
+    "lon": 2.31965,
+    "matched": "Sainte-Geneviève-des-Bois",
+    "pop": 33689
+  },
+  "France|Strasbourg": {
+    "lat": 48.58392,
+    "lon": 7.74553,
+    "matched": "Strasbourg",
+    "pop": 274845
+  },
+  "France|Torcy": {
+    "lat": 48.85064,
+    "lon": 2.65078,
+    "matched": "Torcy",
+    "pop": 24386
+  },
+  "France|Toulon": {
+    "lat": 43.12442,
+    "lon": 5.92836,
+    "matched": "Toulon",
+    "pop": 168701
+  },
+  "France|Toulouse": {
+    "lat": 43.60426,
+    "lon": 1.44367,
+    "matched": "Toulouse",
+    "pop": 511684
+  },
+  "France|Tours": {
+    "lat": 47.39484,
+    "lon": 0.70398,
+    "matched": "Tours",
+    "pop": 141621
+  },
+  "France|Trappes": {
+    "lat": 48.77413,
+    "lon": 2.01781,
+    "matched": "Trappes",
+    "pop": 28367
+  },
+  "France|Versailles": {
+    "lat": 48.80359,
+    "lon": 2.13424,
+    "matched": "Versailles",
+    "pop": 85416
+  },
+  "Germany|Aachen": {
+    "lat": 50.77664,
+    "lon": 6.08342,
+    "matched": "Aachen",
+    "pop": 265208
+  },
+  "Germany|Augsburg": {
+    "lat": 48.37154,
+    "lon": 10.89851,
+    "matched": "Augsburg",
+    "pop": 301105
+  },
+  "Germany|Bergisch Gladbach": {
+    "lat": 50.9856,
+    "lon": 7.13298,
+    "matched": "Bergisch Gladbach",
+    "pop": 106184
+  },
+  "Germany|Berlin": {
+    "lat": 52.52437,
+    "lon": 13.41053,
+    "matched": "Berlin",
+    "pop": 3426354
+  },
+  "Germany|Bielefeld": {
+    "lat": 52.03333,
+    "lon": 8.53333,
+    "matched": "Bielefeld",
+    "pop": 331906
+  },
+  "Germany|Bochum": {
+    "lat": 51.48165,
+    "lon": 7.21648,
+    "matched": "Bochum",
+    "pop": 385729
+  },
+  "Germany|Bonn": {
+    "lat": 50.73438,
+    "lon": 7.09549,
+    "matched": "Bonn",
+    "pop": 330579
+  },
+  "Germany|Bottrop": {
+    "lat": 51.52392,
+    "lon": 6.9285,
+    "matched": "Bottrop",
+    "pop": 119909
+  },
+  "Germany|Bremen": {
+    "lat": 53.07582,
+    "lon": 8.80717,
+    "matched": "Bremen",
+    "pop": 546501
+  },
+  "Germany|Bremerhaven": {
+    "lat": 53.55357,
+    "lon": 8.57553,
+    "matched": "Bremerhaven",
+    "pop": 118610
+  },
+  "Germany|Brunswick": {
+    "lat": 52.26594,
+    "lon": 10.52673,
+    "matched": "Braunschweig",
+    "pop": 244715
+  },
+  "Germany|Chemnitz": {
+    "lat": 50.8357,
+    "lon": 12.92922,
+    "matched": "Chemnitz",
+    "pop": 247220
+  },
+  "Germany|Cologne": {
+    "lat": 50.93333,
+    "lon": 6.95,
+    "matched": "Köln",
+    "pop": 1024621
+  },
+  "Germany|Darmstadt": {
+    "lat": 49.87167,
+    "lon": 8.65027,
+    "matched": "Darmstadt",
+    "pop": 167029
+  },
+  "Germany|Dortmund": {
+    "lat": 51.51494,
+    "lon": 7.466,
+    "matched": "Dortmund",
+    "pop": 588462
+  },
+  "Germany|Dresden": {
+    "lat": 51.05089,
+    "lon": 13.73832,
+    "matched": "Dresden",
+    "pop": 564904
+  },
+  "Germany|Duesseldorf": {
+    "lat": 51.22319,
+    "lon": 6.77927,
+    "matched": "Düsseldorf",
+    "pop": 618685
+  },
+  "Germany|Duisburg": {
+    "lat": 51.43247,
+    "lon": 6.76516,
+    "matched": "Duisburg",
+    "pop": 504358
+  },
+  "Germany|Erlangen": {
+    "lat": 49.59099,
+    "lon": 11.00783,
+    "matched": "Erlangen",
+    "pop": 102675
+  },
+  "Germany|Essen": {
+    "lat": 51.45657,
+    "lon": 7.01228,
+    "matched": "Essen",
+    "pop": 593085
+  },
+  "Germany|Frankfurt on the Main": {
+    "lat": 50.11552,
+    "lon": 8.68417,
+    "matched": "Frankfurt am Main",
+    "pop": 650000
+  },
+  "Germany|Freiburg": {
+    "lat": 47.9959,
+    "lon": 7.85222,
+    "matched": "Freiburg",
+    "pop": 237460
+  },
+  "Germany|Fuerth": {
+    "lat": 49.47593,
+    "lon": 10.98856,
+    "matched": "Fürth",
+    "pop": 132036
+  },
+  "Germany|Gelsenkirchen": {
+    "lat": 51.50508,
+    "lon": 7.09654,
+    "matched": "Gelsenkirchen",
+    "pop": 270028
+  },
+  "Germany|Goettingen": {
+    "lat": 51.53443,
+    "lon": 9.93228,
+    "matched": "Göttingen",
+    "pop": 122149
+  },
+  "Germany|Hagen": {
+    "lat": 51.36081,
+    "lon": 7.47168,
+    "matched": "Hagen",
+    "pop": 198972
+  },
+  "Germany|Halle": {
+    "lat": 51.48158,
+    "lon": 11.97947,
+    "matched": "Halle (Saale)",
+    "pop": 237865
+  },
+  "Germany|Hamburg": {
+    "lat": 53.55073,
+    "lon": 9.99302,
+    "matched": "Hamburg",
+    "pop": 1973896
+  },
+  "Germany|Hanau": {
+    "lat": 50.13423,
+    "lon": 8.91418,
+    "matched": "Hanau am Main",
+    "pop": 88648
+  },
+  "Germany|Hanover": {
+    "lat": 52.37052,
+    "lon": 9.73322,
+    "matched": "Hannover",
+    "pop": 515140
+  },
+  "Germany|Heidelberg": {
+    "lat": 49.40768,
+    "lon": 8.69079,
+    "matched": "Heidelberg",
+    "pop": 143345
+  },
+  "Germany|Heilbronn": {
+    "lat": 49.13995,
+    "lon": 9.22054,
+    "matched": "Heilbronn",
+    "pop": 120733
+  },
+  "Germany|Herne": {
+    "lat": 51.5388,
+    "lon": 7.22572,
+    "matched": "Herne",
+    "pop": 172108
+  },
+  "Germany|Hildesheim": {
+    "lat": 52.15077,
+    "lon": 9.95112,
+    "matched": "Hildesheim",
+    "pop": 103052
+  },
+  "Germany|Ingolstadt": {
+    "lat": 48.76508,
+    "lon": 11.42372,
+    "matched": "Ingolstadt",
+    "pop": 120658
+  },
+  "Germany|Karlsruhe": {
+    "lat": 49.00937,
+    "lon": 8.40444,
+    "matched": "Karlsruhe",
+    "pop": 283799
+  },
+  "Germany|Kassel": {
+    "lat": 51.31667,
+    "lon": 9.5,
+    "matched": "Kassel",
+    "pop": 197230
+  },
+  "Germany|Kiel": {
+    "lat": 54.32133,
+    "lon": 10.13489,
+    "matched": "Kiel",
+    "pop": 252668
+  },
+  "Germany|Koblenz": {
+    "lat": 50.35357,
+    "lon": 7.57883,
+    "matched": "Koblenz",
+    "pop": 107319
+  },
+  "Germany|Krefeld": {
+    "lat": 51.33645,
+    "lon": 6.55381,
+    "matched": "Krefeld",
+    "pop": 237984
+  },
+  "Germany|Leipzig": {
+    "lat": 51.33962,
+    "lon": 12.37129,
+    "matched": "Leipzig",
+    "pop": 504971
+  },
+  "Germany|Leverkusen": {
+    "lat": 51.0303,
+    "lon": 6.98432,
+    "matched": "Leverkusen",
+    "pop": 162738
+  },
+  "Germany|Ludwigshafen": {
+    "lat": 49.48121,
+    "lon": 8.44641,
+    "matched": "Ludwigshafen am Rhein",
+    "pop": 163196
+  },
+  "Germany|Luebeck": {
+    "lat": 53.86893,
+    "lon": 10.68729,
+    "matched": "Lübeck",
+    "pop": 212207
+  },
+  "Germany|Magdeburg": {
+    "lat": 52.13129,
+    "lon": 11.63189,
+    "matched": "Magdeburg",
+    "pop": 244329
+  },
+  "Germany|Mainz": {
+    "lat": 49.98185,
+    "lon": 8.28008,
+    "matched": "Mainz",
+    "pop": 222889
+  },
+  "Germany|Mannheim": {
+    "lat": 49.4891,
+    "lon": 8.46694,
+    "matched": "Mannheim",
+    "pop": 307960
+  },
+  "Germany|Moenchengladbach": {
+    "lat": 51.18539,
+    "lon": 6.44172,
+    "matched": "Mönchengladbach",
+    "pop": 261742
+  },
+  "Germany|Moers": {
+    "lat": 51.45342,
+    "lon": 6.6326,
+    "matched": "Moers",
+    "pop": 103487
+  },
+  "Germany|Muelheim on the Ruhr": {
+    "lat": 51.43218,
+    "lon": 6.87967,
+    "matched": "Mülheim",
+    "pop": 173050
+  },
+  "Germany|Muenster": {
+    "lat": 51.96236,
+    "lon": 7.62571,
+    "matched": "Münster",
+    "pop": 308258
+  },
+  "Germany|Munich": {
+    "lat": 48.13743,
+    "lon": 11.57549,
+    "matched": "Munich",
+    "pop": 1505005
+  },
+  "Germany|Neuss": {
+    "lat": 51.19807,
+    "lon": 6.68504,
+    "matched": "Neuss",
+    "pop": 152457
+  },
+  "Germany|Nuremberg": {
+    "lat": 49.45421,
+    "lon": 11.07752,
+    "matched": "Nuremberg",
+    "pop": 515543
+  },
+  "Germany|Oberhausen": {
+    "lat": 51.47805,
+    "lon": 6.8625,
+    "matched": "Oberhausen",
+    "pop": 219176
+  },
+  "Germany|Offenbach on the Main": {
+    "lat": 50.10061,
+    "lon": 8.76647,
+    "matched": "Offenbach",
+    "pop": 119192
+  },
+  "Germany|Oldenburg": {
+    "lat": 53.14039,
+    "lon": 8.21479,
+    "matched": "Oldenburg",
+    "pop": 159218
+  },
+  "Germany|Osnabrueck": {
+    "lat": 52.27411,
+    "lon": 8.05056,
+    "matched": "Osnabrück",
+    "pop": 166462
+  },
+  "Germany|Pforzheim": {
+    "lat": 48.88436,
+    "lon": 8.69892,
+    "matched": "Pforzheim",
+    "pop": 119313
+  },
+  "Germany|Potsdam": {
+    "lat": 52.39886,
+    "lon": 13.06566,
+    "matched": "Potsdam",
+    "pop": 184754
+  },
+  "Germany|Recklinghausen": {
+    "lat": 51.61379,
+    "lon": 7.19738,
+    "matched": "Recklinghausen",
+    "pop": 122438
+  },
+  "Germany|Regensburg": {
+    "lat": 49.01513,
+    "lon": 12.10161,
+    "matched": "Regensburg",
+    "pop": 151389
+  },
+  "Germany|Remscheid": {
+    "lat": 51.17983,
+    "lon": 7.1925,
+    "matched": "Remscheid",
+    "pop": 117118
+  },
+  "Germany|Reutlingen": {
+    "lat": 48.49144,
+    "lon": 9.20427,
+    "matched": "Reutlingen",
+    "pop": 112627
+  },
+  "Germany|Rostock": {
+    "lat": 54.0887,
+    "lon": 12.14049,
+    "matched": "Rostock",
+    "pop": 198293
+  },
+  "Germany|Saarbruecken": {
+    "lat": 49.23262,
+    "lon": 7.00982,
+    "matched": "Saarbrücken",
+    "pop": 182971
+  },
+  "Germany|Solingen": {
+    "lat": 51.17343,
+    "lon": 7.0845,
+    "matched": "Solingen",
+    "pop": 164359
+  },
+  "Germany|Stuttgart": {
+    "lat": 48.78232,
+    "lon": 9.17702,
+    "matched": "Stuttgart",
+    "pop": 612663
+  },
+  "Germany|Ulm": {
+    "lat": 48.39841,
+    "lon": 9.99155,
+    "matched": "Ulm",
+    "pop": 120451
+  },
+  "Germany|Wiesbaden": {
+    "lat": 50.08601,
+    "lon": 8.24435,
+    "matched": "Wiesbaden",
+    "pop": 288850
+  },
+  "Germany|Wuerzburg": {
+    "lat": 49.79391,
+    "lon": 9.95121,
+    "matched": "Würzburg",
+    "pop": 133731
+  },
+  "Germany|Wuppertal": {
+    "lat": 51.25627,
+    "lon": 7.14816,
+    "matched": "Wuppertal",
+    "pop": 360797
+  },
+  "Greece|Athens Center": {
+    "lat": 37.98376,
+    "lon": 23.72784,
+    "matched": "Athens",
+    "pop": 664046
+  },
+  "Greece|Athens North": {
+    "lat": 37.98376,
+    "lon": 23.72784,
+    "matched": "Athens",
+    "pop": 664046
+  },
+  "Greece|Ioannina": {
+    "lat": 39.66341,
+    "lon": 20.85187,
+    "matched": "Ioánnina",
+    "pop": 65574
+  },
+  "Greece|Iraklion": {
+    "lat": 35.32787,
+    "lon": 25.14341,
+    "matched": "Irákleion",
+    "pop": 137154
+  },
+  "Greece|Larissa": {
+    "lat": 39.62847,
+    "lon": 22.42112,
+    "matched": "Lárisa",
+    "pop": 146926
+  },
+  "Greece|Patras": {
+    "lat": 38.2462,
+    "lon": 21.73508,
+    "matched": "Pátra",
+    "pop": 168034
+  },
+  "Greece|Piraeus": {
+    "lat": 37.94203,
+    "lon": 23.64619,
+    "matched": "Piraeus",
+    "pop": 163688
+  },
+  "Greece|Thessaloniki": {
+    "lat": 40.64072,
+    "lon": 22.93493,
+    "matched": "Thessaloníki",
+    "pop": 317778
+  },
+  "Greece|Volos": {
+    "lat": 39.36923,
+    "lon": 22.94769,
+    "matched": "Volos",
+    "pop": 86048
+  },
+  "Hungary|Budapest": {
+    "lat": 47.49835,
+    "lon": 19.04045,
+    "matched": "Budapest",
+    "pop": 1741041
+  },
+  "Hungary|Debrecen": {
+    "lat": 47.53167,
+    "lon": 21.62444,
+    "matched": "Debrecen",
+    "pop": 202402
+  },
+  "Hungary|Gyor": {
+    "lat": 47.68333,
+    "lon": 17.63512,
+    "matched": "Győr",
+    "pop": 129301
+  },
+  "Hungary|Kecskemet": {
+    "lat": 46.90618,
+    "lon": 19.69128,
+    "matched": "Kecskemét",
+    "pop": 109847
+  },
+  "Hungary|Miskolc": {
+    "lat": 48.10327,
+    "lon": 20.77806,
+    "matched": "Miskolc",
+    "pop": 154521
+  },
+  "Hungary|Nyiregyhaza": {
+    "lat": 47.95539,
+    "lon": 21.71671,
+    "matched": "Nyíregyháza",
+    "pop": 117689
+  },
+  "Hungary|Pecs": {
+    "lat": 46.07617,
+    "lon": 18.22814,
+    "matched": "Pécs",
+    "pop": 145347
+  },
+  "Hungary|Szeged": {
+    "lat": 46.253,
+    "lon": 20.14824,
+    "matched": "Szeged",
+    "pop": 160766
+  },
+  "Iceland|Akureyri": {
+    "lat": 65.68353,
+    "lon": -18.0878,
+    "matched": "Akureyri",
+    "pop": 19219
+  },
+  "Iceland|Gardabaer": {
+    "lat": 64.08865,
+    "lon": -21.92298,
+    "matched": "Garðabær",
+    "pop": 11421
+  },
+  "Iceland|Hafnafjordur": {
+    "lat": null,
+    "lon": null,
+    "matched": null
+  },
+  "Iceland|Kopavogur": {
+    "lat": 64.11234,
+    "lon": -21.91298,
+    "matched": "Kópavogur",
+    "pop": 40040
+  },
+  "Iceland|Mosfellsbaer": {
+    "lat": 64.16667,
+    "lon": -21.7,
+    "matched": "Mosfellsbær",
+    "pop": 13715
+  },
+  "Iceland|Reykjanesbaer": {
+    "lat": 63.99813,
+    "lon": -22.56111,
+    "matched": "Reykjanesbær",
+    "pop": 19724
+  },
+  "Iceland|Reykjavik": {
+    "lat": 64.13548,
+    "lon": -21.89541,
+    "matched": "Reykjavík",
+    "pop": 118918
+  },
+  "Iceland|Selfoss": {
+    "lat": 63.93311,
+    "lon": -20.99712,
+    "matched": "Selfoss",
+    "pop": 9000
+  },
+  "Iceland|Seltjarnarnes": {
+    "lat": null,
+    "lon": null,
+    "matched": null
+  },
+  "Ireland|Cork": {
+    "lat": 51.89797,
+    "lon": -8.47061,
+    "matched": "Cork",
+    "pop": 224004
+  },
+  "Ireland|Dublin": {
+    "lat": 53.33306,
+    "lon": -6.24889,
+    "matched": "Dublin",
+    "pop": 1024027
+  },
+  "Ireland|Limerick": {
+    "lat": 52.66472,
+    "lon": -8.62306,
+    "matched": "Limerick",
+    "pop": 102287
+  },
+  "Italy|Bari": {
+    "lat": 41.12066,
+    "lon": 16.86982,
+    "matched": "Bari",
+    "pop": 316491
+  },
+  "Italy|Bologna": {
+    "lat": 44.49381,
+    "lon": 11.33875,
+    "matched": "Bologna",
+    "pop": 394843
+  },
+  "Italy|Bolzano": {
+    "lat": 46.49067,
+    "lon": 11.33982,
+    "matched": "Bolzano",
+    "pop": 107436
+  },
+  "Italy|Brescia": {
+    "lat": 45.53558,
+    "lon": 10.21472,
+    "matched": "Brescia",
+    "pop": 200423
+  },
+  "Italy|Cagliari": {
+    "lat": 39.23054,
+    "lon": 9.11917,
+    "matched": "Cagliari",
+    "pop": 149257
+  },
+  "Italy|Catania": {
+    "lat": 37.49223,
+    "lon": 15.07041,
+    "matched": "Catania",
+    "pop": 311584
+  },
+  "Italy|Ferrara": {
+    "lat": 44.83804,
+    "lon": 11.62057,
+    "matched": "Ferrara",
+    "pop": 132009
+  },
+  "Italy|Florence": {
+    "lat": 43.77925,
+    "lon": 11.24626,
+    "matched": "Florence",
+    "pop": 367150
+  },
+  "Italy|Foggia": {
+    "lat": 41.45845,
+    "lon": 15.55188,
+    "matched": "Foggia",
+    "pop": 137032
+  },
+  "Italy|Forli": {
+    "lat": 44.22177,
+    "lon": 12.04144,
+    "matched": "Forlì",
+    "pop": 116696
+  },
+  "Italy|Genoa": {
+    "lat": 44.40478,
+    "lon": 8.94439,
+    "matched": "Genoa",
+    "pop": 580097
+  },
+  "Italy|Latina": {
+    "lat": 41.46614,
+    "lon": 12.9043,
+    "matched": "Latina",
+    "pop": 76305
+  },
+  "Italy|Livorno": {
+    "lat": 43.54427,
+    "lon": 10.32615,
+    "matched": "Livorno",
+    "pop": 157017
+  },
+  "Italy|Messina": {
+    "lat": 38.19394,
+    "lon": 15.55256,
+    "matched": "Messina",
+    "pop": 219948
+  },
+  "Italy|Milan-Monza": {
+    "lat": 45.46427,
+    "lon": 9.18951,
+    "matched": "Milan",
+    "pop": 1371498
+  },
+  "Italy|Modena": {
+    "lat": 44.64783,
+    "lon": 10.92539,
+    "matched": "Modena",
+    "pop": 184732
+  },
+  "Italy|Naples": {
+    "lat": 40.85216,
+    "lon": 14.26811,
+    "matched": "Naples",
+    "pop": 909048
+  },
+  "Italy|Padua": {
+    "lat": 45.40797,
+    "lon": 11.88586,
+    "matched": "Padua",
+    "pop": 203725
+  },
+  "Italy|Palermo": {
+    "lat": 38.1166,
+    "lon": 13.3636,
+    "matched": "Palermo",
+    "pop": 648260
+  },
+  "Italy|Parma": {
+    "lat": 44.79935,
+    "lon": 10.32618,
+    "matched": "Parma",
+    "pop": 198292
+  },
+  "Italy|Perugia": {
+    "lat": 43.1122,
+    "lon": 12.38878,
+    "matched": "Perugia",
+    "pop": 120137
+  },
+  "Italy|Pescara": {
+    "lat": 42.4584,
+    "lon": 14.20283,
+    "matched": "Pescara",
+    "pop": 119554
+  },
+  "Italy|Piacenza": {
+    "lat": 45.05242,
+    "lon": 9.69342,
+    "matched": "Piacenza",
+    "pop": 103607
+  },
+  "Italy|Prato": {
+    "lat": 43.8805,
+    "lon": 11.09699,
+    "matched": "Prato",
+    "pop": 195089
+  },
+  "Italy|Ravenna": {
+    "lat": 44.41344,
+    "lon": 12.20121,
+    "matched": "Ravenna",
+    "pop": 80868
+  },
+  "Italy|Reggio Emilia": {
+    "lat": 44.69825,
+    "lon": 10.63125,
+    "matched": "Reggio nell'Emilia",
+    "pop": 171944
+  },
+  "Italy|Rimini": {
+    "lat": 44.05755,
+    "lon": 12.56528,
+    "matched": "Rimini",
+    "pop": 148688
+  },
+  "Italy|Rome": {
+    "lat": 41.89193,
+    "lon": 12.51133,
+    "matched": "Rome",
+    "pop": 2318895
+  },
+  "Italy|Sassari": {
+    "lat": 40.72586,
+    "lon": 8.55552,
+    "matched": "Sassari",
+    "pop": 91895
+  },
+  "Italy|Taranto": {
+    "lat": 40.46438,
+    "lon": 17.24707,
+    "matched": "Taranto",
+    "pop": 198585
+  },
+  "Italy|Terni": {
+    "lat": 42.56335,
+    "lon": 12.64329,
+    "matched": "Terni",
+    "pop": 111189
+  },
+  "Italy|Trieste": {
+    "lat": 45.64953,
+    "lon": 13.77678,
+    "matched": "Trieste",
+    "pop": 204338
+  },
+  "Italy|Turin": {
+    "lat": 45.07049,
+    "lon": 7.68682,
+    "matched": "Turin",
+    "pop": 847287
+  },
+  "Italy|Venice": {
+    "lat": 45.43713,
+    "lon": 12.33265,
+    "matched": "Venice",
+    "pop": 51298
+  },
+  "Italy|Verona": {
+    "lat": 45.43854,
+    "lon": 10.9938,
+    "matched": "Verona",
+    "pop": 258031
+  },
+  "Latvia|Riga": {
+    "lat": 56.946,
+    "lon": 24.10589,
+    "matched": "Riga",
+    "pop": 742572
+  },
+  "Liechtenstein|Information not provided": {
+    "lat": null,
+    "lon": null,
+    "matched": null
+  },
+  "Lithuania|Kaunas": {
+    "lat": 54.90156,
+    "lon": 23.90909,
+    "matched": "Kaunas",
+    "pop": 289380
+  },
+  "Lithuania|Siauliai": {
+    "lat": 55.93333,
+    "lon": 23.31667,
+    "matched": "Šiauliai",
+    "pop": 99462
+  },
+  "Lithuania|Vilnius": {
+    "lat": 54.68916,
+    "lon": 25.2798,
+    "matched": "Vilnius",
+    "pop": 542366
+  },
+  "Luxembourg|Luxembourg": {
+    "lat": 49.60982,
+    "lon": 6.13268,
+    "matched": "Luxembourg",
+    "pop": 76684
+  },
+  "Luxembourg|Luxembourg_south": {
+    "lat": 49.60982,
+    "lon": 6.13268,
+    "matched": "Luxembourg",
+    "pop": 76684
+  },
+  "Malta|Valletta": {
+    "lat": 35.89968,
+    "lon": 14.5148,
+    "matched": "Valletta",
+    "pop": 6794
+  },
+  "Netherlands|Alkmaar": {
+    "lat": 52.63167,
+    "lon": 4.74861,
+    "matched": "Alkmaar",
+    "pop": 94853
+  },
+  "Netherlands|Almere": {
+    "lat": 52.37025,
+    "lon": 5.21413,
+    "matched": "Almere Stad",
+    "pop": 176432
+  },
+  "Netherlands|Amersfoort": {
+    "lat": 52.155,
+    "lon": 5.3875,
+    "matched": "Amersfoort",
+    "pop": 139914
+  },
+  "Netherlands|Amsterdam": {
+    "lat": 52.37403,
+    "lon": 4.88969,
+    "matched": "Amsterdam",
+    "pop": 741636
+  },
+  "Netherlands|Apeldoorn": {
+    "lat": 52.21,
+    "lon": 5.96944,
+    "matched": "Apeldoorn",
+    "pop": 136670
+  },
+  "Netherlands|Arnhem": {
+    "lat": 51.98,
+    "lon": 5.91111,
+    "matched": "Arnhem",
+    "pop": 162424
+  },
+  "Netherlands|Breda": {
+    "lat": 51.58656,
+    "lon": 4.77596,
+    "matched": "Breda",
+    "pop": 184126
+  },
+  "Netherlands|Eindhoven": {
+    "lat": 51.44083,
+    "lon": 5.47778,
+    "matched": "Eindhoven",
+    "pop": 235691
+  },
+  "Netherlands|Enschede": {
+    "lat": 52.21833,
+    "lon": 6.89583,
+    "matched": "Enschede",
+    "pop": 153655
+  },
+  "Netherlands|Gouda": {
+    "lat": 52.01667,
+    "lon": 4.70833,
+    "matched": "Gouda",
+    "pop": 71952
+  },
+  "Netherlands|Groningen": {
+    "lat": 53.21917,
+    "lon": 6.56667,
+    "matched": "Groningen",
+    "pop": 244807
+  },
+  "Netherlands|Heerlen": {
+    "lat": 50.88365,
+    "lon": 5.98154,
+    "matched": "Heerlen",
+    "pop": 93084
+  },
+  "Netherlands|Hilversum": {
+    "lat": 52.22333,
+    "lon": 5.17639,
+    "matched": "Hilversum",
+    "pop": 83640
+  },
+  "Netherlands|Maastricht": {
+    "lat": 50.84833,
+    "lon": 5.68889,
+    "matched": "Maastricht",
+    "pop": 122378
+  },
+  "Netherlands|Nijmegen": {
+    "lat": 51.8425,
+    "lon": 5.85278,
+    "matched": "Nijmegen",
+    "pop": 177359
+  },
+  "Netherlands|Rotterdam": {
+    "lat": 51.9225,
+    "lon": 4.47917,
+    "matched": "Rotterdam",
+    "pop": 868135
+  },
+  "Netherlands|The Hague": {
+    "lat": 52.07667,
+    "lon": 4.29861,
+    "matched": "The Hague",
+    "pop": 474292
+  },
+  "Netherlands|Tilburg": {
+    "lat": 51.55551,
+    "lon": 5.0913,
+    "matched": "Tilburg",
+    "pop": 221947
+  },
+  "Netherlands|Utrecht": {
+    "lat": 52.09083,
+    "lon": 5.12222,
+    "matched": "Utrecht",
+    "pop": 376435
+  },
+  "Netherlands|Zwolle": {
+    "lat": 52.5125,
+    "lon": 6.09444,
+    "matched": "Zwolle",
+    "pop": 129840
+  },
+  "Netherlands|s Hertogenbosch": {
+    "lat": 51.69917,
+    "lon": 5.30417,
+    "matched": "'s-Hertogenbosch",
+    "pop": 160783
+  },
+  "Norway|Bergen": {
+    "lat": 60.39299,
+    "lon": 5.32415,
+    "matched": "Bergen",
+    "pop": 294029
+  },
+  "Norway|Drammen": {
+    "lat": 59.74389,
+    "lon": 10.20449,
+    "matched": "Drammen",
+    "pop": 106013
+  },
+  "Norway|Fredrikstad/Sarpsborg": {
+    "lat": 59.2181,
+    "lon": 10.9298,
+    "matched": "Fredrikstad",
+    "pop": 83761
+  },
+  "Norway|Oslo": {
+    "lat": 59.91273,
+    "lon": 10.74609,
+    "matched": "Oslo",
+    "pop": 1082575
+  },
+  "Norway|Stavanger/Sandnes": {
+    "lat": 58.97005,
+    "lon": 5.73332,
+    "matched": "Stavanger",
+    "pop": 151669
+  },
+  "Norway|Trondheim": {
+    "lat": 63.43049,
+    "lon": 10.39506,
+    "matched": "Trondheim",
+    "pop": 216518
+  },
+  "Poland|Bialystok": {
+    "lat": 53.13333,
+    "lon": 23.16433,
+    "matched": "Białystok",
+    "pop": 295683
+  },
+  "Poland|Bielsko-Biała": {
+    "lat": 49.82245,
+    "lon": 19.04686,
+    "matched": "Bielsko-Biala",
+    "pop": 176515
+  },
+  "Poland|Bydgoszcz": {
+    "lat": 53.1235,
+    "lon": 18.00762,
+    "matched": "Bydgoszcz",
+    "pop": 330038
+  },
+  "Poland|Bytom": {
+    "lat": 50.34802,
+    "lon": 18.93282,
+    "matched": "Bytom",
+    "pop": 189186
+  },
+  "Poland|Chorzow": {
+    "lat": 50.30582,
+    "lon": 18.9742,
+    "matched": "Chorzów",
+    "pop": 113430
+  },
+  "Poland|Czestochowa": {
+    "lat": 50.79646,
+    "lon": 19.12409,
+    "matched": "Częstochowa",
+    "pop": 248125
+  },
+  "Poland|Dabrowa Gornicza": {
+    "lat": 50.33394,
+    "lon": 19.20479,
+    "matched": "Dąbrowa Górnicza",
+    "pop": 116971
+  },
+  "Poland|Elblag": {
+    "lat": 54.1522,
+    "lon": 19.40884,
+    "matched": "Elbląg",
+    "pop": 127558
+  },
+  "Poland|Gdansk": {
+    "lat": 54.35227,
+    "lon": 18.64912,
+    "matched": "Gdańsk",
+    "pop": 487371
+  },
+  "Poland|Gdynia": {
+    "lat": 54.51889,
+    "lon": 18.53188,
+    "matched": "Gdynia",
+    "pop": 257000
+  },
+  "Poland|Gliwice": {
+    "lat": 50.29761,
+    "lon": 18.67658,
+    "matched": "Gliwice",
+    "pop": 198835
+  },
+  "Poland|Gorzow Wielkopolski": {
+    "lat": 52.73371,
+    "lon": 15.22505,
+    "matched": "Gorzów Wielkopolski",
+    "pop": 114567
+  },
+  "Poland|Katowice": {
+    "lat": 50.2597,
+    "lon": 19.02173,
+    "matched": "Katowice",
+    "pop": 286960
+  },
+  "Poland|Kielce": {
+    "lat": 50.87033,
+    "lon": 20.62752,
+    "matched": "Kielce",
+    "pop": 192468
+  },
+  "Poland|Krakow": {
+    "lat": 50.06143,
+    "lon": 19.93658,
+    "matched": "Kraków",
+    "pop": 816614
+  },
+  "Poland|Lodz": {
+    "lat": 51.77058,
+    "lon": 19.47395,
+    "matched": "Łódź",
+    "pop": 639890
+  },
+  "Poland|Lublin": {
+    "lat": 51.25058,
+    "lon": 22.57009,
+    "matched": "Lublin",
+    "pop": 336339
+  },
+  "Poland|Olsztyn": {
+    "lat": 53.78376,
+    "lon": 20.49272,
+    "matched": "Olsztyn",
+    "pop": 169793
+  },
+  "Poland|Opole": {
+    "lat": 50.67119,
+    "lon": 17.92604,
+    "matched": "Opole",
+    "pop": 127676
+  },
+  "Poland|Plock": {
+    "lat": 52.54682,
+    "lon": 19.70638,
+    "matched": "Płock",
+    "pop": 127474
+  },
+  "Poland|Poznan": {
+    "lat": 52.40692,
+    "lon": 16.92993,
+    "matched": "Poznań",
+    "pop": 536151
+  },
+  "Poland|Radom": {
+    "lat": 51.40253,
+    "lon": 21.14714,
+    "matched": "Radom",
+    "pop": 226794
+  },
+  "Poland|Ruda Slaska": {
+    "lat": 50.2584,
+    "lon": 18.85632,
+    "matched": "Ruda Śląska",
+    "pop": 146189
+  },
+  "Poland|Rybnik": {
+    "lat": 50.09713,
+    "lon": 18.54179,
+    "matched": "Rybnik",
+    "pop": 142510
+  },
+  "Poland|Rzeszow": {
+    "lat": 50.04132,
+    "lon": 21.99901,
+    "matched": "Rzeszów",
+    "pop": 198317
+  },
+  "Poland|Sosnowiec": {
+    "lat": 50.28682,
+    "lon": 19.10385,
+    "matched": "Sosnowiec",
+    "pop": 227295
+  },
+  "Poland|Szczecin": {
+    "lat": 53.42894,
+    "lon": 14.55302,
+    "matched": "Szczecin",
+    "pop": 395513
+  },
+  "Poland|Tarnow": {
+    "lat": 50.01381,
+    "lon": 20.98698,
+    "matched": "Tarnów",
+    "pop": 117799
+  },
+  "Poland|Torun": {
+    "lat": 53.01375,
+    "lon": 18.59814,
+    "matched": "Toruń",
+    "pop": 196935
+  },
+  "Poland|Tychy": {
+    "lat": 50.13717,
+    "lon": 18.96641,
+    "matched": "Tychy",
+    "pop": 130000
+  },
+  "Poland|Walbrzych": {
+    "lat": 50.77141,
+    "lon": 16.28432,
+    "matched": "Wałbrzych",
+    "pop": 127431
+  },
+  "Poland|Warsaw": {
+    "lat": 52.22977,
+    "lon": 21.01178,
+    "matched": "Warsaw",
+    "pop": 1702139
+  },
+  "Poland|Wloclawek": {
+    "lat": 52.64817,
+    "lon": 19.0678,
+    "matched": "Włocławek",
+    "pop": 120339
+  },
+  "Poland|Wroclaw": {
+    "lat": 51.10286,
+    "lon": 17.03006,
+    "matched": "Wrocław",
+    "pop": 672545
+  },
+  "Poland|Zabrze": {
+    "lat": 50.32492,
+    "lon": 18.78576,
+    "matched": "Zabrze",
+    "pop": 192177
+  },
+  "Poland|Zielona Gora": {
+    "lat": 51.93548,
+    "lon": 15.50643,
+    "matched": "Zielona Góra",
+    "pop": 118433
+  },
+  "Portugal|Amadora": {
+    "lat": 38.75382,
+    "lon": -9.23083,
+    "matched": "Amadora",
+    "pop": 178858
+  },
+  "Portugal|Lisbon": {
+    "lat": 38.72509,
+    "lon": -9.1498,
+    "matched": "Lisbon",
+    "pop": 517802
+  },
+  "Portugal|Matosinhos": {
+    "lat": 41.18207,
+    "lon": -8.68908,
+    "matched": "Matosinhos",
+    "pop": 28070
+  },
+  "Portugal|Odivelas": {
+    "lat": 38.79269,
+    "lon": -9.1838,
+    "matched": "Odivelas",
+    "pop": 54624
+  },
+  "Portugal|Oeiras": {
+    "lat": 38.69105,
+    "lon": -9.31085,
+    "matched": "Oeiras",
+    "pop": 35000
+  },
+  "Portugal|Porto": {
+    "lat": 41.1485,
+    "lon": -8.61097,
+    "matched": "Porto",
+    "pop": 252687
+  },
+  "Romania|Arad": {
+    "lat": 46.18333,
+    "lon": 21.31667,
+    "matched": "Arad",
+    "pop": 169065
+  },
+  "Romania|Bacau": {
+    "lat": 46.56718,
+    "lon": 26.91384,
+    "matched": "Bacău",
+    "pop": 136087
+  },
+  "Romania|Baia Mare": {
+    "lat": 47.65729,
+    "lon": 23.56808,
+    "matched": "Baia Mare",
+    "pop": 108759
+  },
+  "Romania|Botosani": {
+    "lat": 47.75,
+    "lon": 26.66667,
+    "matched": "Botoşani",
+    "pop": 90010
+  },
+  "Romania|Braila": {
+    "lat": 45.27152,
+    "lon": 27.97429,
+    "matched": "Brăila",
+    "pop": 154686
+  },
+  "Romania|Brasov": {
+    "lat": 45.64861,
+    "lon": 25.60613,
+    "matched": "Braşov",
+    "pop": 253200
+  },
+  "Romania|Bucharest": {
+    "lat": 44.43225,
+    "lon": 26.10626,
+    "matched": "Bucharest",
+    "pop": 1877155
+  },
+  "Romania|Buzau": {
+    "lat": 45.15,
+    "lon": 26.83333,
+    "matched": "Buzău",
+    "pop": 103481
+  },
+  "Romania|Cluj-Napoca": {
+    "lat": 46.76667,
+    "lon": 23.6,
+    "matched": "Cluj-Napoca",
+    "pop": 286598
+  },
+  "Romania|Constanta": {
+    "lat": 44.18073,
+    "lon": 28.63432,
+    "matched": "Constanţa",
+    "pop": 317832
+  },
+  "Romania|Craiova": {
+    "lat": 44.31667,
+    "lon": 23.8,
+    "matched": "Craiova",
+    "pop": 234140
+  },
+  "Romania|Drobeta-Turnu Severin": {
+    "lat": 44.62693,
+    "lon": 22.65288,
+    "matched": "Drobeta-Turnu Severin",
+    "pop": 79865
+  },
+  "Romania|Galati": {
+    "lat": 45.43687,
+    "lon": 28.05028,
+    "matched": "Galaţi",
+    "pop": 217851
+  },
+  "Romania|Iasi": {
+    "lat": 47.16667,
+    "lon": 27.6,
+    "matched": "Iaşi",
+    "pop": 378954
+  },
+  "Romania|Oradea": {
+    "lat": 47.0458,
+    "lon": 21.91833,
+    "matched": "Oradea",
+    "pop": 183105
+  },
+  "Romania|Piatra-Neamt": {
+    "lat": 46.91667,
+    "lon": 26.33333,
+    "matched": "Piatra Neamţ",
+    "pop": 102688
+  },
+  "Romania|Pitesti": {
+    "lat": 44.85,
+    "lon": 24.86667,
+    "matched": "Piteşti",
+    "pop": 141275
+  },
+  "Romania|Ploiesti": {
+    "lat": 44.95,
+    "lon": 26.01667,
+    "matched": "Ploieşti",
+    "pop": 180540
+  },
+  "Romania|Ramnicu Valcea": {
+    "lat": 45.1,
+    "lon": 24.36667,
+    "matched": "Râmnicu Vâlcea",
+    "pop": 93151
+  },
+  "Romania|Satu Mare": {
+    "lat": 47.79926,
+    "lon": 22.86255,
+    "matched": "Satu Mare",
+    "pop": 112490
+  },
+  "Romania|Sibiu": {
+    "lat": 45.8,
+    "lon": 24.15,
+    "matched": "Sibiu",
+    "pop": 134309
+  },
+  "Romania|Suceava": {
+    "lat": 47.63333,
+    "lon": 26.25,
+    "matched": "Suceava",
+    "pop": 84308
+  },
+  "Romania|Targu Mures": {
+    "lat": 46.54245,
+    "lon": 24.55747,
+    "matched": "Târgu Mureş",
+    "pop": 212752
+  },
+  "Romania|Timisoara": {
+    "lat": 45.75372,
+    "lon": 21.22571,
+    "matched": "Timişoara",
+    "pop": 250849
+  },
+  "Romania|Vaslui": {
+    "lat": 46.63333,
+    "lon": 27.73333,
+    "matched": "Vaslui",
+    "pop": 63035
+  },
+  "Slovakia|Bratislava": {
+    "lat": 48.14816,
+    "lon": 17.10674,
+    "matched": "Bratislava",
+    "pop": 423737
+  },
+  "Slovakia|Kosicka": {
+    "lat": null,
+    "lon": null,
+    "matched": null
+  },
+  "Slovenia|Ljubljana": {
+    "lat": 46.05108,
+    "lon": 14.50513,
+    "matched": "Ljubljana",
+    "pop": 272220
+  },
+  "Slovenia|Maribor": {
+    "lat": 46.55583,
+    "lon": 15.64593,
+    "matched": "Maribor",
+    "pop": 96209
+  },
+  "Spain|A Coruna": {
+    "lat": 43.37135,
+    "lon": -8.396,
+    "matched": "A Coruña",
+    "pop": 250438
+  },
+  "Spain|Albacete": {
+    "lat": 38.99424,
+    "lon": -1.85643,
+    "matched": "Albacete",
+    "pop": 173050
+  },
+  "Spain|Alcala de Henares": {
+    "lat": 40.48205,
+    "lon": -3.35996,
+    "matched": "Alcalá de Henares",
+    "pop": 193751
+  },
+  "Spain|Alcobendas": {
+    "lat": 40.54746,
+    "lon": -3.64197,
+    "matched": "Alcobendas",
+    "pop": 116037
+  },
+  "Spain|Alcorcon": {
+    "lat": 40.34582,
+    "lon": -3.82487,
+    "matched": "Alcorcón",
+    "pop": 172384
+  },
+  "Spain|Algeciras": {
+    "lat": 36.13326,
+    "lon": -5.45051,
+    "matched": "Algeciras",
+    "pop": 121414
+  },
+  "Spain|Alicante": {
+    "lat": 38.34517,
+    "lon": -0.48149,
+    "matched": "Alicante",
+    "pop": 348901
+  },
+  "Spain|Almeria": {
+    "lat": 36.83814,
+    "lon": -2.45974,
+    "matched": "Almería",
+    "pop": 196851
+  },
+  "Spain|Badajoz": {
+    "lat": 38.87789,
+    "lon": -6.97061,
+    "matched": "Badajoz",
+    "pop": 150530
+  },
+  "Spain|Baix Llobregat Nord": {
+    "lat": null,
+    "lon": null,
+    "matched": null
+  },
+  "Spain|Baix Llobregat Sud": {
+    "lat": null,
+    "lon": null,
+    "matched": null
+  },
+  "Spain|Barakaldo": {
+    "lat": 43.29639,
+    "lon": -2.98813,
+    "matched": "Barakaldo",
+    "pop": 100435
+  },
+  "Spain|Barcelona": {
+    "lat": 41.38879,
+    "lon": 2.15899,
+    "matched": "Barcelona",
+    "pop": 1686208
+  },
+  "Spain|Barcelones Nord": {
+    "lat": 41.38879,
+    "lon": 2.15899,
+    "matched": "Barcelona",
+    "pop": 1686208
+  },
+  "Spain|Bilbao": {
+    "lat": 43.26271,
+    "lon": -2.92528,
+    "matched": "Bilbao",
+    "pop": 347342
+  },
+  "Spain|Burgos": {
+    "lat": 42.34106,
+    "lon": -3.70184,
+    "matched": "Burgos",
+    "pop": 176418
+  },
+  "Spain|Cadiz": {
+    "lat": 36.52672,
+    "lon": -6.2891,
+    "matched": "Cadiz",
+    "pop": 116979
+  },
+  "Spain|Cartagena": {
+    "lat": 37.60197,
+    "lon": -0.98397,
+    "matched": "Cartagena",
+    "pop": 213943
+  },
+  "Spain|Castellon de la Plana": {
+    "lat": 39.98567,
+    "lon": -0.04935,
+    "matched": "Castelló de la Plana",
+    "pop": 183711
+  },
+  "Spain|Cordoba": {
+    "lat": 37.89155,
+    "lon": -4.77275,
+    "matched": "Córdoba",
+    "pop": 325708
+  },
+  "Spain|Dos Hermanas": {
+    "lat": 37.28287,
+    "lon": -5.92088,
+    "matched": "Dos Hermanas",
+    "pop": 122943
+  },
+  "Spain|Elche": {
+    "lat": 38.26218,
+    "lon": -0.70107,
+    "matched": "Elche",
+    "pop": 234765
+  },
+  "Spain|Fuenlabrada": {
+    "lat": 40.28419,
+    "lon": -3.79415,
+    "matched": "Fuenlabrada",
+    "pop": 190496
+  },
+  "Spain|Getafe": {
+    "lat": 40.30571,
+    "lon": -3.73295,
+    "matched": "Getafe",
+    "pop": 187525
+  },
+  "Spain|Gijon": {
+    "lat": 43.53573,
+    "lon": -5.66152,
+    "matched": "Gijón",
+    "pop": 271780
+  },
+  "Spain|Girones": {
+    "lat": null,
+    "lon": null,
+    "matched": null
+  },
+  "Spain|Granada": {
+    "lat": 37.18817,
+    "lon": -3.60667,
+    "matched": "Granada",
+    "pop": 233532
+  },
+  "Spain|Huelva": {
+    "lat": 37.26638,
+    "lon": -6.94004,
+    "matched": "Huelva",
+    "pop": 144258
+  },
+  "Spain|Jaen": {
+    "lat": 37.76922,
+    "lon": -3.79028,
+    "matched": "Jaén",
+    "pop": 113457
+  },
+  "Spain|Jerez de la Frontera": {
+    "lat": 36.68645,
+    "lon": -6.13606,
+    "matched": "Jerez de la Frontera",
+    "pop": 212879
+  },
+  "Spain|L'Hospitalet de Llobregat": {
+    "lat": 41.35967,
+    "lon": 2.10028,
+    "matched": "L'Hospitalet de Llobregat",
+    "pop": 257038
+  },
+  "Spain|Las Palmas de Gran Canaria": {
+    "lat": 28.10178,
+    "lon": -15.41573,
+    "matched": "Las Palmas de Gran Canaria",
+    "pop": 383516
+  },
+  "Spain|Leganes": {
+    "lat": 40.32718,
+    "lon": -3.7635,
+    "matched": "Leganés",
+    "pop": 188425
+  },
+  "Spain|Leon": {
+    "lat": 42.60003,
+    "lon": -5.57032,
+    "matched": "León",
+    "pop": 124772
+  },
+  "Spain|Lleida": {
+    "lat": 41.61674,
+    "lon": 0.62218,
+    "matched": "Lleida",
+    "pop": 140797
+  },
+  "Spain|Logrono": {
+    "lat": 42.46615,
+    "lon": -2.45115,
+    "matched": "Logroño",
+    "pop": 151164
+  },
+  "Spain|Madrid": {
+    "lat": 40.4165,
+    "lon": -3.70256,
+    "matched": "Madrid",
+    "pop": 3255944
+  },
+  "Spain|Malaga": {
+    "lat": 36.72016,
+    "lon": -4.42034,
+    "matched": "Málaga",
+    "pop": 592346
+  },
+  "Spain|Mataro": {
+    "lat": 41.54211,
+    "lon": 2.4445,
+    "matched": "Mataró",
+    "pop": 126988
+  },
+  "Spain|Mostoles": {
+    "lat": 40.32234,
+    "lon": -3.86496,
+    "matched": "Móstoles",
+    "pop": 207095
+  },
+  "Spain|Murcia": {
+    "lat": 37.98704,
+    "lon": -1.13004,
+    "matched": "Murcia",
+    "pop": 471982
+  },
+  "Spain|Oviedo": {
+    "lat": 43.36029,
+    "lon": -5.84476,
+    "matched": "Oviedo",
+    "pop": 220027
+  },
+  "Spain|Palma de Mallorca": {
+    "lat": 39.56939,
+    "lon": 2.65024,
+    "matched": "Palma",
+    "pop": 438234
+  },
+  "Spain|Pamplona": {
+    "lat": 42.81687,
+    "lon": -1.64323,
+    "matched": "Pamplona",
+    "pop": 208243
+  },
+  "Spain|Parla": {
+    "lat": 40.23604,
+    "lon": -3.76752,
+    "matched": "Parla",
+    "pop": 115611
+  },
+  "Spain|Reus": {
+    "lat": 41.15612,
+    "lon": 1.10687,
+    "matched": "Reus",
+    "pop": 103477
+  },
+  "Spain|Roquetas de Mar": {
+    "lat": 36.76419,
+    "lon": -2.61475,
+    "matched": "Roquetas de Mar",
+    "pop": 94925
+  },
+  "Spain|Salamanca": {
+    "lat": 40.42972,
+    "lon": -3.67975,
+    "matched": "Salamanca",
+    "pop": 147707
+  },
+  "Spain|San Cristobal de La Laguna": {
+    "lat": 28.4853,
+    "lon": -16.32014,
+    "matched": "La Laguna",
+    "pop": 150661
+  },
+  "Spain|San Sebastian - Donostia": {
+    "lat": 43.31283,
+    "lon": -1.97499,
+    "matched": "Donostia / San Sebastián",
+    "pop": 185357
+  },
+  "Spain|Santa Cruz de Tenerife": {
+    "lat": 28.46824,
+    "lon": -16.25462,
+    "matched": "Santa Cruz de Tenerife",
+    "pop": 211359
+  },
+  "Spain|Santander": {
+    "lat": 43.46589,
+    "lon": -3.80493,
+    "matched": "Santander",
+    "pop": 173635
+  },
+  "Spain|Sevilla": {
+    "lat": 37.38283,
+    "lon": -5.97317,
+    "matched": "Sevilla",
+    "pop": 686741
+  },
+  "Spain|Tarragones": {
+    "lat": 41.11905,
+    "lon": 1.24544,
+    "matched": "Tarragona",
+    "pop": 141542
+  },
+  "Spain|Telde": {
+    "lat": 27.99243,
+    "lon": -15.41915,
+    "matched": "Telde",
+    "pop": 123265
+  },
+  "Spain|Torrejon de Ardoz": {
+    "lat": 40.45535,
+    "lon": -3.46973,
+    "matched": "Torrejón de Ardoz",
+    "pop": 118162
+  },
+  "Spain|Valencia": {
+    "lat": 39.47391,
+    "lon": -0.37966,
+    "matched": "Valencia",
+    "pop": 824340
+  },
+  "Spain|Valladolid": {
+    "lat": 41.65541,
+    "lon": -4.72353,
+    "matched": "Valladolid",
+    "pop": 300618
+  },
+  "Spain|Valles Occidental I": {
+    "lat": null,
+    "lon": null,
+    "matched": null
+  },
+  "Spain|Valles Occidental II": {
+    "lat": null,
+    "lon": null,
+    "matched": null
+  },
+  "Spain|Vigo": {
+    "lat": 42.23282,
+    "lon": -8.72264,
+    "matched": "Vigo",
+    "pop": 293642
+  },
+  "Spain|Vitoria - Gazteiz": {
+    "lat": 42.84998,
+    "lon": -2.67268,
+    "matched": "Gasteiz / Vitoria",
+    "pop": 257407
+  },
+  "Spain|Zaragoza": {
+    "lat": 41.65606,
+    "lon": -0.87734,
+    "matched": "Zaragoza",
+    "pop": 686986
+  },
+  "Sweden|Boras": {
+    "lat": 57.72101,
+    "lon": 12.9401,
+    "matched": "Borås",
+    "pop": 71700
+  },
+  "Sweden|Eskilstuna": {
+    "lat": 59.36661,
+    "lon": 16.5077,
+    "matched": "Eskilstuna",
+    "pop": 67359
+  },
+  "Sweden|Gavle": {
+    "lat": 60.67452,
+    "lon": 17.14174,
+    "matched": "Gävle",
+    "pop": 74884
+  },
+  "Sweden|Gothenburg": {
+    "lat": 57.70716,
+    "lon": 11.96679,
+    "matched": "Gothenburg",
+    "pop": 608462
+  },
+  "Sweden|Halmstad": {
+    "lat": 56.67446,
+    "lon": 12.85676,
+    "matched": "Halmstad",
+    "pop": 70480
+  },
+  "Sweden|Helsingborg": {
+    "lat": 56.04673,
+    "lon": 12.69437,
+    "matched": "Helsingborg",
+    "pop": 104250
+  },
+  "Sweden|Huddinge": {
+    "lat": 59.23705,
+    "lon": 17.98192,
+    "matched": "Huddinge",
+    "pop": 90182
+  },
+  "Sweden|Jonkoping": {
+    "lat": 57.78145,
+    "lon": 14.15618,
+    "matched": "Jönköping",
+    "pop": 112766
+  },
+  "Sweden|Linkoping": {
+    "lat": 58.41086,
+    "lon": 15.62157,
+    "matched": "Linköping",
+    "pop": 166673
+  },
+  "Sweden|Lund": {
+    "lat": 55.70584,
+    "lon": 13.19321,
+    "matched": "Lund",
+    "pop": 87244
+  },
+  "Sweden|Malmo": {
+    "lat": 55.60587,
+    "lon": 13.00073,
+    "matched": "Malmö",
+    "pop": 362133
+  },
+  "Sweden|Nacka": {
+    "lat": 59.31053,
+    "lon": 18.16372,
+    "matched": "Nacka",
+    "pop": 25170
+  },
+  "Sweden|Norrkoping": {
+    "lat": 58.59419,
+    "lon": 16.1826,
+    "matched": "Norrköping",
+    "pop": 93765
+  },
+  "Sweden|Orebro": {
+    "lat": 59.27412,
+    "lon": 15.2066,
+    "matched": "Örebro",
+    "pop": 155989
+  },
+  "Sweden|Stockholm": {
+    "lat": 59.32938,
+    "lon": 18.06871,
+    "matched": "Stockholm",
+    "pop": 1515017
+  },
+  "Sweden|Umea": {
+    "lat": 63.82842,
+    "lon": 20.25972,
+    "matched": "Umeå",
+    "pop": 130224
+  },
+  "Sweden|Uppsala": {
+    "lat": 59.85882,
+    "lon": 17.63889,
+    "matched": "Uppsala",
+    "pop": 177074
+  },
+  "Sweden|Vasteras": {
+    "lat": 59.61617,
+    "lon": 16.55276,
+    "matched": "Västerås",
+    "pop": 127799
+  },
+  "Switzerland|Baden-Brugg": {
+    "lat": 47.47333,
+    "lon": 8.30592,
+    "matched": "Baden",
+    "pop": 19340
+  },
+  "Switzerland|Basel": {
+    "lat": 47.55839,
+    "lon": 7.57327,
+    "matched": "Basel",
+    "pop": 177595
+  },
+  "Switzerland|Bern": {
+    "lat": 46.94809,
+    "lon": 7.44744,
+    "matched": "Bern",
+    "pop": 121631
+  },
+  "Switzerland|Biel/Bienne": {
+    "lat": 47.13713,
+    "lon": 7.24608,
+    "matched": "Biel/Bienne",
+    "pop": 55120
+  },
+  "Switzerland|Fribourg": {
+    "lat": 46.80237,
+    "lon": 7.15128,
+    "matched": "Fribourg",
+    "pop": 38365
+  },
+  "Switzerland|Geneva": {
+    "lat": 46.20222,
+    "lon": 6.14569,
+    "matched": "Geneva",
+    "pop": 201741
+  },
+  "Switzerland|Lausanne": {
+    "lat": 46.516,
+    "lon": 6.63282,
+    "matched": "Lausanne",
+    "pop": 139111
+  },
+  "Switzerland|Lucerne": {
+    "lat": 47.05048,
+    "lon": 8.30635,
+    "matched": "Luzern",
+    "pop": 81691
+  },
+  "Switzerland|Lugano": {
+    "lat": 46.01008,
+    "lon": 8.96004,
+    "matched": "Lugano",
+    "pop": 63185
+  },
+  "Switzerland|St. Gallen": {
+    "lat": 47.42391,
+    "lon": 9.37477,
+    "matched": "Sankt Gallen",
+    "pop": 75833
+  },
+  "Switzerland|Winterthur": {
+    "lat": 47.50564,
+    "lon": 8.72413,
+    "matched": "Winterthur",
+    "pop": 111840
+  },
+  "Switzerland|Zug": {
+    "lat": 47.17242,
+    "lon": 8.51745,
+    "matched": "Zug",
+    "pop": 30542
+  },
+  "Switzerland|Zurich": {
+    "lat": 47.36667,
+    "lon": 8.55,
+    "matched": "Zürich",
+    "pop": 415367
+  },
+  "Turkey|Information not provided": {
+    "lat": null,
+    "lon": null,
+    "matched": null
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "people_per_ring": 10000,
+  "max_rings_per_band": 12,
+  "agglomerations_total": 435,
+  "agglomerations_geocoded": 425,
+  "agglomerations_unmatched": [
+    "Iceland / Hafnafjordur",
+    "Iceland / Seltjarnarnes",
+    "Liechtenstein / Information not provided",
+    "Slovakia / Kosicka",
+    "Spain / Baix Llobregat Nord",
+    "Spain / Baix Llobregat Sud",
+    "Spain / Girones",
+    "Spain / Valles Occidental I",
+    "Spain / Valles Occidental II",
+    "Turkey / Information not provided"
+  ],
+  "ring_features": 11858,
+  "output": "app/public/data/agglomeration_soundwaves.geojson"
+}
