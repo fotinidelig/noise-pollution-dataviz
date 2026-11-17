@@ -122,10 +122,16 @@ export function NoiseMap() {
   const [chartCities, setChartCities] = useState<ChartCity[]>([])
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [hoverSeries, setHoverSeries] = useState<HoverSeries | null>(null)
+  const [pinnedId, setPinnedId] = useState<string | null>(null)
+  const [pinnedSeries, setPinnedSeries] = useState<HoverSeries | null>(null)
+  const pinnedIdRef = useRef<string | null>(null)
 
   sourceRef.current = source
   metricRef.current = metric
   citiesRef.current = chartCities
+  pinnedIdRef.current = pinnedId
+
+  const focusId = hoveredId ?? pinnedId
 
   const pointsForToggle = useMemo(() => {
     const key = `${source}__${metric}`
@@ -393,16 +399,61 @@ export function NoiseMap() {
       setStatus('Map error — check console / data assets')
     })
 
-    // Click cluster → zoom to expand
-    map.on('click', HIT_LAYER, (e) => {
-      const feat = e.features?.[0]
-      if (!feat?.properties?.cluster) return
-      const clusterId = Number(feat.properties.cluster_id)
-      const citySource = map.getSource(CITIES_SOURCE) as maplibregl.GeoJSONSource
-      void citySource.getClusterExpansionZoom(clusterId).then((zoom) => {
-        const coords = (feat.geometry as Point).coordinates as [number, number]
-        map.easeTo({ center: coords, zoom })
-      })
+    // Click cluster → zoom to expand; click city → pin chart; click empty → unpin
+    map.on('click', (e) => {
+      const hits = map.queryRenderedFeatures(e.point, { layers: [HIT_LAYER] })
+      if (!hits.length) {
+        setPinnedId(null)
+        setPinnedSeries(null)
+        return
+      }
+      const feat = hits[0]
+      const props = feat.properties ?? {}
+      if (props.cluster) {
+        const clusterId = Number(props.cluster_id)
+        const citySource = map.getSource(CITIES_SOURCE) as maplibregl.GeoJSONSource
+        void citySource.getClusterExpansionZoom(clusterId).then((zoom) => {
+          const coords = (feat.geometry as Point).coordinates as [number, number]
+          map.easeTo({ center: coords, zoom })
+        })
+        return
+      }
+
+      const id = String(props.id ?? '')
+      if (!id) return
+      if (pinnedIdRef.current === id) {
+        setPinnedId(null)
+        setPinnedSeries(null)
+        return
+      }
+
+      const src = sourceRef.current
+      const met = metricRef.current
+      const key = `${src}__${met}`
+      let tip: ChartSeries | null = null
+      try {
+        const all = JSON.parse(String(props.tooltip || '{}')) as Record<string, ChartSeries>
+        tip = all[key] ?? null
+      } catch {
+        tip = null
+      }
+      if (!tip || !(tip.total > 0)) return
+      const bands = seriesToBands(met, tip)
+      const series: HoverSeries = {
+        id,
+        name: String(props.agglomeration ?? ''),
+        total: tip.total,
+        points: bands.map((b) => ({
+          band: b.band,
+          label: b.label,
+          color: b.color,
+          people: b.people,
+        })),
+      }
+      setPinnedId(id)
+      setPinnedSeries(series)
+      setHoveredId(id)
+      setHoverSeries(series)
     })
 
     return () => {
@@ -426,6 +477,8 @@ export function NoiseMap() {
       popupRef.current?.remove()
       setHoveredId(null)
       setHoverSeries(null)
+      setPinnedId(null)
+      setPinnedSeries(null)
       map.getCanvas().style.cursor = ''
       setStatus(`${source} · ${metric} · agglomerations`)
       scheduleRebuild()
@@ -442,8 +495,8 @@ export function NoiseMap() {
 
     const apply = () => {
       if (!map.getLayer(RINGS_LAYER)) return
-      const activeId = hoveredId ?? ''
-      const dimming = Boolean(hoveredId)
+      const activeId = focusId ?? ''
+      const dimming = Boolean(focusId)
 
       // Opacity drop reads as desaturation on the dark basemap
       map.setPaintProperty(
@@ -514,7 +567,7 @@ export function NoiseMap() {
 
     if (map.isStyleLoaded() && map.getLayer(RINGS_LAYER)) apply()
     else map.once('load', apply)
-  }, [hoveredId])
+  }, [focusId])
 
   // Hover
   useEffect(() => {
@@ -698,7 +751,9 @@ export function NoiseMap() {
             metric={metric}
             hoveredId={hoveredId}
             hoverSeries={hoverSeries}
-            onHoverCity={setHoveredId}
+            pinnedId={pinnedId}
+            pinnedSeries={pinnedSeries}
+            pinned={Boolean(pinnedId)}
           />
         ) : null}
         <div className="noise-legend" aria-label="dB band legend">

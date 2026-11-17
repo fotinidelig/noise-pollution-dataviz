@@ -44,10 +44,13 @@ type Props = {
   cities: ChartCity[]
   source: NoiseSource
   metric: NoiseMetric
+  /** Live hover from the map (temporary). */
   hoveredId: string | null
-  /** When set (e.g. cluster aggregate), overrides city lookup. */
   hoverSeries?: HoverSeries | null
-  onHoverCity: (id: string | null) => void
+  /** Click-pinned city — stays until cleared. */
+  pinnedId?: string | null
+  pinnedSeries?: HoverSeries | null
+  pinned?: boolean
 }
 
 type Pt = { x: number; y: number; color: string; t: number }
@@ -77,7 +80,6 @@ function lerpColor(a: string, b: string, t: number): string {
   return `rgb(${mix[0]}, ${mix[1]}, ${mix[2]})`
 }
 
-/** Catmull-Rom → densely sampled polyline for gradient stroke. */
 function sampleCatmullRom(
   anchors: { x: number; y: number; color: string }[],
   segmentsPerSpan = 18,
@@ -87,10 +89,8 @@ function sampleCatmullRom(
     .x((d) => d.x)
     .y((d) => d.y)
     .curve(curveCatmullRom.alpha(0.9))
-  // Build path then sample via SVG path element
   const d = line(anchors)
   if (!d || typeof document === 'undefined') {
-    // fallback: linear
     const out: Pt[] = []
     for (let i = 0; i < anchors.length; i++) {
       out.push({ ...anchors[i], t: i / (anchors.length - 1) })
@@ -105,7 +105,6 @@ function sampleCatmullRom(
   for (let i = 0; i <= n; i++) {
     const u = i / n
     const p = path.getPointAtLength(u * len)
-    // colour by progress across band anchors
     const f = u * (anchors.length - 1)
     const i0 = Math.floor(f)
     const i1 = Math.min(anchors.length - 1, i0 + 1)
@@ -126,9 +125,19 @@ export function CityWaveChart({
   metric,
   hoveredId,
   hoverSeries = null,
+  pinnedId = null,
+  pinnedSeries = null,
+  pinned = false,
 }: Props) {
   const plotRef = useRef<HTMLDivElement | null>(null)
   const [size, setSize] = useState({ w: 220, h: 640 })
+  const [bandTip, setBandTip] = useState<{
+    label: string
+    people: number
+    color: string
+    x: number
+    y: number
+  } | null>(null)
 
   useEffect(() => {
     const el = plotRef.current
@@ -150,14 +159,16 @@ export function CityWaveChart({
   const seriesKey = `${source}__${metric}`
 
   const active = useMemo(() => {
-    if (hoverSeries && hoverSeries.points.length) {
+    const series = hoverSeries ?? pinnedSeries
+    const id = hoveredId ?? pinnedId
+    if (series && series.points.length) {
       return {
-        ...hoverSeries,
-        localMax: Math.max(1, ...hoverSeries.points.map((p) => p.people)),
+        ...series,
+        localMax: Math.max(1, ...series.points.map((p) => p.people)),
       }
     }
-    if (!hoveredId) return null
-    const city = cities.find((c) => c.id === hoveredId)
+    if (!id) return null
+    const city = cities.find((c) => c.id === id)
     if (!city) return null
     const tip = city.series[seriesKey]
     if (!tip || !(tip.total > 0)) return null
@@ -178,19 +189,30 @@ export function CityWaveChart({
       points,
       localMax: Math.max(1, ...points.map((p) => p.people)),
     }
-  }, [hoverSeries, hoveredId, cities, seriesKey, bandKeys, bandMeta])
+  }, [
+    hoverSeries,
+    pinnedSeries,
+    hoveredId,
+    pinnedId,
+    cities,
+    seriesKey,
+    bandKeys,
+    bandMeta,
+  ])
 
-  const pad = { top: 12, right: 14, bottom: 28, left: 52 }
+  useEffect(() => {
+    setBandTip(null)
+  }, [active?.id, source, metric])
+
+  const pad = { top: 16, right: 36, bottom: 28, left: 52 }
   const innerW = Math.max(40, size.w - pad.left - pad.right)
   const innerH = Math.max(80, size.h - pad.top - pad.bottom)
 
-  // Quieter bands at top, louder at bottom
   const y = scalePoint<string>()
     .domain(bandKeys)
     .range([0, innerH])
     .padding(0.4)
 
-  // De-normalized: this city's max people fills the chart width
   const x = scaleLinear()
     .domain([0, active?.localMax ?? 1])
     .nice()
@@ -204,6 +226,7 @@ export function CityWaveChart({
       color: p.color,
       people: p.people,
       band: p.band,
+      label: p.label,
     }))
   }, [active, x, y])
 
@@ -217,15 +240,26 @@ export function CityWaveChart({
       .curve(curveCatmullRom.alpha(0.9))(anchors)
   }, [anchors])
 
-  const xTicks = x.ticks(3)
+  const maxAnchor = useMemo(() => {
+    if (!anchors.length) return null
+    return anchors.reduce((best, p) => (p.people > best.people ? p : best), anchors[0])
+  }, [anchors])
+
+  const xTicks = x.ticks(3).filter((t) => t < (active?.localMax ?? 0) * 0.92)
 
   return (
-    <div className="wave-panel" aria-label="People by dB band">
+    <div
+      className={`wave-panel${active ? ' has-series' : ''}${pinned ? ' is-pinned' : ''}`}
+      aria-label="People by dB band"
+    >
       <div className="wave-panel__head">
         <span className="wave-panel__title">people × dB</span>
-        <span className="wave-panel__meta">
-          {active ? active.name : 'hover a city'}
-        </span>
+        {active ? (
+          <span className="wave-panel__meta">
+            {active.name}
+            {pinned ? <span className="wave-pin-badge">pinned</span> : null}
+          </span>
+        ) : null}
       </div>
       <div className="wave-panel__plot" ref={plotRef}>
         <svg
@@ -233,7 +267,7 @@ export function CityWaveChart({
           width={size.w}
           height={size.h}
           role="img"
-          aria-label="Sound-wave profile for hovered agglomeration"
+          aria-label="Sound-wave profile for selected agglomeration"
         >
           <g transform={`translate(${pad.left},${pad.top})`}>
             <line className="wave-axis" x1={0} x2={0} y1={0} y2={innerH} />
@@ -270,25 +304,27 @@ export function CityWaveChart({
               )
             })}
 
-            {xTicks.map((t) => (
-              <g key={t}>
-                <line
-                  className="wave-band-grid"
-                  x1={x(t)}
-                  x2={x(t)}
-                  y1={0}
-                  y2={innerH}
-                />
-                <text
-                  className="wave-x-label"
-                  x={x(t)}
-                  y={innerH + 16}
-                  textAnchor="middle"
-                >
-                  {formatPeople(t)}
-                </text>
-              </g>
-            ))}
+            {active
+              ? xTicks.map((t) => (
+                  <g key={t}>
+                    <line
+                      className="wave-band-grid"
+                      x1={x(t)}
+                      x2={x(t)}
+                      y1={0}
+                      y2={innerH}
+                    />
+                    <text
+                      className="wave-x-label"
+                      x={x(t)}
+                      y={innerH + 16}
+                      textAnchor="middle"
+                    >
+                      {formatPeople(t)}
+                    </text>
+                  </g>
+                ))
+              : null}
 
             {active && samples.length > 1 ? (
               <g className="wave-active">
@@ -307,29 +343,77 @@ export function CityWaveChart({
                     />
                   )
                 })}
+
+                {/* Max annotation — sticks to the right edge */}
+                {maxAnchor ? (
+                  <g className="wave-max">
+                    <line
+                      className="wave-max-guide"
+                      x1={maxAnchor.x}
+                      y1={maxAnchor.y}
+                      x2={innerW}
+                      y2={maxAnchor.y}
+                    />
+                    <text
+                      className="wave-max-label"
+                      x={innerW + 4}
+                      y={maxAnchor.y}
+                      dominantBaseline="middle"
+                    >
+                      {formatPeople(maxAnchor.people)}
+                    </text>
+                  </g>
+                ) : null}
+
                 {anchors.map((p) => (
-                  <circle
-                    key={p.band}
-                    className="wave-dot"
-                    cx={p.x}
-                    cy={p.y}
-                    r={3.4}
-                    fill={p.color}
-                  />
+                  <g key={p.band}>
+                    <circle
+                      className="wave-dot-hit"
+                      cx={p.x}
+                      cy={p.y}
+                      r={10}
+                      onMouseEnter={() =>
+                        setBandTip({
+                          label: p.label,
+                          people: p.people,
+                          color: p.color,
+                          x: pad.left + p.x,
+                          y: pad.top + p.y,
+                        })
+                      }
+                      onMouseLeave={() => setBandTip(null)}
+                    />
+                    <circle
+                      className="wave-dot"
+                      cx={p.x}
+                      cy={p.y}
+                      r={3.4}
+                      fill={p.color}
+                      pointerEvents="none"
+                    />
+                  </g>
                 ))}
               </g>
-            ) : (
-              <text
-                className="wave-empty"
-                x={innerW / 2}
-                y={innerH / 2}
-                textAnchor="middle"
-              >
-                hover a city
-              </text>
-            )}
+            ) : null}
           </g>
         </svg>
+
+        {bandTip ? (
+          <div
+            className="wave-band-tip"
+            style={{
+              left: Math.min(bandTip.x + 12, size.w - 120),
+              top: Math.max(8, bandTip.y - 28),
+            }}
+          >
+            <span
+              className="wave-band-tip__swatch"
+              style={{ background: bandTip.color }}
+            />
+            <span>{bandTip.label}</span>
+            <strong>{formatPeople(bandTip.people)}</strong>
+          </div>
+        ) : null}
       </div>
       {active ? (
         <div className="wave-hover-label">

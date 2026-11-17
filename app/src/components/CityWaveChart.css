@@ -19,6 +19,15 @@
   overflow: hidden;
 }
 
+.wave-panel.has-series {
+  pointer-events: auto;
+}
+
+.wave-panel.is-pinned {
+  border-color: rgba(0, 229, 255, 0.45);
+  box-shadow: 0 0 18px rgba(0, 229, 255, 0.12);
+}
+
 .wave-panel__head {
   display: flex;
   justify-content: space-between;
@@ -30,6 +39,7 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   flex: 0 0 auto;
+  pointer-events: none;
 }
 
 .wave-panel__title {
@@ -37,15 +47,28 @@
 }
 
 .wave-panel__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   opacity: 0.85;
   font-size: 0.9rem;
   text-transform: none;
   letter-spacing: 0.02em;
-  max-width: 55%;
+  max-width: 60%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   text-align: right;
+}
+
+.wave-pin-badge {
+  flex: 0 0 auto;
+  padding: 0.05rem 0.3rem;
+  border: 1px solid rgba(0, 229, 255, 0.4);
+  color: #00e5ff;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .wave-panel__plot {
@@ -77,13 +100,6 @@
   fill: #7a8eaa;
   font-size: 11px;
   font-family: "VT323", monospace;
-}
-
-.wave-empty {
-  fill: rgba(140, 160, 190, 0.45);
-  font-size: 14px;
-  font-family: "VT323", monospace;
-  letter-spacing: 0.04em;
 }
 
 .wave-active {
@@ -119,6 +135,53 @@
   stroke: rgba(3, 5, 10, 0.85);
   stroke-width: 1;
   filter: drop-shadow(0 0 5px rgba(0, 229, 255, 0.35));
+}
+
+.wave-dot-hit {
+  fill: transparent;
+  cursor: help;
+}
+
+.wave-max-guide {
+  stroke: rgba(232, 240, 255, 0.35);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+.wave-max-label {
+  fill: #e8f0ff;
+  font-size: 12px;
+  font-family: "VT323", monospace;
+  paint-order: stroke;
+  stroke: rgba(3, 5, 10, 0.85);
+  stroke-width: 3px;
+}
+
+.wave-band-tip {
+  position: absolute;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.4rem;
+  background: rgba(6, 10, 18, 0.94);
+  border: 1px solid rgba(0, 229, 255, 0.35);
+  color: #e8f0ff;
+  font-size: 0.95rem;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.wave-band-tip__swatch {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  box-shadow: 0 0 6px currentColor;
+}
+
+.wave-band-tip strong {
+  color: #00e5ff;
+  font-weight: 400;
 }
 
 .wave-hover-label {
