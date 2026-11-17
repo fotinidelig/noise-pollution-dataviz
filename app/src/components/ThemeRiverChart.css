@@ -51,33 +51,23 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.theme-river__legend {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  flex: 0 0 auto;
-  color: #c5d3ea;
-  letter-spacing: 0.04em;
   text-transform: none;
+  letter-spacing: 0.04em;
+  color: #9db0cc;
 }
 
-.theme-river__legend .sw {
-  width: 0.7rem;
-  height: 0.7rem;
-  display: inline-block;
-  border: 1px solid rgba(255, 255, 255, 0.25);
+.theme-river__term {
+  font-weight: 400;
 }
 
-.theme-river__legend .sw.ha {
-  background: rgba(255, 0, 229, 0.7);
-  box-shadow: 0 0 8px rgba(255, 0, 229, 0.45);
+.theme-river__term--ha {
+  color: #ff6df5;
+  text-shadow: 0 0 10px rgba(255, 0, 229, 0.45);
 }
 
-.theme-river__legend .sw.hsd {
-  background: rgba(0, 229, 255, 0.7);
-  box-shadow: 0 0 8px rgba(0, 229, 255, 0.45);
+.theme-river__term--hsd {
+  color: #5ef0ff;
+  text-shadow: 0 0 10px rgba(0, 229, 255, 0.45);
 }
 
 .theme-river__svg {

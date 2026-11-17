@@ -181,14 +181,22 @@ export function ThemeRiverChart({ data, source, focusId, onHoverCity }: Props) {
   }
 
   return (
-    <div className="theme-river" ref={wrapRef} aria-label="HA and HSD ThemeRiver">
+    <div
+      className="theme-river"
+      ref={wrapRef}
+      aria-label="Highly annoyed (HA) and highly sleep disturbed (HSD) ThemeRiver"
+    >
       <div className="theme-river__head">
         <span className="theme-river__title">
-          People highly annoyed / sleep disturbed · {source}
-        </span>
-        <span className="theme-river__legend">
-          <span className="sw ha" /> HA
-          <span className="sw hsd" /> HSD
+          People{' '}
+          <span className="theme-river__term theme-river__term--ha">
+            highly annoyed
+          </span>{' '}
+          (HA) /{' '}
+          <span className="theme-river__term theme-river__term--hsd">
+            highly sleep disturbed
+          </span>{' '}
+          (HSD) · {source}
         </span>
       </div>
       <svg
