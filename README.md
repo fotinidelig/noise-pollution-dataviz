@@ -50,3 +50,7 @@ Curated source lists live in the Project Agent Store (not duplicated here):
 ## Data policy (sprint start)
 
 `data/raw/` and `data/processed/` are empty placeholders (`.gitkeep` only). **Do not download END, Asia, or other large datasets until explicitly approved.**
+
+## Reference viz projects
+
+Local convention / idea references live under `~/Documents/projects/dataviz/` (not `~/Documents/dataviz/`). Closest layout cousins: `pacific-dataviz-2026` (`analysis/` + `data/` + front end) and Vite+React+D3 apps such as `energy-dashboard` / `d3-intro-page`. Spatial/Python patterns: `natura2000-interactive`.
