@@ -19,7 +19,6 @@ import {
   tipFromProps,
 } from '../lib/countryAggregates'
 import {
-  PEOPLE_PER_RING,
   aggregateBands,
   buildEqualSpacedRings,
   seriesToBands,
@@ -99,7 +98,6 @@ function buildTooltipHtml(
       <div class="tip-meta">${source} · ${metric}${mean != null ? ` · ~${mean} dB mean` : ''}</div>
       <div class="tip-total">${formatPeople(total)} people in mapped bands</div>
       <div class="tip-bands">${rows || '<div class="tip-empty">No exposure reported</div>'}</div>
-      <div class="tip-note">1 ring ≈ ${formatPeople(PEOPLE_PER_RING)} people (max 12 / band) · equal ring spacing</div>
     </div>
   `
 }
