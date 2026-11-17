@@ -1,0 +1,53 @@
+:root {
+  --ink: #1c2420;
+  --muted: #5c6a62;
+  --fog: #e7ece8;
+  --mist: #c5d2cb;
+  --paper: #f4f7f5;
+  --font-display: "Fraunces", "Iowan Old Style", "Palatino Linotype", Palatino,
+    serif;
+  --font-body: "Source Sans 3", "Source Sans Pro", "Helvetica Neue", Helvetica,
+    Arial, sans-serif;
+
+  font-family: var(--font-body);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: var(--ink);
+  background-color: var(--paper);
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100svh;
+  background:
+    radial-gradient(
+      120% 80% at 10% -10%,
+      color-mix(in oklab, var(--mist) 55%, transparent),
+      transparent 55%
+    ),
+    radial-gradient(
+      90% 60% at 100% 0%,
+      color-mix(in oklab, var(--fog) 90%, transparent),
+      transparent 50%
+    ),
+    var(--paper);
+}
+
+#root {
+  min-height: 100svh;
+}
+
+a {
+  color: inherit;
+}

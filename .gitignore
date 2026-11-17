@@ -1,0 +1,71 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+.ipynb_checkpoints/
+.marimo/
+
+# Build / tooling
+dist/
+dist-ssr/
+*.local
+.turbo/
+.cache/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.sw?
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Data — keep folder structure; ignore bulky downloads later
+data/raw/**
+!data/raw/.gitkeep
+data/processed/**
+!data/processed/.gitkeep
+*.gpkg
+*.geojson
+*.tif
+*.tiff
+*.shp
+*.dbf
+*.shx
+*.prj
+*.cpg
+*.parquet
+*.feather
+*.h5
+*.hdf5
+*.zip
+*.7z
+*.tar
+*.tar.gz
+*.csv.gz
