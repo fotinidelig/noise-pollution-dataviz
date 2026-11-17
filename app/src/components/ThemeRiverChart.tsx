@@ -188,15 +188,11 @@ export function ThemeRiverChart({ data, source, focusId, onHoverCity }: Props) {
     >
       <div className="theme-river__head">
         <span className="theme-river__title">
-          People{' '}
-          <span className="theme-river__term theme-river__term--ha">
-            highly annoyed
-          </span>{' '}
-          (HA) /{' '}
-          <span className="theme-river__term theme-river__term--hsd">
-            highly sleep disturbed
-          </span>{' '}
-          (HSD) · {source}
+          People highly annoyed (
+          <span className="theme-river__term theme-river__term--ha">HA</span>) /
+          highly sleep disturbed (
+          <span className="theme-river__term theme-river__term--hsd">HSD</span>) ·{' '}
+          {source}
         </span>
       </div>
       <svg
