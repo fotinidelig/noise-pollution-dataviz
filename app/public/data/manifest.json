@@ -3,55 +3,58 @@
     "road__Lden": {
       "pmtiles": "data/processed/map/end_road_lden.pmtiles",
       "public": "app/public/data/end_road_lden.pmtiles",
-      "bytes": 1773119,
-      "countries": 2
+      "bytes": 8269229,
+      "countries": 6
     },
     "road__Lnight": {
       "pmtiles": "data/processed/map/end_road_lnight.pmtiles",
       "public": "app/public/data/end_road_lnight.pmtiles",
-      "bytes": 1306028,
-      "countries": 2
+      "bytes": 4430152,
+      "countries": 5
     },
     "rail__Lden": {
       "pmtiles": "data/processed/map/end_rail_lden.pmtiles",
       "public": "app/public/data/end_rail_lden.pmtiles",
-      "bytes": 508373,
-      "countries": 2
+      "bytes": 866800,
+      "countries": 4
     },
     "rail__Lnight": {
       "pmtiles": "data/processed/map/end_rail_lnight.pmtiles",
       "public": "app/public/data/end_rail_lnight.pmtiles",
-      "bytes": 534139,
-      "countries": 2
+      "bytes": 791763,
+      "countries": 4
     },
     "aircraft__Lden": {
       "pmtiles": "data/processed/map/end_aircraft_lden.pmtiles",
       "public": "app/public/data/end_aircraft_lden.pmtiles",
-      "bytes": 10356,
-      "countries": 2
+      "bytes": 19337,
+      "countries": 5
     },
     "aircraft__Lnight": {
       "pmtiles": "data/processed/map/end_aircraft_lnight.pmtiles",
       "public": "app/public/data/end_aircraft_lnight.pmtiles",
-      "bytes": 7389,
-      "countries": 2
+      "bytes": 16677,
+      "countries": 5
     },
     "industry__Lden": {
       "pmtiles": "data/processed/map/end_industry_lden.pmtiles",
       "public": "app/public/data/end_industry_lden.pmtiles",
-      "bytes": 85366,
-      "countries": 1
+      "bytes": 386626,
+      "countries": 4
     },
     "industry__Lnight": {
       "pmtiles": "data/processed/map/end_industry_lnight.pmtiles",
       "public": "app/public/data/end_industry_lnight.pmtiles",
-      "bytes": 221945,
-      "countries": 2
+      "bytes": 384567,
+      "countries": 5
     }
   },
   "countries": [
     "EE",
+    "LT",
     "LV",
-    "PT"
+    "MT",
+    "PT",
+    "RO"
   ]
 }
