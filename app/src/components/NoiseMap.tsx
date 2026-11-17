@@ -139,13 +139,117 @@ export function NoiseMap() {
   const [pinnedId, setPinnedId] = useState<string | null>(null)
   const [pinnedSeries, setPinnedSeries] = useState<HoverSeries | null>(null)
   const pinnedIdRef = useRef<string | null>(null)
+  const hoveredIdRef = useRef<string | null>(null)
+  const focusIdRef = useRef<string | null>(null)
+  const hoverGenRef = useRef(0)
+  const clearHoverTimer = useRef<number | null>(null)
 
   sourceRef.current = source
   metricRef.current = metric
   citiesRef.current = chartCities
   pinnedIdRef.current = pinnedId
+  hoveredIdRef.current = hoveredId
 
   const focusId = hoveredId ?? pinnedId
+  focusIdRef.current = focusId
+
+  /** Apply ring/label dimming immediately (do not wait for React paint effect). */
+  const applyFocusPaint = (activeId: string | null) => {
+    const map = mapRef.current
+    if (!map || !map.getLayer(RINGS_LAYER)) return
+    const dimming = Boolean(activeId)
+    const id = activeId ?? ''
+
+    map.setPaintProperty(
+      RINGS_LAYER,
+      'line-opacity',
+      dimming
+        ? ([
+            'case',
+            ['==', ['to-string', ['get', 'id']], id],
+            1,
+            0.16,
+          ] as maplibregl.ExpressionSpecification)
+        : 0.9,
+    )
+
+    map.setPaintProperty(
+      RINGS_LAYER,
+      'line-width',
+      dimming
+        ? ([
+            'case',
+            ['==', ['to-string', ['get', 'id']], id],
+            ['interpolate', ['linear'], ['zoom'], 3, 1.2, 6, 2.0, 10, 2.8],
+            ['interpolate', ['linear'], ['zoom'], 3, 0.45, 6, 0.7, 10, 1.0],
+          ] as maplibregl.ExpressionSpecification)
+        : ([
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            3,
+            0.7,
+            6,
+            1.2,
+            10,
+            1.9,
+          ] as maplibregl.ExpressionSpecification),
+    )
+
+    if (map.getLayer(LABEL_LAYER)) {
+      map.setPaintProperty(
+        LABEL_LAYER,
+        'text-opacity',
+        dimming
+          ? ([
+              'case',
+              ['==', ['to-string', ['get', 'id']], id],
+              1,
+              0.2,
+            ] as maplibregl.ExpressionSpecification)
+          : ([
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              5.5,
+              0,
+              6.5,
+              0.9,
+            ] as maplibregl.ExpressionSpecification),
+      )
+    }
+    if (map.getLayer(COUNTRY_LABEL_LAYER)) {
+      map.setPaintProperty(
+        COUNTRY_LABEL_LAYER,
+        'text-opacity',
+        dimming
+          ? ([
+              'case',
+              ['==', ['to-string', ['get', 'id']], id],
+              1,
+              0.22,
+            ] as maplibregl.ExpressionSpecification)
+          : 0.95,
+      )
+    }
+  }
+
+  const cancelPendingClear = () => {
+    if (clearHoverTimer.current != null) {
+      window.clearTimeout(clearHoverTimer.current)
+      clearHoverTimer.current = null
+    }
+  }
+
+  const setMapHover = (id: string | null, series: HoverSeries | null) => {
+    cancelPendingClear()
+    hoverGenRef.current += 1
+    hoveredIdRef.current = id
+    focusIdRef.current = id ?? pinnedIdRef.current
+    applyFocusPaint(focusIdRef.current)
+    setHoveredId(id)
+    setHoverSeries(series)
+  }
 
   const countryAggs = useMemo(
     () => buildCountryAggregates(chartCities, source, metric),
@@ -201,20 +305,23 @@ export function NoiseMap() {
 
   const onStreamHoverCity = (id: string | null) => {
     if (!id) {
-      setHoveredId(null)
-      setHoverSeries(null)
+      // Keep pin highlight if pinned
+      setMapHover(null, null)
       return
     }
-    setHoveredId(id)
-    // Keep left wave chart in sync when possible
+    if (hoveredIdRef.current === id) {
+      // Paint already correct; avoid redundant React churn while scrubbing stream
+      applyFocusPaint(id ?? pinnedIdRef.current)
+      return
+    }
     const city = citiesRef.current.find((c) => c.id === id)
     if (!city) {
-      setHoverSeries(null)
+      setMapHover(id, null)
       return
     }
     const tip = city.series[`${sourceRef.current}__${metricRef.current}`]
     if (!tip) {
-      setHoverSeries({
+      setMapHover(id, {
         id,
         name: city.agglomeration,
         total: 0,
@@ -222,7 +329,7 @@ export function NoiseMap() {
       })
       return
     }
-    setHoverSeries(seriesFromBands(id, city.agglomeration, tip.bands))
+    setMapHover(id, seriesFromBands(id, city.agglomeration, tip.bands))
   }
 
   const setCountryMode = (on: boolean) => {
@@ -371,6 +478,8 @@ export function NoiseMap() {
 
     const ringSource = map.getSource(RINGS_SOURCE) as maplibregl.GeoJSONSource
     ringSource.setData({ type: 'FeatureCollection', features: ringFeatures })
+    // Rings were replaced — re-apply focus paint so dimming never sticks/lags
+    applyFocusPaint(focusIdRef.current)
   }
 
   const scheduleRebuild = () => {
@@ -581,8 +690,10 @@ export function NoiseMap() {
         : [HIT_LAYER]
       const hits = map.queryRenderedFeatures(e.point, { layers: hitLayers })
       if (!hits.length) {
+        pinnedIdRef.current = null
         setPinnedId(null)
         setPinnedSeries(null)
+        applyFocusPaint(hoveredIdRef.current)
         return
       }
       const feat = hits[0]
@@ -592,8 +703,10 @@ export function NoiseMap() {
         const id = String(props.id ?? '')
         if (!id) return
         if (pinnedIdRef.current === id) {
+          pinnedIdRef.current = null
           setPinnedId(null)
           setPinnedSeries(null)
+          applyFocusPaint(hoveredIdRef.current)
           return
         }
         let series: HoverSeries | null = null
@@ -603,10 +716,10 @@ export function NoiseMap() {
           series = null
         }
         if (!series) return
+        pinnedIdRef.current = id
         setPinnedId(id)
         setPinnedSeries(series)
-        setHoveredId(id)
-        setHoverSeries(series)
+        setMapHover(id, series)
         return
       }
 
@@ -623,8 +736,10 @@ export function NoiseMap() {
       const id = String(props.id ?? '')
       if (!id) return
       if (pinnedIdRef.current === id) {
+        pinnedIdRef.current = null
         setPinnedId(null)
         setPinnedSeries(null)
+        applyFocusPaint(hoveredIdRef.current)
         return
       }
 
@@ -634,10 +749,10 @@ export function NoiseMap() {
       if (!tip) return
       const bands = seriesToBands(met, tip)
       const series = seriesFromBands(id, String(props.agglomeration ?? ''), bands)
+      pinnedIdRef.current = id
       setPinnedId(id)
       setPinnedSeries(series)
-      setHoveredId(id)
-      setHoverSeries(series)
+      setMapHover(id, series)
     })
 
     return () => {
@@ -661,6 +776,12 @@ export function NoiseMap() {
       src.setData(pointsForToggle)
       if (countries) countries.setData(countriesToGeoJSON(countryAggs))
       popupRef.current?.remove()
+      cancelPendingClear()
+      hoverGenRef.current += 1
+      hoveredIdRef.current = null
+      pinnedIdRef.current = null
+      focusIdRef.current = null
+      applyFocusPaint(null)
       setHoveredId(null)
       setHoverSeries(null)
       setPinnedId(null)
@@ -674,112 +795,31 @@ export function NoiseMap() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pointsForToggle, countryAggs, source, metric])
 
-  // Dim / desaturate other cities while one is hovered
+  // Safety net: keep paint aligned if React focus changes without map handler
   useEffect(() => {
-    const map = mapRef.current
-    if (!map) return
-
-    const apply = () => {
-      if (!map.getLayer(RINGS_LAYER)) return
-      const activeId = focusId ?? ''
-      const dimming = Boolean(focusId)
-
-      // Opacity drop reads as desaturation on the dark basemap
-      map.setPaintProperty(
-        RINGS_LAYER,
-        'line-opacity',
-        dimming
-          ? ([
-              'case',
-              ['==', ['get', 'id'], activeId],
-              1,
-              0.16,
-            ] as maplibregl.ExpressionSpecification)
-          : 0.9,
-      )
-
-      map.setPaintProperty(
-        RINGS_LAYER,
-        'line-color',
-        ['get', 'color'] as maplibregl.ExpressionSpecification,
-      )
-
-      map.setPaintProperty(
-        RINGS_LAYER,
-        'line-width',
-        dimming
-          ? ([
-              'case',
-              ['==', ['get', 'id'], activeId],
-              ['interpolate', ['linear'], ['zoom'], 3, 1.2, 6, 2.0, 10, 2.8],
-              ['interpolate', ['linear'], ['zoom'], 3, 0.45, 6, 0.7, 10, 1.0],
-            ] as maplibregl.ExpressionSpecification)
-          : ([
-              'interpolate',
-              ['linear'],
-              ['zoom'],
-              3,
-              0.7,
-              6,
-              1.2,
-              10,
-              1.9,
-            ] as maplibregl.ExpressionSpecification),
-      )
-
-      if (map.getLayer(LABEL_LAYER)) {
-        map.setPaintProperty(
-          LABEL_LAYER,
-          'text-opacity',
-          dimming
-            ? ([
-                'case',
-                ['==', ['get', 'id'], activeId],
-                1,
-                0.2,
-              ] as maplibregl.ExpressionSpecification)
-            : ([
-                'interpolate',
-                ['linear'],
-                ['zoom'],
-                5.5,
-                0,
-                6.5,
-                0.9,
-              ] as maplibregl.ExpressionSpecification),
-        )
-      }
-      if (map.getLayer(COUNTRY_LABEL_LAYER)) {
-        map.setPaintProperty(
-          COUNTRY_LABEL_LAYER,
-          'text-opacity',
-          dimming
-            ? ([
-                'case',
-                ['==', ['get', 'id'], activeId],
-                1,
-                0.22,
-              ] as maplibregl.ExpressionSpecification)
-            : 0.95,
-        )
-      }
-    }
-
-    if (map.isStyleLoaded() && map.getLayer(RINGS_LAYER)) apply()
-    else map.once('load', apply)
+    applyFocusPaint(focusId)
   }, [focusId])
 
-  // Hover
+  // Hover — paint updates are synchronous via setMapHover; empty hits are debounced
   useEffect(() => {
     const map = mapRef.current
     const popup = popupRef.current
     if (!map || !popup) return
 
-    const clearHover = () => {
+    const clearHoverNow = () => {
+      cancelPendingClear()
       map.getCanvas().style.cursor = ''
       popup.remove()
-      setHoveredId(null)
-      setHoverSeries(null)
+      setMapHover(null, null)
+    }
+
+    const scheduleClearHover = () => {
+      if (clearHoverTimer.current != null) return
+      clearHoverTimer.current = window.setTimeout(() => {
+        clearHoverTimer.current = null
+        // Only clear if we still have no pending newer hover
+        if (hoveredIdRef.current != null) clearHoverNow()
+      }, 50)
     }
 
     const onMove = async (e: maplibregl.MapMouseEvent) => {
@@ -788,9 +828,12 @@ export function NoiseMap() {
         : [HIT_LAYER]
       const feats = map.queryRenderedFeatures(e.point, { layers: hitLayers })
       if (!feats.length) {
-        clearHover()
+        // Gaps between hit circles — debounce clear to avoid flicker / stuck dim
+        scheduleClearHover()
         return
       }
+      cancelPendingClear()
+
       const feat = feats[0]
       const props = feat.properties ?? {}
       const src = sourceRef.current
@@ -806,11 +849,14 @@ export function NoiseMap() {
           series = null
         }
         if (!series) {
-          clearHover()
+          scheduleClearHover()
           return
         }
-        setHoveredId(series.id)
-        setHoverSeries(series)
+        if (hoveredIdRef.current !== series.id) {
+          setMapHover(series.id, series)
+        } else {
+          applyFocusPaint(series.id)
+        }
         popup
           .setLngLat(coords)
           .setHTML(
@@ -828,14 +874,23 @@ export function NoiseMap() {
 
       if (props.cluster) {
         const clusterId = Number(props.cluster_id)
+        const hoverId = `cluster:${clusterId}`
+        // Optimistic paint before async leaves resolve
+        if (hoveredIdRef.current !== hoverId) {
+          applyFocusPaint(hoverId)
+          hoveredIdRef.current = hoverId
+          focusIdRef.current = hoverId
+        }
+        const gen = ++hoverGenRef.current
         const citySource = map.getSource(CITIES_SOURCE) as maplibregl.GeoJSONSource
         let leaves: Feature[] = []
         try {
           leaves = await getClusterLeaves(citySource, clusterId)
         } catch {
-          clearHover()
+          if (gen === hoverGenRef.current) scheduleClearHover()
           return
         }
+        if (gen !== hoverGenRef.current) return
         const tips: ChartSeries[] = []
         for (const leaf of leaves) {
           const tip = tipFromProps(leaf.properties?.tooltip, src, met)
@@ -843,12 +898,11 @@ export function NoiseMap() {
         }
         const bands = aggregateBands(met, tips)
         const series = seriesFromBands(
-          `cluster:${clusterId}`,
+          hoverId,
           `${leaves.length} cities`,
           bands,
         )
-        setHoveredId(series.id)
-        setHoverSeries(series)
+        setMapHover(series.id, series)
         popup
           .setLngLat(coords)
           .setHTML(
@@ -867,13 +921,16 @@ export function NoiseMap() {
       const id = String(props.id ?? '')
       const tip = tipFromProps(props.tooltip, src, met)
       if (!tip) {
-        clearHover()
+        scheduleClearHover()
         return
       }
       const bands = seriesToBands(met, tip)
       const series = seriesFromBands(id, String(props.agglomeration ?? ''), bands)
-      setHoveredId(id)
-      setHoverSeries(series)
+      if (hoveredIdRef.current !== id) {
+        setMapHover(id, series)
+      } else {
+        applyFocusPaint(id)
+      }
       popup
         .setLngLat(coords)
         .setHTML(
@@ -888,17 +945,25 @@ export function NoiseMap() {
         .addTo(map)
     }
 
+    const canvas = map.getCanvas()
+    const onCanvasLeave = () => {
+      // Prefer canvas mouseleave over map mouseout (avoids popup/control fights)
+      clearHoverNow()
+    }
+
     const bind = () => {
       map.on('mousemove', onMove)
-      map.on('mouseout', clearHover)
+      canvas.addEventListener('mouseleave', onCanvasLeave)
     }
     if (map.isStyleLoaded()) bind()
     else map.once('load', bind)
 
     return () => {
+      cancelPendingClear()
       map.off('mousemove', onMove)
-      map.off('mouseout', clearHover)
+      canvas.removeEventListener('mouseleave', onCanvasLeave)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const bands = metric === 'Lden' ? LDEN_BANDS : LNIGHT_BANDS

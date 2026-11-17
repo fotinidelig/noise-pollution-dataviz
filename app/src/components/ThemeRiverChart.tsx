@@ -60,6 +60,7 @@ type StackRow = { i: number; ha: number; hsd: number }
 
 export function ThemeRiverChart({ data, source, focusId, onHoverCity }: Props) {
   const wrapRef = useRef<HTMLDivElement | null>(null)
+  const lastNotifiedId = useRef<string | null>(null)
   const [size, setSize] = useState({ w: 800, h: 168 })
   const [localHover, setLocalHover] = useState<string | null>(null)
 
@@ -167,11 +168,15 @@ export function ThemeRiverChart({ data, source, focusId, onHoverCity }: Props) {
     const city = layout.cities[best]
     if (!city) return
     setLocalHover(city.id)
-    onHoverCity(city.id)
+    if (lastNotifiedId.current !== city.id) {
+      lastNotifiedId.current = city.id
+      onHoverCity(city.id)
+    }
   }
 
   const onLeave = () => {
     setLocalHover(null)
+    lastNotifiedId.current = null
     onHoverCity(null)
   }
 
