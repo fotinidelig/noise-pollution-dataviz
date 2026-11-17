@@ -108,7 +108,7 @@
 .noise-legend {
   position: absolute;
   right: 0.85rem;
-  bottom: 0.85rem;
+  bottom: clamp(10.5rem, 24vh, 13.5rem);
   z-index: 2;
   display: grid;
   gap: 0.3rem;

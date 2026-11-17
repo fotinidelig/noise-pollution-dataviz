@@ -30,6 +30,7 @@ import {
   type ChartSeries,
   type HoverSeries,
 } from './CityWaveChart'
+import { ThemeRiverChart, type StreamData } from './ThemeRiverChart'
 import './NoiseMap.css'
 
 const CITIES_SOURCE = 'aggl-cities'
@@ -41,6 +42,7 @@ const LABEL_LAYER = 'aggl-labels'
 const COUNTRY_HIT_LAYER = 'aggl-country-hit'
 const COUNTRY_LABEL_LAYER = 'aggl-country-labels'
 const CHART_URL = '/data/agglomeration_chart.json'
+const STREAM_URL = '/data/agglomeration_ha_hsd_stream.json'
 
 let workerConfigured = false
 
@@ -131,6 +133,7 @@ export function NoiseMap() {
   const [metric, setMetric] = useState<NoiseMetric>('Lden')
   const [status, setStatus] = useState('Loading map…')
   const [chartCities, setChartCities] = useState<ChartCity[]>([])
+  const [streamData, setStreamData] = useState<StreamData | null>(null)
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [hoverSeries, setHoverSeries] = useState<HoverSeries | null>(null)
   const [pinnedId, setPinnedId] = useState<string | null>(null)
@@ -183,10 +186,44 @@ export function NoiseMap() {
       .catch(() => {
         if (!cancelled) setChartCities([])
       })
+    fetch(STREAM_URL)
+      .then((r) => r.json())
+      .then((data: StreamData) => {
+        if (!cancelled) setStreamData(data)
+      })
+      .catch(() => {
+        if (!cancelled) setStreamData(null)
+      })
     return () => {
       cancelled = true
     }
   }, [])
+
+  const onStreamHoverCity = (id: string | null) => {
+    if (!id) {
+      setHoveredId(null)
+      setHoverSeries(null)
+      return
+    }
+    setHoveredId(id)
+    // Keep left wave chart in sync when possible
+    const city = citiesRef.current.find((c) => c.id === id)
+    if (!city) {
+      setHoverSeries(null)
+      return
+    }
+    const tip = city.series[`${sourceRef.current}__${metricRef.current}`]
+    if (!tip) {
+      setHoverSeries({
+        id,
+        name: city.agglomeration,
+        total: 0,
+        points: [],
+      })
+      return
+    }
+    setHoverSeries(seriesFromBands(id, city.agglomeration, tip.bands))
+  }
 
   const setCountryMode = (on: boolean) => {
     const map = mapRef.current
@@ -915,6 +952,14 @@ export function NoiseMap() {
             pinnedId={pinnedId}
             pinnedSeries={pinnedSeries}
             pinned={Boolean(pinnedId)}
+          />
+        ) : null}
+        {streamData ? (
+          <ThemeRiverChart
+            data={streamData}
+            source={source}
+            focusId={focusId}
+            onHoverCity={onStreamHoverCity}
           />
         ) : null}
         <div className="noise-legend" aria-label="dB band legend">
