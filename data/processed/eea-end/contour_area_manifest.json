@@ -1,0 +1,103 @@
+{
+  "processed_packages": {
+    "EE.gpkg": {
+      "rows": 66,
+      "countries": [
+        "EE"
+      ],
+      "bytes": 73924608
+    },
+    "LV.gpkg": {
+      "rows": 71,
+      "countries": [
+        "LV"
+      ],
+      "bytes": 63721472
+    },
+    "CY.gpkg": {
+      "rows": 85,
+      "countries": [
+        "CY"
+      ],
+      "bytes": 219697152
+    },
+    "CH.gpkg": {
+      "rows": 66,
+      "countries": [
+        "CH"
+      ],
+      "bytes": 1121607680
+    },
+    "CZ.gpkg": {
+      "rows": 93,
+      "countries": [
+        "CZ"
+      ],
+      "bytes": 609054720
+    },
+    "DK.gpkg": {
+      "rows": 69,
+      "countries": [
+        "DK"
+      ],
+      "bytes": 255508480
+    },
+    "FI.gpkg": {
+      "rows": 50,
+      "countries": [
+        "FI"
+      ],
+      "bytes": 331370496
+    },
+    "LT.gpkg": {
+      "rows": 94,
+      "countries": [
+        "LT"
+      ],
+      "bytes": 210378752
+    },
+    "LU.gpkg": {
+      "rows": 76,
+      "countries": [
+        "LU"
+      ],
+      "bytes": 1128792064
+    },
+    "MT.gpkg": {
+      "rows": 33,
+      "countries": [
+        "MT"
+      ],
+      "bytes": 183537664
+    },
+    "NL.gpkg": {
+      "rows": 68,
+      "countries": [
+        "NL"
+      ],
+      "bytes": 1055731712
+    },
+    "NO.gpkg": {
+      "rows": 44,
+      "countries": [
+        "NO"
+      ],
+      "bytes": 575995904
+    },
+    "PT.gpkg": {
+      "rows": 85,
+      "countries": [
+        "PT"
+      ],
+      "bytes": 167600128
+    },
+    "RO.gpkg": {
+      "rows": 69,
+      "countries": [
+        "RO"
+      ],
+      "bytes": 216272896
+    }
+  },
+  "notes": []
+}

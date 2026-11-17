@@ -8,23 +8,39 @@ Audience: general public + portfolio. Sprint deliverable: a Vite + React + D3 si
 
 ```
 noise-pollution-dataviz/
-├── analysis/          # Python scripts + marimo notebooks (later)
+├── analysis/          # Python scripts + marimo notebooks
 ├── data/
-│   ├── raw/           # Empty for now — do not download END/Asia yet
-│   └── processed/     # Derived tables / geo for the app
+│   ├── raw/eea-end/   # END exposure Excel + contour GPKGs (large; gitignored)
+│   └── processed/     # Small CSV summaries for EDA / later viz
 ├── app/               # Vite + React + TypeScript interactive viz
 └── README.md
 ```
+
+## Analysis (EDA)
+
+```bash
+cd analysis
+uv venv .venv --python 3.12
+uv pip install --python .venv/bin/python -r requirements.txt
+source .venv/bin/activate
+python scripts/download_eea_end.py          # resume-friendly
+python scripts/process_exposure.py
+python scripts/process_contours.py          # area aggregates only
+python scripts/preprocess_map_layers.py     # simplify → PMTiles for MapLibre
+marimo edit notebooks/end_2022_exposure_contours_eda.py
+```
+
+Raw inventory / URLs: [`data/raw/eea-end/README.md`](data/raw/eea-end/README.md).
 
 ## How to run the app
 
 ```bash
 cd app
 npm install
-npm run dev
+npm run dev -- --host 127.0.0.1 --port 5174
 ```
 
-Then open the URL Vite prints (usually `http://localhost:5173`).
+Open `http://127.0.0.1:5174` — dark neon Europe map (MapLibre + OSM/Carto dark labels), toggles for road/rail/aircraft/industry and Lden/Lnight. Contour PMTiles live in `app/public/data/`.
 
 Other scripts (from `app/`):
 
@@ -34,7 +50,7 @@ Other scripts (from `app/`):
 
 ## Stack notes
 
-- **Analysis:** Python scripts + marimo (to be added under `analysis/`)
+- **Analysis:** Python + marimo; geopandas/pyogrio for contour area EDA (no PMTiles yet)
 - **Front end:** Vite, React, TypeScript, D3, MapLibre GL (OSM-friendly). MapLibre is installed; the UI currently shows a stub only — no tiles / Map instance yet.
 - **Hosting:** later (GitHub Pages or Netlify)
 
@@ -47,9 +63,11 @@ Curated source lists live in the Project Agent Store (not duplicated here):
 - Asia city noise: `/cursor/stores/self/docs/asia-city-noise-resources.md`  
   (also `/cursor/stores/bc-36eb9549-bf41-46b2-908b-412b53810f5d/docs/asia-city-noise-resources.md`)
 
-## Data policy (sprint start)
+## Data policy
 
-`data/raw/` and `data/processed/` are empty placeholders (`.gitkeep` only). **Do not download END, Asia, or other large datasets until explicitly approved.**
+- **EEA END 2022** exposure + contours: download under `data/raw/eea-end/` (large contour packages stay local / gitignored).
+- **Asia** and other extras: still wait for explicit approval before downloading.
+- Processed outputs committed only when small (CSV summaries).
 
 ## Reference viz projects
 

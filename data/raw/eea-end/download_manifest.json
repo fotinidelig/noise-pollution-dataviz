@@ -1,0 +1,39 @@
+{
+  "hub": "https://www.eea.europa.eu/en/datahub/datahubitem-view/c952f520-8d71-42c9-b74c-b7eb002f939b",
+  "share_token": "sptXqwkQr5g7Bp5",
+  "exposure_remote": "eea_t_noise-exposure-2022_p_2021_v02_r00",
+  "contours_remote": "eea_v_3035_1_k_noise-contours-end2022_p_2026_v01_r00",
+  "exposure": [],
+  "contours": [
+    {
+      "name": "README.md",
+      "url": "https://sdi.eea.europa.eu/datashare/public.php/webdav/eea_v_3035_1_k_noise-contours-end2022_p_2026_v01_r00/README.md",
+      "path": "/Users/luminosa/Documents/ecal/noise-pollution-dataviz/data/raw/eea-end/contours/README.md",
+      "bytes": 1671,
+      "status": "already_complete"
+    },
+    {
+      "name": "Noise_contours_data_reported_under_Environmental_Noise_Directive_END_2_metadata_853e72e4-4642-47d1-8556-2cc231bd43e0.xml",
+      "url": "https://sdi.eea.europa.eu/datashare/public.php/webdav/eea_v_3035_1_k_noise-contours-end2022_p_2026_v01_r00/Noise_contours_data_reported_under_Environmental_Noise_Directive_END_2_metadata_853e72e4-4642-47d1-8556-2cc231bd43e0.xml",
+      "path": "/Users/luminosa/Documents/ecal/noise-pollution-dataviz/data/raw/eea-end/contours/Noise_contours_data_reported_under_Environmental_Noise_Directive_END_2_metadata_853e72e4-4642-47d1-8556-2cc231bd43e0.xml",
+      "bytes": 56002,
+      "status": "already_complete"
+    },
+    {
+      "name": "noise-map.jpg",
+      "url": "https://sdi.eea.europa.eu/datashare/public.php/webdav/eea_v_3035_1_k_noise-contours-end2022_p_2026_v01_r00/noise-map.jpg",
+      "path": "/Users/luminosa/Documents/ecal/noise-pollution-dataviz/data/raw/eea-end/contours/noise-map.jpg",
+      "bytes": 79210,
+      "status": "already_complete"
+    },
+    {
+      "name": "PL.gpkg",
+      "url": "https://sdi.eea.europa.eu/datashare/public.php/webdav/eea_v_3035_1_k_noise-contours-end2022_p_2026_v01_r00/PL.gpkg",
+      "path": "/Users/luminosa/Documents/ecal/noise-pollution-dataviz/data/raw/eea-end/contours/PL.gpkg",
+      "bytes": 9299005440,
+      "expected_bytes": 9299005440,
+      "status": "complete",
+      "attempts": 1
+    }
+  ]
+}

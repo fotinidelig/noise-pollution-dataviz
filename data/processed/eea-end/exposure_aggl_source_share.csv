@@ -1,0 +1,9 @@
+metric,source,people_exposed_end_bands
+Lden,air,1448300.0
+Lden,industry,529200.0
+Lden,rail,7197200.0
+Lden,road,56316000.0
+Lnight,air,461300.0
+Lnight,industry,254700.0
+Lnight,rail,5084400.0
+Lnight,road,36014900.0

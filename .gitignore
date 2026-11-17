@@ -46,13 +46,22 @@ pnpm-debug.log*
 .env.*
 !.env.example
 
-# Data — keep folder structure; ignore bulky downloads later
+# Data — keep docs/manifests; ignore bulky downloads & large binaries
 data/raw/**
 !data/raw/.gitkeep
+!data/raw/**/
+!data/raw/**/README.md
+!data/raw/**/download_manifest.json
 data/processed/**
 !data/processed/.gitkeep
+!data/processed/**/
+!data/processed/**/*.csv
+!data/processed/**/*.json
+!data/processed/**/*.md
+!data/processed/map/*.pmtiles
 *.gpkg
 *.geojson
+!app/public/data/**
 *.tif
 *.tiff
 *.shp
@@ -64,8 +73,16 @@ data/processed/**
 *.feather
 *.h5
 *.hdf5
+*.xlsx
+*.xls
 *.zip
 *.7z
 *.tar
 *.tar.gz
 *.csv.gz
+*.pmtiles
+!data/processed/map/*.pmtiles
+!app/public/data/*.pmtiles
+
+# Analysis local env
+analysis/.venv/

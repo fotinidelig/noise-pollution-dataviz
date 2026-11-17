@@ -1,23 +1,12 @@
 :root {
-  --ink: #1c2420;
-  --muted: #5c6a62;
-  --fog: #e7ece8;
-  --mist: #c5d2cb;
-  --paper: #f4f7f5;
-  --font-display: "Fraunces", "Iowan Old Style", "Palatino Linotype", Palatino,
-    serif;
-  --font-body: "Source Sans 3", "Source Sans Pro", "Helvetica Neue", Helvetica,
-    Arial, sans-serif;
-
-  font-family: var(--font-body);
+  color: #e8f0ff;
+  background: #03050a;
+  font-family: "Source Sans 3", "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: var(--ink);
-  background-color: var(--paper);
-  line-height: 1.5;
-  font-weight: 400;
+  line-height: 1.45;
 }
 
 *,
@@ -26,28 +15,21 @@
   box-sizing: border-box;
 }
 
-body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100svh;
-  background:
-    radial-gradient(
-      120% 80% at 10% -10%,
-      color-mix(in oklab, var(--mist) 55%, transparent),
-      transparent 55%
-    ),
-    radial-gradient(
-      90% 60% at 100% 0%,
-      color-mix(in oklab, var(--fog) 90%, transparent),
-      transparent 50%
-    ),
-    var(--paper);
-}
-
+html,
+body,
 #root {
-  min-height: 100svh;
+  margin: 0;
+  min-height: 100%;
 }
 
-a {
-  color: inherit;
+body {
+  min-width: 320px;
+  background:
+    radial-gradient(90% 60% at 15% -10%, rgba(0, 229, 255, 0.08), transparent 55%),
+    radial-gradient(70% 50% at 100% 0%, rgba(255, 0, 229, 0.07), transparent 50%),
+    #03050a;
+}
+
+button {
+  font: inherit;
 }
