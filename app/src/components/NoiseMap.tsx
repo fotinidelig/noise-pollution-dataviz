@@ -12,6 +12,13 @@ import {
   type NoiseSource,
 } from '../lib/noiseStyle'
 import {
+  MAX_UNITS_PER_COUNTRY_FOR_COUNTRY_VIEW,
+  buildCountryAggregates,
+  countriesToGeoJSON,
+  seriesFromBands,
+  tipFromProps,
+} from '../lib/countryAggregates'
+import {
   PEOPLE_PER_RING,
   aggregateBands,
   buildEqualSpacedRings,
@@ -26,10 +33,13 @@ import {
 import './NoiseMap.css'
 
 const CITIES_SOURCE = 'aggl-cities'
+const COUNTRIES_SOURCE = 'aggl-countries'
 const RINGS_SOURCE = 'aggl-rings-dyn'
 const RINGS_LAYER = 'aggl-rings'
 const HIT_LAYER = 'aggl-hit'
 const LABEL_LAYER = 'aggl-labels'
+const COUNTRY_HIT_LAYER = 'aggl-country-hit'
+const COUNTRY_LABEL_LAYER = 'aggl-country-labels'
 const CHART_URL = '/data/agglomeration_chart.json'
 
 let workerConfigured = false
@@ -115,6 +125,7 @@ export function NoiseMap() {
   const sourceRef = useRef<NoiseSource>('road')
   const metricRef = useRef<NoiseMetric>('Lden')
   const rebuildTimer = useRef<number | null>(null)
+  const countryModeRef = useRef(false)
 
   const [source, setSource] = useState<NoiseSource>('road')
   const [metric, setMetric] = useState<NoiseMetric>('Lden')
@@ -132,6 +143,13 @@ export function NoiseMap() {
   pinnedIdRef.current = pinnedId
 
   const focusId = hoveredId ?? pinnedId
+
+  const countryAggs = useMemo(
+    () => buildCountryAggregates(chartCities, source, metric),
+    [chartCities, source, metric],
+  )
+  const countryAggsRef = useRef(countryAggs)
+  countryAggsRef.current = countryAggs
 
   const pointsForToggle = useMemo(() => {
     const key = `${source}__${metric}`
@@ -170,19 +188,44 @@ export function NoiseMap() {
     }
   }, [])
 
+  const setCountryMode = (on: boolean) => {
+    const map = mapRef.current
+    if (!map) return
+    countryModeRef.current = on
+    const cityVis = on ? 'none' : 'visible'
+    const countryVis = on ? 'visible' : 'none'
+    if (map.getLayer(HIT_LAYER)) map.setLayoutProperty(HIT_LAYER, 'visibility', cityVis)
+    if (map.getLayer(LABEL_LAYER)) map.setLayoutProperty(LABEL_LAYER, 'visibility', cityVis)
+    if (map.getLayer(COUNTRY_HIT_LAYER)) {
+      map.setLayoutProperty(COUNTRY_HIT_LAYER, 'visibility', countryVis)
+    }
+    if (map.getLayer(COUNTRY_LABEL_LAYER)) {
+      map.setLayoutProperty(COUNTRY_LABEL_LAYER, 'visibility', countryVis)
+    }
+  }
+
   const rebuildRings = async () => {
     const map = mapRef.current
     if (!map || !map.getSource(CITIES_SOURCE) || !map.getSource(RINGS_SOURCE)) return
     const src = sourceRef.current
     const met = metricRef.current
-    const key = `${src}__${met}`
     const citySource = map.getSource(CITIES_SOURCE) as maplibregl.GeoJSONSource
 
     // Clustered + unclustered points for the current zoom
     const rendered = map.querySourceFeatures(CITIES_SOURCE)
-    const ringFeatures: Feature[] = []
+    const unitsByCountry = new Map<string, number>()
     const seenClusters = new Set<number>()
     const seenCities = new Set<string>()
+    type CityUnit = {
+      kind: 'city' | 'cluster'
+      id: string
+      lon: number
+      lat: number
+      label: string
+      tips: ChartSeries[]
+      cityCount: number
+    }
+    const cityUnits: CityUnit[] = []
 
     for (const feat of rendered) {
       const props = feat.properties ?? {}
@@ -200,57 +243,93 @@ export function NoiseMap() {
           continue
         }
         const tips: ChartSeries[] = []
+        const countries = new Set<string>()
         for (const leaf of leaves) {
-          try {
-            const all = JSON.parse(String(leaf.properties?.tooltip || '{}')) as Record<
-              string,
-              ChartSeries
-            >
-            const tip = all[key]
-            if (tip && tip.total > 0) tips.push(tip)
-          } catch {
-            /* skip */
-          }
+          const tip = tipFromProps(leaf.properties?.tooltip, src, met)
+          if (tip) tips.push(tip)
+          const c = String(leaf.properties?.country ?? '')
+          if (c) countries.add(c)
         }
         if (!tips.length) continue
-        const bands = aggregateBands(met, tips)
-        const label = `${leaves.length} cities`
-        ringFeatures.push(
-          ...buildEqualSpacedRings({
-            lon: coords[0],
-            lat: coords[1],
-            source: src,
-            metric: met,
-            bands,
-            id: `cluster:${clusterId}`,
-            label,
-          }),
-        )
+        for (const c of countries) {
+          unitsByCountry.set(c, (unitsByCountry.get(c) ?? 0) + 1)
+        }
+        cityUnits.push({
+          kind: 'cluster',
+          id: `cluster:${clusterId}`,
+          lon: coords[0],
+          lat: coords[1],
+          label: `${leaves.length} cities`,
+          tips,
+          cityCount: leaves.length,
+        })
       } else {
         const id = String(props.id ?? '')
         if (!id || seenCities.has(id)) continue
         seenCities.add(id)
-        let tip: ChartSeries | null = null
-        try {
-          const all = JSON.parse(String(props.tooltip || '{}')) as Record<string, ChartSeries>
-          tip = all[key] ?? null
-        } catch {
-          tip = null
-        }
-        const bands = seriesToBands(met, tip)
-        if (!bands.some((b) => b.people > 0)) continue
+        const tip = tipFromProps(props.tooltip, src, met)
+        if (!tip) continue
+        const country = String(props.country ?? '')
+        if (country) unitsByCountry.set(country, (unitsByCountry.get(country) ?? 0) + 1)
+        cityUnits.push({
+          kind: 'city',
+          id,
+          lon: coords[0],
+          lat: coords[1],
+          label: String(props.agglomeration ?? id),
+          tips: [tip],
+          cityCount: 1,
+        })
+      }
+    }
+
+    // Landing / far zoom: always countries. Otherwise only when each country
+    // has ≤2 city/cluster units on screen.
+    const zoom = map.getZoom()
+    const sparseEnough =
+      unitsByCountry.size > 0 &&
+      [...unitsByCountry.values()].every(
+        (n) => n <= MAX_UNITS_PER_COUNTRY_FOR_COUNTRY_VIEW,
+      )
+    const useCountryView = zoom < 5 || sparseEnough
+
+    const ringFeatures: Feature[] = []
+
+    if (useCountryView) {
+      setCountryMode(true)
+      for (const agg of countryAggsRef.current) {
+        if (!agg.bands.some((b) => b.people > 0)) continue
         ringFeatures.push(
           ...buildEqualSpacedRings({
-            lon: coords[0],
-            lat: coords[1],
+            lon: agg.lon,
+            lat: agg.lat,
             source: src,
             metric: met,
-            bands,
-            id,
-            label: String(props.agglomeration ?? id),
+            bands: agg.bands,
+            id: agg.id,
+            label: agg.country,
           }),
         )
       }
+      setStatus(`${src} · ${met} · countries`)
+    } else {
+      setCountryMode(false)
+      for (const unit of cityUnits) {
+        const bands = aggregateBands(met, unit.tips)
+        if (!bands.some((b) => b.people > 0)) continue
+        ringFeatures.push(
+          ...buildEqualSpacedRings({
+            lon: unit.lon,
+            lat: unit.lat,
+            source: src,
+            metric: met,
+            bands,
+            id: unit.id,
+            label: unit.label,
+          }),
+        )
+      }
+      setStatus(`${src} · ${met} · agglomerations`)
     }
 
     const ringSource = map.getSource(RINGS_SOURCE) as maplibregl.GeoJSONSource
@@ -292,11 +371,16 @@ export function NoiseMap() {
         type: 'geojson',
         data: { type: 'FeatureCollection', features: [] },
         cluster: true,
-        clusterRadius: 56,
-        clusterMaxZoom: 9,
+        clusterRadius: 70,
+        clusterMaxZoom: 8,
       })
 
       map.addSource(RINGS_SOURCE, {
+        type: 'geojson',
+        data: { type: 'FeatureCollection', features: [] },
+      })
+
+      map.addSource(COUNTRIES_SOURCE, {
         type: 'geojson',
         data: { type: 'FeatureCollection', features: [] },
       })
@@ -385,13 +469,67 @@ export function NoiseMap() {
         },
       })
 
+      map.addLayer({
+        id: COUNTRY_LABEL_LAYER,
+        type: 'symbol',
+        source: COUNTRIES_SOURCE,
+        layout: {
+          visibility: 'none',
+          'text-field': ['get', 'country'],
+          'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
+          'text-size': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            2,
+            11,
+            5,
+            14,
+            7,
+            16,
+          ],
+          'text-offset': [0, 1.1],
+          'text-anchor': 'top',
+          'text-optional': true,
+        },
+        paint: {
+          'text-color': '#e8f0ff',
+          'text-halo-color': 'rgba(3,5,10,0.9)',
+          'text-halo-width': 1.4,
+          'text-opacity': 0.95,
+        },
+      })
+
+      map.addLayer({
+        id: COUNTRY_HIT_LAYER,
+        type: 'circle',
+        source: COUNTRIES_SOURCE,
+        layout: { visibility: 'none' },
+        paint: {
+          'circle-radius': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            2,
+            22,
+            5,
+            28,
+            7,
+            34,
+          ],
+          'circle-opacity': 0,
+          'circle-stroke-width': 0,
+          'circle-color': '#000000',
+        },
+      })
+
       map.on('moveend', scheduleRebuild)
       map.on('zoomend', scheduleRebuild)
       map.on('sourcedata', (e) => {
         if (e.sourceId === CITIES_SOURCE && e.isSourceLoaded) scheduleRebuild()
       })
 
-      setStatus(`${sourceRef.current} · ${metricRef.current} · agglomerations`)
+      setStatus(`${sourceRef.current} · ${metricRef.current} · countries`)
       scheduleRebuild()
     })
 
@@ -399,9 +537,12 @@ export function NoiseMap() {
       setStatus('Map error — check console / data assets')
     })
 
-    // Click cluster → zoom to expand; click city → pin chart; click empty → unpin
+    // Country / city pin; cluster → zoom; empty → unpin
     map.on('click', (e) => {
-      const hits = map.queryRenderedFeatures(e.point, { layers: [HIT_LAYER] })
+      const hitLayers = countryModeRef.current
+        ? [COUNTRY_HIT_LAYER]
+        : [HIT_LAYER]
+      const hits = map.queryRenderedFeatures(e.point, { layers: hitLayers })
       if (!hits.length) {
         setPinnedId(null)
         setPinnedSeries(null)
@@ -409,6 +550,29 @@ export function NoiseMap() {
       }
       const feat = hits[0]
       const props = feat.properties ?? {}
+
+      if (props.kind === 'country') {
+        const id = String(props.id ?? '')
+        if (!id) return
+        if (pinnedIdRef.current === id) {
+          setPinnedId(null)
+          setPinnedSeries(null)
+          return
+        }
+        let series: HoverSeries | null = null
+        try {
+          series = JSON.parse(String(props.series || 'null')) as HoverSeries
+        } catch {
+          series = null
+        }
+        if (!series) return
+        setPinnedId(id)
+        setPinnedSeries(series)
+        setHoveredId(id)
+        setHoverSeries(series)
+        return
+      }
+
       if (props.cluster) {
         const clusterId = Number(props.cluster_id)
         const citySource = map.getSource(CITIES_SOURCE) as maplibregl.GeoJSONSource
@@ -429,27 +593,10 @@ export function NoiseMap() {
 
       const src = sourceRef.current
       const met = metricRef.current
-      const key = `${src}__${met}`
-      let tip: ChartSeries | null = null
-      try {
-        const all = JSON.parse(String(props.tooltip || '{}')) as Record<string, ChartSeries>
-        tip = all[key] ?? null
-      } catch {
-        tip = null
-      }
-      if (!tip || !(tip.total > 0)) return
+      const tip = tipFromProps(props.tooltip, src, met)
+      if (!tip) return
       const bands = seriesToBands(met, tip)
-      const series: HoverSeries = {
-        id,
-        name: String(props.agglomeration ?? ''),
-        total: tip.total,
-        points: bands.map((b) => ({
-          band: b.band,
-          label: b.label,
-          color: b.color,
-          people: b.people,
-        })),
-      }
+      const series = seriesFromBands(id, String(props.agglomeration ?? ''), bands)
       setPinnedId(id)
       setPinnedSeries(series)
       setHoveredId(id)
@@ -472,21 +619,23 @@ export function NoiseMap() {
     if (!map) return
     const apply = () => {
       const src = map.getSource(CITIES_SOURCE) as maplibregl.GeoJSONSource | undefined
+      const countries = map.getSource(COUNTRIES_SOURCE) as maplibregl.GeoJSONSource | undefined
       if (!src) return
       src.setData(pointsForToggle)
+      if (countries) countries.setData(countriesToGeoJSON(countryAggs))
       popupRef.current?.remove()
       setHoveredId(null)
       setHoverSeries(null)
       setPinnedId(null)
       setPinnedSeries(null)
       map.getCanvas().style.cursor = ''
-      setStatus(`${source} · ${metric} · agglomerations`)
+      setStatus(`${source} · ${metric}`)
       scheduleRebuild()
     }
     if (map.isStyleLoaded() && map.getSource(CITIES_SOURCE)) apply()
     else map.once('load', apply)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pointsForToggle, source, metric])
+  }, [pointsForToggle, countryAggs, source, metric])
 
   // Dim / desaturate other cities while one is hovered
   useEffect(() => {
@@ -563,6 +712,20 @@ export function NoiseMap() {
               ] as maplibregl.ExpressionSpecification),
         )
       }
+      if (map.getLayer(COUNTRY_LABEL_LAYER)) {
+        map.setPaintProperty(
+          COUNTRY_LABEL_LAYER,
+          'text-opacity',
+          dimming
+            ? ([
+                'case',
+                ['==', ['get', 'id'], activeId],
+                1,
+                0.22,
+              ] as maplibregl.ExpressionSpecification)
+            : 0.95,
+        )
+      }
     }
 
     if (map.isStyleLoaded() && map.getLayer(RINGS_LAYER)) apply()
@@ -583,8 +746,10 @@ export function NoiseMap() {
     }
 
     const onMove = async (e: maplibregl.MapMouseEvent) => {
-      if (!map.getLayer(HIT_LAYER)) return
-      const feats = map.queryRenderedFeatures(e.point, { layers: [HIT_LAYER] })
+      const hitLayers = countryModeRef.current
+        ? [COUNTRY_HIT_LAYER]
+        : [HIT_LAYER]
+      const feats = map.queryRenderedFeatures(e.point, { layers: hitLayers })
       if (!feats.length) {
         clearHover()
         return
@@ -593,9 +758,36 @@ export function NoiseMap() {
       const props = feat.properties ?? {}
       const src = sourceRef.current
       const met = metricRef.current
-      const key = `${src}__${met}`
       const coords = (feat.geometry as Point).coordinates as [number, number]
       map.getCanvas().style.cursor = 'pointer'
+
+      if (props.kind === 'country') {
+        let series: HoverSeries | null = null
+        try {
+          series = JSON.parse(String(props.series || 'null')) as HoverSeries
+        } catch {
+          series = null
+        }
+        if (!series) {
+          clearHover()
+          return
+        }
+        setHoveredId(series.id)
+        setHoverSeries(series)
+        popup
+          .setLngLat(coords)
+          .setHTML(
+            buildTooltipHtml(
+              series.name,
+              `${props.cityCount ?? '?'} agglomerations · country total`,
+              src,
+              met,
+              series.points.map((b) => ({ ...b, rings: 0 })),
+            ),
+          )
+          .addTo(map)
+        return
+      }
 
       if (props.cluster) {
         const clusterId = Number(props.cluster_id)
@@ -609,38 +801,22 @@ export function NoiseMap() {
         }
         const tips: ChartSeries[] = []
         for (const leaf of leaves) {
-          try {
-            const all = JSON.parse(String(leaf.properties?.tooltip || '{}')) as Record<
-              string,
-              ChartSeries
-            >
-            const tip = all[key]
-            if (tip && tip.total > 0) tips.push(tip)
-          } catch {
-            /* skip */
-          }
+          const tip = tipFromProps(leaf.properties?.tooltip, src, met)
+          if (tip) tips.push(tip)
         }
         const bands = aggregateBands(met, tips)
-        const total = bands.reduce((s, b) => s + b.people, 0)
-        const id = `cluster:${clusterId}`
-        const name = `${leaves.length} cities`
-        setHoveredId(id)
-        setHoverSeries({
-          id,
-          name,
-          total,
-          points: bands.map((b) => ({
-            band: b.band,
-            label: b.label,
-            color: b.color,
-            people: b.people,
-          })),
-        })
+        const series = seriesFromBands(
+          `cluster:${clusterId}`,
+          `${leaves.length} cities`,
+          bands,
+        )
+        setHoveredId(series.id)
+        setHoverSeries(series)
         popup
           .setLngLat(coords)
           .setHTML(
             buildTooltipHtml(
-              name,
+              series.name,
               'aggregated · click to zoom in',
               src,
               met,
@@ -652,30 +828,15 @@ export function NoiseMap() {
       }
 
       const id = String(props.id ?? '')
-      let tip: ChartSeries | null = null
-      try {
-        const all = JSON.parse(String(props.tooltip || '{}')) as Record<string, ChartSeries>
-        tip = all[key] ?? null
-      } catch {
-        tip = null
-      }
-      if (!tip || !(tip.total > 0)) {
+      const tip = tipFromProps(props.tooltip, src, met)
+      if (!tip) {
         clearHover()
         return
       }
       const bands = seriesToBands(met, tip)
+      const series = seriesFromBands(id, String(props.agglomeration ?? ''), bands)
       setHoveredId(id)
-      setHoverSeries({
-        id,
-        name: String(props.agglomeration ?? ''),
-        total: tip.total,
-        points: bands.map((b) => ({
-          band: b.band,
-          label: b.label,
-          color: b.color,
-          people: b.people,
-        })),
-      })
+      setHoverSeries(series)
       popup
         .setLngLat(coords)
         .setHTML(
@@ -694,7 +855,7 @@ export function NoiseMap() {
       map.on('mousemove', onMove)
       map.on('mouseout', clearHover)
     }
-    if (map.isStyleLoaded() && map.getLayer(HIT_LAYER)) bind()
+    if (map.isStyleLoaded()) bind()
     else map.once('load', bind)
 
     return () => {
