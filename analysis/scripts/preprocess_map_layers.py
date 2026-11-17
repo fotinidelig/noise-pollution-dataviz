@@ -170,27 +170,22 @@ def load_and_prep_layer(
     if gdf.empty:
         return None
 
-    # Dissolve by category in projected CRS, then simplify
-    dissolved_rows = []
-    for cat, sub in gdf.groupby("category", dropna=False):
-        geom = unary_union(sub.geometry.values)
-        geom = make_valid(geom)
-        if geom.is_empty:
-            continue
-        geom = geom.simplify(tol_m, preserve_topology=True)
-        if geom.is_empty:
-            continue
-        dissolved_rows.append(
-            {
-                "category": str(cat),
-                "country": country,
-                "geometry": geom,
-            }
-        )
-    if not dissolved_rows:
+    # Simplify first (cheap), then dissolve — avoids O(n²) unary_union on dense roads
+    pre_tol = max(tol_m * 0.5, 30.0)
+    gdf["geometry"] = gdf.geometry.simplify(pre_tol, preserve_topology=True)
+    gdf = gdf[~gdf.geometry.is_empty & gdf.geometry.notna()].copy()
+    if gdf.empty:
         return None
-    out = gpd.GeoDataFrame(dissolved_rows, crs="EPSG:3035")
-    out = out.to_crs(4326)
+
+    dissolved = gdf.dissolve(by="category", as_index=False)
+    dissolved["geometry"] = dissolved.geometry.map(
+        lambda g: make_valid(g.simplify(tol_m, preserve_topology=True)) if g is not None else g
+    )
+    dissolved = dissolved[~dissolved.geometry.is_empty & dissolved.geometry.notna()].copy()
+    if dissolved.empty:
+        return None
+    dissolved["country"] = country
+    out = dissolved[["category", "country", "geometry"]].to_crs(4326)
     out["geometry"] = out.geometry.map(lambda g: make_valid(g) if g is not None else g)
     out = out[~out.geometry.is_empty & out.geometry.notna()]
     return out if not out.empty else None
