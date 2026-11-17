@@ -28,7 +28,16 @@ export type ChartCity = {
   agglomeration: string
   country: string
   inhabitants: number
+  lon?: number
+  lat?: number
   series: Record<string, ChartSeries>
+}
+
+export type HoverSeries = {
+  id: string
+  name: string
+  total: number
+  points: { band: string; label: string; color: string; people: number }[]
 }
 
 type Props = {
@@ -36,6 +45,8 @@ type Props = {
   source: NoiseSource
   metric: NoiseMetric
   hoveredId: string | null
+  /** When set (e.g. cluster aggregate), overrides city lookup. */
+  hoverSeries?: HoverSeries | null
   onHoverCity: (id: string | null) => void
 }
 
@@ -114,6 +125,7 @@ export function CityWaveChart({
   source,
   metric,
   hoveredId,
+  hoverSeries = null,
 }: Props) {
   const plotRef = useRef<HTMLDivElement | null>(null)
   const [size, setSize] = useState({ w: 220, h: 640 })
@@ -137,38 +149,36 @@ export function CityWaveChart({
   const bandKeys = metric === 'Lden' ? [...LDEN_KEYS] : [...LNIGHT_KEYS]
   const seriesKey = `${source}__${metric}`
 
-  const peopleCeiling = useMemo(() => {
-    let m = 1
-    for (const c of cities) {
-      const tip = c.series[seriesKey]
-      if (!tip) continue
-      for (const b of tip.bands) m = Math.max(m, b.people || 0)
-    }
-    return m
-  }, [cities, seriesKey])
-
   const active = useMemo(() => {
+    if (hoverSeries && hoverSeries.points.length) {
+      return {
+        ...hoverSeries,
+        localMax: Math.max(1, ...hoverSeries.points.map((p) => p.people)),
+      }
+    }
     if (!hoveredId) return null
     const city = cities.find((c) => c.id === hoveredId)
     if (!city) return null
     const tip = city.series[seriesKey]
     if (!tip || !(tip.total > 0)) return null
     const byBand = new Map(tip.bands.map((b) => [b.band, b]))
+    const points = bandKeys.map((b, i) => {
+      const hit = byBand.get(b)
+      return {
+        band: b,
+        label: bandMeta[i]?.label ?? b,
+        color: hit?.color ?? bandMeta[i]?.color ?? '#88aaaa',
+        people: hit?.people ?? 0,
+      }
+    })
     return {
       id: city.id,
       name: city.agglomeration,
       total: tip.total,
-      points: bandKeys.map((b, i) => {
-        const hit = byBand.get(b)
-        return {
-          band: b,
-          label: bandMeta[i]?.label ?? b,
-          color: hit?.color ?? bandMeta[i]?.color ?? '#88aaaa',
-          people: hit?.people ?? 0,
-        }
-      }),
+      points,
+      localMax: Math.max(1, ...points.map((p) => p.people)),
     }
-  }, [hoveredId, cities, seriesKey, bandKeys, bandMeta])
+  }, [hoverSeries, hoveredId, cities, seriesKey, bandKeys, bandMeta])
 
   const pad = { top: 12, right: 14, bottom: 28, left: 52 }
   const innerW = Math.max(40, size.w - pad.left - pad.right)
@@ -180,7 +190,11 @@ export function CityWaveChart({
     .range([0, innerH])
     .padding(0.4)
 
-  const x = scaleLinear().domain([0, peopleCeiling]).nice().range([0, innerW])
+  // De-normalized: this city's max people fills the chart width
+  const x = scaleLinear()
+    .domain([0, active?.localMax ?? 1])
+    .nice()
+    .range([0, innerW])
 
   const anchors = useMemo(() => {
     if (!active) return []

@@ -231,17 +231,13 @@ def rings_for_people(people: float) -> int:
     return min(MAX_RINGS_PER_BAND, max(1, n))
 
 
-def band_radii(order: int, n_rings: int, base_km: float = 1.6) -> list[float]:
-    """Inner bands smaller; within-band spacing tightens slightly (sound-wave feel)."""
-    shell0 = base_km * (1.35**order)
-    band_gap = base_km * 0.55 * (1.15**order)
-    start = shell0 + order * band_gap
-    radii: list[float] = []
-    r = start
-    for i in range(n_rings):
-        radii.append(r)
-        r += base_km * 0.32 * (0.86**i)
-    return radii
+RING_STEP_KM = 0.55
+RING_BASE_KM = 1.2
+
+
+def equal_spaced_radii(start_index: int, n_rings: int) -> list[float]:
+    """Constant distance between consecutive rings (no extra gap for sparse bands)."""
+    return [RING_BASE_KM + (start_index + i) * RING_STEP_KM for i in range(n_rings)]
 
 
 def load_exposure(path: Path):
@@ -383,13 +379,14 @@ def build(people_per_ring: int, max_rings: int) -> None:
             for metric, bands in metrics.items():
                 band_defs = LDEN_BANDS if metric == "Lden" else LNIGHT_BANDS
                 mean_db = mean_db_approx(metric, bands)
+                ring_index = 0
                 for bdef in band_defs:
                     people = float(bands.get(bdef["band"], 0.0) or 0.0)
                     n = rings_for_people(people)
                     if n == 0:
                         continue
-                    radii = band_radii(bdef["order"], n)
-                    for i, radius_km in enumerate(radii):
+                    radii = equal_spaced_radii(ring_index, n)
+                    for radius_km in radii:
                         features.append(
                             {
                                 "type": "Feature",
@@ -409,7 +406,7 @@ def build(people_per_ring: int, max_rings: int) -> None:
                                     "band_order": bdef["order"],
                                     "people": people,
                                     "people_per_ring": PEOPLE_PER_RING,
-                                    "ring_index": i,
+                                    "ring_index": ring_index,
                                     "rings_in_band": n,
                                     "radius_km": round(radius_km, 3),
                                     "mean_db": mean_db,
@@ -417,6 +414,7 @@ def build(people_per_ring: int, max_rings: int) -> None:
                                 },
                             }
                         )
+                        ring_index += 1
 
     CACHE.parent.mkdir(parents=True, exist_ok=True)
     CACHE.write_text(json.dumps(cache, indent=2, ensure_ascii=False))
@@ -435,12 +433,15 @@ def build(people_per_ring: int, max_rings: int) -> None:
     chart_cities = []
     for c in centers:
         p = c["properties"]
+        lon, lat = c["geometry"]["coordinates"]
         chart_cities.append(
             {
                 "id": f"{p['country']}|{p['agglomeration']}",
                 "agglomeration": p["agglomeration"],
                 "country": p["country"],
                 "inhabitants": p.get("inhabitants") or 0,
+                "lon": lon,
+                "lat": lat,
                 "series": json.loads(p.get("tooltip") or "{}"),
             }
         )
