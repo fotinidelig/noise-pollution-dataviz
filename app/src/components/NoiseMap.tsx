@@ -20,6 +20,14 @@ const FILL_LAYER = 'end-contours-fill'
 const LINE_LAYER = 'end-contours-line'
 
 let protocolRegistered = false
+let workerConfigured = false
+
+function ensureMaplibreWorker() {
+  if (workerConfigured) return
+  // Serve worker from /public to avoid Vite dep-optimizer MIME/504 worker failures.
+  maplibregl.setWorkerUrl(`${import.meta.env.BASE_URL}maplibre-gl-worker.mjs`)
+  workerConfigured = true
+}
 
 function ensurePmtilesProtocol() {
   if (protocolRegistered) return
@@ -70,6 +78,7 @@ export function NoiseMap() {
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return
+    ensureMaplibreWorker()
     ensurePmtilesProtocol()
 
     const map = new maplibregl.Map({
@@ -83,8 +92,7 @@ export function NoiseMap() {
     mapRef.current = map
 
     map.on('load', () => setStatus('Map ready'))
-    map.on('error', (e: maplibregl.ErrorEvent) => {
-      console.error(e)
+    map.on('error', () => {
       setStatus('Map error — check console / data assets')
     })
 
