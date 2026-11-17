@@ -348,19 +348,33 @@ def build(people_per_ring: int, max_rings: int) -> None:
                     ],
                 }
 
+        center_props: dict = {
+            "kind": "center",
+            "country": m["country"],
+            "agglomeration": m["agglomeration"],
+            "inhabitants": m["inhabitants"],
+            "area_km2": m["area_km2"],
+            "matched": hit.get("matched"),
+            "tooltip": json.dumps(tooltip, separators=(",", ":")),
+        }
+        # Flat totals for MapLibre filters (hide centers with no people for a toggle)
+        any_data = False
+        for tip_key, tip_val in tooltip.items():
+            total = float(tip_val.get("total") or 0)
+            center_props[f"total__{tip_key}"] = total
+            if total > 0:
+                any_data = True
+        center_props["has_any_data"] = 1 if any_data else 0
+
+        # Skip places with zero exposure across every source×metric
+        if not any_data:
+            continue
+
         centers.append(
             {
                 "type": "Feature",
                 "geometry": {"type": "Point", "coordinates": [lon, lat]},
-                "properties": {
-                    "kind": "center",
-                    "country": m["country"],
-                    "agglomeration": m["agglomeration"],
-                    "inhabitants": m["inhabitants"],
-                    "area_km2": m["area_km2"],
-                    "matched": hit.get("matched"),
-                    "tooltip": json.dumps(tooltip, separators=(",", ":")),
-                },
+                "properties": center_props,
             }
         )
 

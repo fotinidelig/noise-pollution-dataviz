@@ -48,6 +48,33 @@ function formatPeople(n: number): string {
   return String(Math.round(n))
 }
 
+function totalProp(source: NoiseSource, metric: NoiseMetric): string {
+  return `total__${source}__${metric}`
+}
+
+function centerFilter(
+  source: NoiseSource,
+  metric: NoiseMetric,
+): maplibregl.FilterSpecification {
+  return [
+    'all',
+    ['==', ['get', 'kind'], 'center'],
+    ['>', ['get', totalProp(source, metric)], 0],
+  ]
+}
+
+function ringFilter(
+  source: NoiseSource,
+  metric: NoiseMetric,
+): maplibregl.FilterSpecification {
+  return [
+    'all',
+    ['==', ['get', 'kind'], 'ring'],
+    ['==', ['get', 'source'], source],
+    ['==', ['get', 'metric'], metric],
+  ]
+}
+
 function buildTooltipHtml(
   name: string,
   country: string,
@@ -122,12 +149,7 @@ export function NoiseMap() {
         id: RINGS_LAYER,
         type: 'line',
         source: RINGS_SOURCE,
-        filter: [
-          'all',
-          ['==', ['get', 'kind'], 'ring'],
-          ['==', ['get', 'source'], source],
-          ['==', ['get', 'metric'], metric],
-        ],
+        filter: ringFilter(source, metric),
         paint: {
           'line-color': ['get', 'color'],
           'line-opacity': 0.88,
@@ -150,7 +172,7 @@ export function NoiseMap() {
         id: HIT_LAYER,
         type: 'circle',
         source: RINGS_SOURCE,
-        filter: ['==', ['get', 'kind'], 'center'],
+        filter: centerFilter(source, metric),
         paint: {
           'circle-radius': [
             'interpolate',
@@ -175,7 +197,7 @@ export function NoiseMap() {
         id: LABEL_LAYER,
         type: 'symbol',
         source: RINGS_SOURCE,
-        filter: ['==', ['get', 'kind'], 'center'],
+        filter: centerFilter(source, metric),
         layout: {
           'text-field': ['get', 'agglomeration'],
           'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
@@ -234,12 +256,9 @@ export function NoiseMap() {
 
     const apply = () => {
       if (!map.getLayer(RINGS_LAYER)) return
-      map.setFilter(RINGS_LAYER, [
-        'all',
-        ['==', ['get', 'kind'], 'ring'],
-        ['==', ['get', 'source'], source],
-        ['==', ['get', 'metric'], metric],
-      ])
+      map.setFilter(RINGS_LAYER, ringFilter(source, metric))
+      if (map.getLayer(HIT_LAYER)) map.setFilter(HIT_LAYER, centerFilter(source, metric))
+      if (map.getLayer(LABEL_LAYER)) map.setFilter(LABEL_LAYER, centerFilter(source, metric))
       setStatus(`${source} · ${metric} · agglomerations`)
     }
 
