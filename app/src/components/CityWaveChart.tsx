@@ -196,9 +196,10 @@ export function CityWaveChart({
   const innerW = Math.max(40, size.w - pad.left - pad.right)
   const innerH = Math.max(40, size.h - pad.top - pad.bottom)
 
+  // Low dB at bottom, high dB at top
   const y = scalePoint<string>()
     .domain(bandKeys)
-    .range([0, innerH])
+    .range([innerH, 0])
     .padding(0.35)
 
   const x = scaleLinear()

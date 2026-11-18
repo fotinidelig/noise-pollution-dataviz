@@ -8,7 +8,7 @@
 /* Abstract line docked to the tooltip — no chrome */
 .wave-panel--sidecar {
   display: block;
-  width: min(160px, 22vw);
+  width: min(112px, 15.4vw);
   bottom: auto;
   right: auto;
   background: transparent;
@@ -52,6 +52,6 @@
 
 @media (max-width: 720px) {
   .wave-panel--sidecar {
-    width: min(120px, 32vw);
+    width: min(84px, 22vw);
   }
 }
