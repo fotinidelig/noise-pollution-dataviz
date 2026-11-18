@@ -1,18 +1,18 @@
-year,site,metric,db
-2025,Périphérique Vincennes,Ln,77.5
-2025,Périphérique Auteuil,Ln,74.8
-2025,gesvres,Ln,69.2
-2025,246 boulevard Saint-Germain,Ln,68.3
-2025,74 rue Pierre Soulié,Ln,68.1
-2025,102 boulevard de Sébastopol,Ln,67.7
-2025,21 boulevard Poissonière,Ln,67.6
-2025,bastille,Ln,66.6
-2025,anatolefrance,Ln,66.5
-2025,malesherbes,Ln,66.4
-2025,4 place St Michel,Ln,65.2
-2025,88 rue de Courcelles (enrob-clas),Ln,65.1
-2025,214 rue Lecourbe,Ln,64.2
-2025,62 rue de Courcelles (enrob-pho),Ln,64.1
-2025,88 rue de Rivoli,Ln,63.7
-2025,37 rue Frémicourt (enrob-pho),Ln,63.1
-2025,13 rue Frémicourt (enrob-clas),Ln,62.7
+year,site,metric,db,source_col
+2025,Périphérique Vincennes,Ln,77.5,Périphérique Vincennes - Ln dB(A)
+2025,Périphérique Auteuil,Ln,74.8,Périphérique Auteuil - Ln dB(A)
+2025,gesvres,Ln,69.2,ln_bruit routier_gesvres
+2025,246 boulevard Saint-Germain,Ln,68.3,246 boulevard Saint-Germain - Ln  dB(A)
+2025,74 rue Pierre Soulié,Ln,68.1,74 rue Pierre Soulié - Ln dB(A)
+2025,102 boulevard de Sébastopol,Ln,67.7,102 boulevard de Sébastopol - Ln dB(A)
+2025,21 boulevard Poissonière,Ln,67.6,21 boulevard Poissonière - Ln dB(A)
+2025,bastille,Ln,66.6,ln_bruit routier_bastille
+2025,anatolefrance,Ln,66.5,ln_bruit routier_anatolefrance
+2025,malesherbes,Ln,66.4,ln_bruit routier_malesherbes
+2025,4 place St Michel,Ln,65.2,4 place St Michel - Ln dB(A)
+2025,88 rue de Courcelles (enrob-clas),Ln,65.1,88 rue de Courcelles (enrob-clas) - Ln dB(A)
+2025,214 rue Lecourbe,Ln,64.2,214 rue Lecourbe - Ln dB(A)
+2025,62 rue de Courcelles (enrob-pho),Ln,64.1,62 rue de Courcelles (enrob-pho) - Ln dB(A)
+2025,88 rue de Rivoli,Ln,63.7,88 rue de Rivoli - Ln dB(A)
+2025,37 rue Frémicourt (enrob-pho),Ln,63.1,37 rue Frémicourt (enrob-pho) - Ln dB(A)
+2025,13 rue Frémicourt (enrob-clas),Ln,62.7,13 rue Frémicourt (enrob-clas) - Ln dB(A)
