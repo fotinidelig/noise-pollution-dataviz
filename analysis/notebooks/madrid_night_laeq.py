@@ -107,17 +107,17 @@ def _(OUT, night, pd):
         "spread_median", ascending=False
     )
     distinctive = loudest
-    for sid in spread_rank["Estación"].astype(int):
-        if sid not in {loudest, calmest}:
-            distinctive = int(sid)
+    for _sid in spread_rank["Estación"].astype(int):
+        if _sid not in {loudest, calmest}:
+            distinctive = int(_sid)
             break
     if distinctive in {loudest, calmest} and len(eligible) > 2:
         distinctive = int(eligible.iloc[1]["Estación"])
 
     focus_ids = []
-    for sid in (loudest, distinctive, calmest):
-        if sid not in focus_ids:
-            focus_ids.append(sid)
+    for _sid in (loudest, distinctive, calmest):
+        if _sid not in focus_ids:
+            focus_ids.append(_sid)
 
     city_yearly = (
         night.groupby("Año", as_index=False)
@@ -172,17 +172,19 @@ def _(city_yearly, focus_ids, focus_yearly, mo, plt, station_overall):
         label="city median (context)",
         zorder=1,
     )
-    for sid in focus_ids:
-        sub = focus_yearly.loc[focus_yearly["Estación"] == sid]
+    for _plot_sid in focus_ids:
+        sub = focus_yearly.loc[focus_yearly["Estación"] == _plot_sid]
         med = float(
-            station_overall.loc[station_overall["Estación"] == sid, "laeq_median"].iloc[0]
+            station_overall.loc[
+                station_overall["Estación"] == _plot_sid, "laeq_median"
+            ].iloc[0]
         )
         ax.plot(
             sub["Año"],
             sub["laeq_median"],
-            color=palette.get(sid, "#00e5ff"),
+            color=palette.get(_plot_sid, "#00e5ff"),
             lw=2.2,
-            label=f"st {sid} (med {med:.1f} dB)",
+            label=f"st {_plot_sid} (med {med:.1f} dB)",
             zorder=2,
         )
     ax.set_title("Madrid night LAeq — focus stations vs city median")

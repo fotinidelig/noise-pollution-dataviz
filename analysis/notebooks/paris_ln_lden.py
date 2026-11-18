@@ -71,17 +71,19 @@ def _(OUT, RAW, mo, pd, re):
             metric = "Lden"
         if metric is None:
             continue
-        site = re.sub(r"\s*[-–]?\s*L(?:den|n)\s*dB\(A\)\s*$", "", c, flags=re.I)
-        site = re.sub(r"^(?:lden|ln)[_\s]*bruit\s*routier[_\s]*", "", site, flags=re.I)
-        site = site.strip(" -_") or c
-        for _, row in wide.iterrows():
-            val = row[col]
+        _site_name = re.sub(r"\s*[-–]?\s*L(?:den|n)\s*dB\(A\)\s*$", "", c, flags=re.I)
+        _site_name = re.sub(
+            r"^(?:lden|ln)[_\s]*bruit\s*routier[_\s]*", "", _site_name, flags=re.I
+        )
+        _site_name = _site_name.strip(" -_") or c
+        for _, _row in wide.iterrows():
+            val = _row[col]
             if pd.isna(val) or str(val).strip() == "":
                 continue
             records.append(
                 {
-                    "year": int(row[year_col]),
-                    "site": site,
+                    "year": int(_row[year_col]),
+                    "site": _site_name,
                     "metric": metric,
                     "db": float(val),
                     "source_col": col,
@@ -108,20 +110,20 @@ def _(OUT, long, pd):
     if len(snap):
         focus_sites.append(snap.iloc[0]["site"])  # loudest
     # Second périphérique segment if loudest already is one (keep names distinct)
-    for _, row in peri.iterrows():
-        if row["site"] not in focus_sites:
-            focus_sites.append(row["site"])
+    for _, _peri_row in peri.iterrows():
+        if _peri_row["site"] not in focus_sites:
+            focus_sites.append(_peri_row["site"])
             break
     if len(snap):
         calm = snap.iloc[-1]["site"]
         if calm not in focus_sites:
             focus_sites.append(calm)
     # Fill to 3 with next-loudest if needed
-    for _, row in snap.iterrows():
+    for _, _snap_row in snap.iterrows():
         if len(focus_sites) >= 3:
             break
-        if row["site"] not in focus_sites:
-            focus_sites.append(row["site"])
+        if _snap_row["site"] not in focus_sites:
+            focus_sites.append(_snap_row["site"])
     focus_sites = focus_sites[:3]
     focus = ln.loc[ln["site"].isin(focus_sites)]
     snap.to_csv(OUT / "paris_ln_latest_snapshot.csv", index=False)
@@ -134,9 +136,15 @@ def _(focus, focus_sites, latest, ln, long, mo, plt, snap):
     fig, axes = plt.subplots(1, 2, figsize=(11, 4.4), constrained_layout=True)
     ax = axes[0]
     palette = ["#ff1744", "#ffea00", "#76ff03", "#00e5ff"]
-    for i, site in enumerate(focus_sites):
-        sub = focus.loc[focus["site"] == site]
-        ax.plot(sub["year"], sub["db"], lw=2.2, color=palette[i % len(palette)], label=site[:42])
+    for i, _plot_site in enumerate(focus_sites):
+        sub = focus.loc[focus["site"] == _plot_site]
+        ax.plot(
+            sub["year"],
+            sub["db"],
+            lw=2.2,
+            color=palette[i % len(palette)],
+            label=_plot_site[:42],
+        )
     ax.set_title(f"Paris Ln — focus sites")
     ax.set_ylabel("Ln dB(A)")
     ax.set_ylim(55, 85)
