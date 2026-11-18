@@ -2,7 +2,7 @@
   position: relative;
   min-height: 100svh;
   color: #e8f0ff;
-  font-family: "VT323", "Courier New", monospace;
+  font-family: var(--font-body, "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif);
 }
 
 .scrolly-loading {
@@ -214,6 +214,7 @@
 
 .scrolly-step__title {
   margin: 0 0 0.65rem;
+  font-family: var(--font-display, "VT323", "Courier New", monospace);
   font-weight: 400;
   font-size: clamp(1.6rem, 3.2vw, 2.35rem);
   line-height: 1.05;

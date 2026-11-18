@@ -3,7 +3,7 @@
   display: flex;
   flex-direction: column;
   color: #e8f0ff;
-  font-family: "VT323", "Courier New", monospace;
+  font-family: var(--font-body, "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif);
 }
 
 /* Softer, lighter calm-spaces beat */
@@ -68,7 +68,7 @@
 
 .noise-brand h1 {
   margin: 0;
-  font-family: inherit;
+  font-family: var(--font-display, "VT323", "Courier New", monospace);
   font-weight: 400;
   font-size: clamp(1.85rem, 3.4vw, 2.6rem);
   letter-spacing: 0.02em;
@@ -123,7 +123,9 @@
   background: transparent;
   color: #9db0cc;
   font: inherit;
-  font-size: 1.05rem;
+  font-family: var(--font-body, "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif);
+  font-size: 0.92rem;
+  font-weight: 500;
   padding: 0.4rem 0.75rem;
   cursor: pointer;
   transition: color 120ms ease, background 120ms ease, box-shadow 120ms ease;
@@ -169,7 +171,7 @@
 .noise-canvas .maplibregl-ctrl-attrib {
   background: rgba(5, 8, 16, 0.65);
   color: #8ea2c0;
-  font-family: "VT323", monospace;
+  font-family: var(--font-body, "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif);
 }
 
 .noise-canvas .maplibregl-ctrl-group {
@@ -188,7 +190,7 @@
   border: 1px solid rgba(0, 184, 204, 0.35);
   box-shadow: 0 0 24px rgba(0, 184, 204, 0.12);
   color: #e8f0ff;
-  font-family: "VT323", monospace;
+  font-family: var(--font-body, "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif);
 }
 
 .noise-tip .maplibregl-popup-tip {
@@ -231,6 +233,7 @@
 }
 
 .tip-title {
+  font-family: var(--font-display, "VT323", "Courier New", monospace);
   font-size: 1.35rem;
   line-height: 1.1;
 }

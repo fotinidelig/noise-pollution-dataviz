@@ -1,13 +1,15 @@
 :root {
+  --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "VT323", "Courier New", monospace;
   color: #e8f0ff;
   background: #03050a;
-  font-family: "VT323", "Courier New", monospace;
+  font-family: var(--font-body);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  line-height: 1.35;
-  font-size: 18px;
+  line-height: 1.4;
+  font-size: 16px;
 }
 
 *,
@@ -25,10 +27,19 @@ body,
 
 body {
   min-width: 320px;
+  font-family: var(--font-body);
   background:
     radial-gradient(90% 60% at 15% -10%, rgba(0, 184, 204, 0.08), transparent 55%),
     radial-gradient(70% 50% at 100% 0%, rgba(255, 23, 68, 0.06), transparent 50%),
     #03050a;
+}
+
+h1,
+h2,
+h3,
+.font-display {
+  font-family: var(--font-display);
+  font-weight: 400;
 }
 
 button {

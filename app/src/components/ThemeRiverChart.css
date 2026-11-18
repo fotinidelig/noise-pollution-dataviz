@@ -111,6 +111,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   text-transform: none;
+  font-family: var(--font-display, "VT323", "Courier New", monospace);
   letter-spacing: 0.04em;
   color: #9db0cc;
 }
@@ -168,9 +169,9 @@
 
 .theme-river__tick {
   fill: #8fa3c0;
-  font-family: "VT323", "Courier New", monospace;
-  font-size: 11px;
-  letter-spacing: 0.04em;
+  font-family: var(--font-body, "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif);
+  font-size: 10px;
+  letter-spacing: 0.02em;
 }
 
 .theme-river__tip {
@@ -190,6 +191,7 @@
 }
 
 .theme-river__tip .tip-name {
+  font-family: var(--font-display, "VT323", "Courier New", monospace);
   color: #e8f0ff;
   font-size: 1.15rem;
   letter-spacing: 0.03em;

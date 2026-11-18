@@ -57,7 +57,8 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   color: #e8f2ea;
-  font-size: 1.15rem;
+  font-family: var(--font-display, "VT323", "Courier New", monospace);
+  font-size: 1.2rem;
   letter-spacing: 0.03em;
   line-height: 1.2;
 }
@@ -149,13 +150,13 @@
 
 .calm-chart__y-tick {
   fill: #b7c9bc;
-  font-family: "VT323", "Courier New", monospace;
+  font-family: var(--font-body, "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif);
   font-size: 14px;
 }
 
 .calm-chart__band {
   fill: #9eb5a8;
-  font-family: "VT323", "Courier New", monospace;
+  font-family: var(--font-body, "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif);
   font-size: 13px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -171,7 +172,7 @@
 
 .calm-chart__label {
   fill: #e8f4ec;
-  font-family: "VT323", "Courier New", monospace;
+  font-family: var(--font-body, "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif);
   font-size: 15px;
   letter-spacing: 0.02em;
   pointer-events: none;
@@ -200,6 +201,7 @@
 }
 
 .calm-chart__tip .tip-name {
+  font-family: var(--font-display, "VT323", "Courier New", monospace);
   color: #f2f7f3;
   font-size: 1.35rem;
   line-height: 1.15;
