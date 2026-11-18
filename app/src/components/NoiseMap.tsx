@@ -155,6 +155,8 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
   const pulsePhaseRef = useRef(0)
   const pulseRafRef = useRef<number | null>(null)
   const ringFocusIdRef = useRef<string | null>(null)
+  const paintRingSoundWaveRef = useRef<(activeId?: string | null) => void>(() => {})
+  const pulseErrorLoggedRef = useRef(false)
 
   // Standalone map = explore; scrolly steps lock until the final explore beat
   const explore = !story || Boolean(story.explore)
@@ -186,8 +188,9 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
   focusIdRef.current = focusId
 
   /**
-   * Sound-wave pulse on END exposure rings: crest travels outward by ring_index,
-   * opacity/blur breathe ~20fps via paint expressions (no geometry churn).
+   * Sound-wave pulse on END exposure rings.
+   * Uses interpolate stops on ring_index (no MapLibre `%`/`match`) so paint
+   * updates stay valid; crest travels outward ~20fps.
    */
   const paintRingSoundWave = (activeId: string | null = ringFocusIdRef.current) => {
     const map = mapRef.current
@@ -197,116 +200,124 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     const id = activeId ?? ''
     const phase = pulsePhaseRef.current
     const N = RING_PULSE_BUCKETS
+    const maxRing = 28
 
-    const opacities: number[] = []
-    const blurs: number[] = []
-    const widthBoosts: number[] = []
-    for (let i = 0; i < N; i++) {
-      // Crest moves outward: inner rings peak first, then outer.
-      const t = (phase - i / N + 1) % 1
-      const wave = Math.sin(t * Math.PI)
-      const soft = wave * wave
-      opacities.push(0.32 + 0.58 * soft)
-      blurs.push(0.15 + 1.35 * soft)
-      widthBoosts.push(0.82 + 0.38 * soft)
+    const opacityStops: Array<number> = []
+    const blurStops: Array<number> = []
+    const widthStops: Array<number> = []
+    for (let i = 0; i <= maxRing; i++) {
+      const t = (phase - (i % N) / N + 1) % 1
+      const soft = Math.sin(t * Math.PI) ** 2
+      // Strong enough to read as a pulse on the dark neon map
+      opacityStops.push(i, 0.22 + 0.78 * soft)
+      blurStops.push(i, 0.05 + 2.2 * soft)
+      widthStops.push(i, 0.75 + 0.55 * soft)
     }
 
+    const ringIdx = [
+      'coalesce',
+      ['to-number', ['get', 'ring_index']],
+      0,
+    ] as maplibregl.ExpressionSpecification
     const pulseOpacity = [
-      'match',
-      ['%', ['to-number', ['get', 'ring_index']], N],
-      ...opacities.flatMap((o, i) => [i, o]),
-      opacities[0],
+      'interpolate',
+      ['linear'],
+      ringIdx,
+      ...opacityStops,
     ] as maplibregl.ExpressionSpecification
-
     const pulseBlur = [
-      'match',
-      ['%', ['to-number', ['get', 'ring_index']], N],
-      ...blurs.flatMap((b, i) => [i, b]),
-      blurs[0],
+      'interpolate',
+      ['linear'],
+      ringIdx,
+      ...blurStops,
     ] as maplibregl.ExpressionSpecification
-
     const pulseWidthMul = [
-      'match',
-      ['%', ['to-number', ['get', 'ring_index']], N],
-      ...widthBoosts.flatMap((w, i) => [i, w]),
-      widthBoosts[0],
+      'interpolate',
+      ['linear'],
+      ringIdx,
+      ...widthStops,
     ] as maplibregl.ExpressionSpecification
 
-    const focusMul = dimming
+    const focusMul: maplibregl.ExpressionSpecification | number = dimming
       ? ([
           'case',
           ['==', ['to-string', ['get', 'id']], id],
           1,
-          0.16,
+          0.14,
         ] as maplibregl.ExpressionSpecification)
       : 1
 
-    map.setPaintProperty(RINGS_LAYER, 'line-opacity', [
+    const baseWidth: maplibregl.ExpressionSpecification = dimming
+      ? ([
+          'case',
+          ['==', ['to-string', ['get', 'id']], id],
+          ['interpolate', ['linear'], ['zoom'], 3, 1.2, 6, 2.0, 10, 2.8],
+          ['interpolate', ['linear'], ['zoom'], 3, 0.45, 6, 0.7, 10, 1.0],
+        ] as maplibregl.ExpressionSpecification)
+      : ([
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          3,
+          0.75,
+          6,
+          1.25,
+          10,
+          2.0,
+        ] as maplibregl.ExpressionSpecification)
+
+    const setPaint = (layer: string, prop: string, value: unknown) => {
+      try {
+        map.setPaintProperty(layer, prop, value as maplibregl.ExpressionSpecification)
+        return true
+      } catch (err) {
+        if (!pulseErrorLoggedRef.current) {
+          pulseErrorLoggedRef.current = true
+          console.warn(`[rings pulse] ${layer}.${prop} failed`, err)
+        }
+        return false
+      }
+    }
+
+    // Global breath (literal) — guaranteed visible even if data-driven stagger fails
+    const breath = 0.28 + 0.72 * Math.sin(phase * Math.PI) ** 2
+    const breathBlur = 0.15 + 2.4 * Math.sin(phase * Math.PI) ** 2
+
+    // Prefer traveling-wave stagger by ring_index; fall back to global breath
+    const opacityOk = setPaint(RINGS_LAYER, 'line-opacity', [
       '*',
       focusMul,
       pulseOpacity,
-    ] as maplibregl.ExpressionSpecification)
-    map.setPaintProperty(RINGS_LAYER, 'line-blur', pulseBlur)
-    map.setPaintProperty(RINGS_LAYER, 'line-width', [
-      '*',
-      pulseWidthMul,
-      dimming
-        ? ([
-            'case',
-            ['==', ['to-string', ['get', 'id']], id],
-            ['interpolate', ['linear'], ['zoom'], 3, 1.15, 6, 1.9, 10, 2.6],
-            ['interpolate', ['linear'], ['zoom'], 3, 0.4, 6, 0.65, 10, 0.95],
-          ] as maplibregl.ExpressionSpecification)
-        : ([
-            'interpolate',
-            ['linear'],
-            ['zoom'],
-            3,
-            0.65,
-            6,
-            1.1,
-            10,
-            1.75,
-          ] as maplibregl.ExpressionSpecification),
-    ] as maplibregl.ExpressionSpecification)
+    ])
+    if (!opacityOk) {
+      setPaint(RINGS_LAYER, 'line-opacity', ['*', focusMul, breath])
+    }
+    const widthOk = setPaint(RINGS_LAYER, 'line-width', ['*', pulseWidthMul, baseWidth])
+    if (!widthOk) {
+      setPaint(RINGS_LAYER, 'line-width', ['*', breath * 0.5 + 0.75, baseWidth])
+    }
+    if (!setPaint(RINGS_LAYER, 'line-blur', pulseBlur)) {
+      setPaint(RINGS_LAYER, 'line-blur', breathBlur)
+    }
 
     if (map.getLayer(RINGS_GLOW_LAYER)) {
-      map.setPaintProperty(RINGS_GLOW_LAYER, 'line-opacity', [
-        '*',
-        focusMul,
-        0.38,
-        pulseOpacity,
-      ] as maplibregl.ExpressionSpecification)
-      map.setPaintProperty(RINGS_GLOW_LAYER, 'line-blur', [
-        '+',
-        1.2,
-        pulseBlur,
-      ] as maplibregl.ExpressionSpecification)
-      map.setPaintProperty(RINGS_GLOW_LAYER, 'line-width', [
-        '*',
-        1.55,
-        pulseWidthMul,
-        dimming
-          ? ([
-              'case',
-              ['==', ['to-string', ['get', 'id']], id],
-              ['interpolate', ['linear'], ['zoom'], 3, 1.4, 6, 2.3, 10, 3.2],
-              ['interpolate', ['linear'], ['zoom'], 3, 0.5, 6, 0.8, 10, 1.1],
-            ] as maplibregl.ExpressionSpecification)
-          : ([
-              'interpolate',
-              ['linear'],
-              ['zoom'],
-              3,
-              0.9,
-              6,
-              1.5,
-              10,
-              2.3,
-            ] as maplibregl.ExpressionSpecification),
-      ] as maplibregl.ExpressionSpecification)
+      if (
+        !setPaint(RINGS_GLOW_LAYER, 'line-opacity', [
+          '*',
+          focusMul,
+          0.6,
+          pulseOpacity,
+        ])
+      ) {
+        setPaint(RINGS_GLOW_LAYER, 'line-opacity', ['*', focusMul, 0.55 * breath])
+      }
+      setPaint(RINGS_GLOW_LAYER, 'line-width', ['*', 1.8, widthOk ? pulseWidthMul : 1, baseWidth])
+      if (!setPaint(RINGS_GLOW_LAYER, 'line-blur', ['+', 1.8, pulseBlur])) {
+        setPaint(RINGS_GLOW_LAYER, 'line-blur', breathBlur + 1.8)
+      }
     }
   }
+  paintRingSoundWaveRef.current = paintRingSoundWave
 
   /** Apply ring/label dimming immediately (do not wait for React paint effect). */
   const applyFocusPaint = (activeId: string | null) => {
@@ -429,6 +440,29 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     const nav = document.querySelector('.maplibregl-ctrl-bottom-right') as HTMLElement | null
     if (nav) nav.style.display = storyLocked ? 'none' : ''
   }, [storyLocked, story?.stepId, mapReady])
+
+  // Sound-wave pulse loop — keyed off mapReady so it survives story remounts
+  useEffect(() => {
+    if (!mapReady) return
+    let last = 0
+    const tick = (now: number) => {
+      if (now - last >= 48) {
+        last = now
+        pulsePhaseRef.current = (pulsePhaseRef.current + 0.04) % 1
+        paintRingSoundWaveRef.current(ringFocusIdRef.current)
+      }
+      pulseRafRef.current = window.requestAnimationFrame(tick)
+    }
+    // Kick once immediately so the first paint isn't the static layer default
+    paintRingSoundWaveRef.current(ringFocusIdRef.current)
+    pulseRafRef.current = window.requestAnimationFrame(tick)
+    return () => {
+      if (pulseRafRef.current != null) {
+        window.cancelAnimationFrame(pulseRafRef.current)
+        pulseRafRef.current = null
+      }
+    }
+  }, [mapReady])
 
   // Hong Kong raster + Seoul bubbles — unlock once, then keep visible
   useEffect(() => {
@@ -857,6 +891,8 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     })
     popupRef.current = popup
     mapRef.current = map
+    // Debug hook for pulse verification (harmless in prod)
+    ;(window as unknown as { __noiseMap?: maplibregl.Map }).__noiseMap = map
 
     map.on('load', () => {
       map.addSource(CITIES_SOURCE, {
@@ -1046,19 +1082,6 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
       setStatus(`${sourceRef.current} · ${metricRef.current} · countries`)
       setMapReady(true)
       scheduleRebuild()
-      paintRingSoundWave(ringFocusIdRef.current)
-
-      // Subtle outward sound-wave pulse (~20fps paint updates only)
-      let lastPulse = 0
-      const tickPulse = (now: number) => {
-        if (now - lastPulse >= 50) {
-          lastPulse = now
-          pulsePhaseRef.current = (pulsePhaseRef.current + 0.028) % 1
-          paintRingSoundWave(ringFocusIdRef.current)
-        }
-        pulseRafRef.current = window.requestAnimationFrame(tickPulse)
-      }
-      pulseRafRef.current = window.requestAnimationFrame(tickPulse)
     })
 
     map.on('error', () => {
@@ -1138,10 +1161,6 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     })
 
     return () => {
-      if (pulseRafRef.current != null) {
-        window.cancelAnimationFrame(pulseRafRef.current)
-        pulseRafRef.current = null
-      }
       if (rebuildTimer.current != null) window.clearTimeout(rebuildTimer.current)
       popup.remove()
       map.remove()
