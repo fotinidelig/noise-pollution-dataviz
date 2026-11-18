@@ -8,9 +8,16 @@ export const MAX_RINGS_PER_BAND = 12
 export const RING_STEP_KM = 0.55
 export const RING_BASE_KM = 1.2
 export const RING_VERTICES = 48
-/** Extra expanding pulse rings beyond the last static ring (visible at overview). */
-export const PULSE_OUTER_COUNT = 4
-export const PULSE_STEP_KM = 1.35
+/** Extra expanding pulse rings beyond the last static ring. */
+export const PULSE_OUTER_COUNT = 6
+/** Outer pulse step when zoomed in (km). */
+export const PULSE_STEP_KM = 1.6
+/** Outer pulse step at country overview — must clearly exceed the country blob. */
+export const PULSE_STEP_KM_OVERVIEW = 16
+/** Extra clearance past last static radius before the first overview pulse ring. */
+export const PULSE_OVERVIEW_CLEARANCE_FRAC = 0.55
+/** Below this zoom, pulse only on far outer rings (stack twins collapse to a blob). */
+export const PULSE_STACK_MIN_ZOOM = 5.4
 
 export const LDEN_KEYS = ['55-59', '60-64', '65-69', '70-74', '>75'] as const
 export const LNIGHT_KEYS = ['50-54', '55-59', '60-64', '65-69', '>70'] as const
@@ -52,10 +59,14 @@ export function ringCoords(
   return coords
 }
 
+/** Soft cyan-gray pulse — visible on dark basemap, lower chroma than band neon. */
+export const PULSE_COLOR = '#9bb7c2'
+
 /**
  * Build equally spaced rings across bands (no extra gap when a band has fewer rings).
  * Colour still encodes dB band; radius only depends on cumulative ring index.
- * Appends outer `role:'pulse'` rings so the sound-wave can travel past the static set.
+ * Emits `role:'pulse'` copies through the full stack + outer rings so the sound-wave
+ * travels across the visible rings (not only past them).
  */
 export function buildEqualSpacedRings(args: {
   lon: number
@@ -65,15 +76,43 @@ export function buildEqualSpacedRings(args: {
   bands: BandPeople[]
   id: string
   label: string
+  /** Map zoom — drives whether pulse twins the stack or only far outer rings. */
+  zoom?: number
 }): Feature[] {
   const features: Feature[] = []
   let ringIndex = 0
-  let lastColor = '#00e5ff'
+  const zoom = args.zoom ?? 6
+  const pulseStack = zoom >= PULSE_STACK_MIN_ZOOM
+  const pulseStep = pulseStack ? PULSE_STEP_KM : PULSE_STEP_KM_OVERVIEW
+
+  const pushPulse = (radiusKm: number, index: number) => {
+    features.push({
+      type: 'Feature',
+      geometry: {
+        type: 'LineString',
+        coordinates: ringCoords(args.lon, args.lat, radiusKm),
+      },
+      properties: {
+        kind: 'ring',
+        role: 'pulse',
+        id: args.id,
+        label: args.label,
+        source: args.source,
+        metric: args.metric,
+        band: 'pulse',
+        band_label: 'pulse',
+        color: PULSE_COLOR,
+        people: 0,
+        ring_index: index,
+        radius_km: Number(radiusKm.toFixed(3)),
+      },
+    })
+  }
+
   for (const b of args.bands) {
     const n = ringsForPeople(b.people)
     for (let i = 0; i < n; i++) {
       const radiusKm = RING_BASE_KM + ringIndex * RING_STEP_KM
-      lastColor = b.color
       features.push({
         type: 'Feature',
         geometry: {
@@ -95,6 +134,9 @@ export function buildEqualSpacedRings(args: {
           radius_km: Number(radiusKm.toFixed(3)),
         },
       })
+      // At city zoom, twin the stack so the crest travels through visible rings.
+      // At overview, skip twins — they collapse into an opaque blob.
+      if (pulseStack) pushPulse(radiusKm, ringIndex)
       ringIndex += 1
     }
   }
@@ -104,29 +146,15 @@ export function buildEqualSpacedRings(args: {
       ? RING_BASE_KM + (ringIndex - 1) * RING_STEP_KM
       : RING_BASE_KM
 
+  // Outer wave — at overview, start well past the country-cluster radius
+  let pulseIndex = pulseStack ? ringIndex : 0
+  const overviewClearance = pulseStack
+    ? 0
+    : Math.max(pulseStep, lastStaticRadius * PULSE_OVERVIEW_CLEARANCE_FRAC)
   for (let i = 0; i < PULSE_OUTER_COUNT; i++) {
-    const radiusKm = lastStaticRadius + (i + 1) * PULSE_STEP_KM
-    features.push({
-      type: 'Feature',
-      geometry: {
-        type: 'LineString',
-        coordinates: ringCoords(args.lon, args.lat, radiusKm),
-      },
-      properties: {
-        kind: 'ring',
-        role: 'pulse',
-        id: args.id,
-        label: args.label,
-        source: args.source,
-        metric: args.metric,
-        band: 'pulse',
-        band_label: 'pulse',
-        color: lastColor,
-        people: 0,
-        ring_index: i,
-        radius_km: Number(radiusKm.toFixed(3)),
-      },
-    })
+    const radiusKm = lastStaticRadius + overviewClearance + i * pulseStep
+    pushPulse(radiusKm, pulseIndex)
+    pulseIndex += 1
   }
 
   return features

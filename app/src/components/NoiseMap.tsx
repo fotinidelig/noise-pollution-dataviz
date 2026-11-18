@@ -37,7 +37,14 @@ const RINGS_SOURCE = 'aggl-rings-dyn'
 const RINGS_LAYER = 'aggl-rings'
 /** Outer traveling sound-wave — separate layer so hover hit-testing stays snappy. */
 const RINGS_PULSE_LAYER = 'aggl-rings-pulse'
-const RING_PULSE_BUCKETS = 4
+/** Stops cover large agglomerations (bands × max rings + outer). */
+const RING_PULSE_BUCKETS = 64
+/** Crest repeats every N rings so a city stack shows a clear travelling wave. */
+const RING_PULSE_PERIOD = 8
+/** Soft cyan-gray (less chroma than neon band colours). */
+const PULSE_LINE_COLOR = '#9bb7c2'
+/** Phase advance per ~80ms tick — lower = slower crest. */
+const PULSE_PHASE_STEP = 0.038
 const HIT_LAYER = 'aggl-hit'
 const LABEL_LAYER = 'aggl-labels'
 const COUNTRY_HIT_LAYER = 'aggl-country-hit'
@@ -196,8 +203,9 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
   focusIdRef.current = focusId
 
   /**
-   * Paint-only pulse on the OUTER pulse layer (not static rings).
+   * Paint-only pulse layer (twins of static rings + outer).
    * Throttled ~12fps; never touches hit layers or static ring paint used by hover.
+   * Soft focus dim only — harsh 0.12 mul made the wave invisible in story/hover.
    */
   const paintRingSoundWave = (activeId: string | null = ringFocusIdRef.current) => {
     const map = mapRef.current
@@ -211,10 +219,13 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     const opacityStops: number[] = []
     const blurStops: number[] = []
     for (let i = 0; i < N; i++) {
-      const t = (phase - i / N + 1) % 1
-      const soft = Math.sin(t * Math.PI) ** 2
-      opacityStops.push(i, 0.08 + 0.72 * soft)
-      blurStops.push(i, 0.4 + 2.6 * soft)
+      // Short period so crest travels through a typical city stack
+      let t = i / RING_PULSE_PERIOD - phase
+      t = t - Math.floor(t)
+      const soft = Math.sin(t * Math.PI) ** 3
+      // Tasteful crest: still readable, lower peak than the neon pass
+      opacityStops.push(i, 0.12 + 0.58 * soft)
+      blurStops.push(i, 0.1 + 0.9 * soft)
     }
 
     const ringIdx = [
@@ -223,12 +234,13 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
       0,
     ] as maplibregl.ExpressionSpecification
 
+    // Keep non-focus pulses readable (was 0.12 → invisible)
     const focusMul: maplibregl.ExpressionSpecification | number = dimming
       ? ([
           'case',
           ['==', ['to-string', ['get', 'id']], id],
           1,
-          0.12,
+          0.55,
         ] as maplibregl.ExpressionSpecification)
       : 1
 
@@ -425,7 +437,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     const tick = (now: number) => {
       if (now - last >= 80) {
         last = now
-        pulsePhaseRef.current = (pulsePhaseRef.current + 0.055) % 1
+        pulsePhaseRef.current = (pulsePhaseRef.current + PULSE_PHASE_STEP) % 1
         paintRingSoundWaveRef.current(ringFocusIdRef.current)
       }
       pulseRafRef.current = window.requestAnimationFrame(tick)
@@ -852,6 +864,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
             bands: agg.bands,
             id: agg.id,
             label: agg.country,
+            zoom,
           }),
         )
       }
@@ -870,6 +883,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
             bands,
             id: unit.id,
             label: unit.label,
+            zoom,
           }),
         )
       }
@@ -911,6 +925,9 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     })
     popupRef.current = popup
     mapRef.current = map
+    if (import.meta.env.DEV) {
+      ;(window as unknown as { __noiseMap?: maplibregl.Map }).__noiseMap = map
+    }
 
     map.on('load', () => {
       map.addSource(CITIES_SOURCE, {
@@ -929,6 +946,32 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
       map.addSource(COUNTRIES_SOURCE, {
         type: 'geojson',
         data: { type: 'FeatureCollection', features: [] },
+      })
+
+      // Pulse UNDER static rings so the coloured stack stays on top
+      map.addLayer({
+        id: RINGS_PULSE_LAYER,
+        type: 'line',
+        source: RINGS_SOURCE,
+        filter: ['==', ['get', 'role'], 'pulse'],
+        paint: {
+          'line-color': PULSE_LINE_COLOR,
+          'line-opacity': 0.4,
+          'line-width': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            3,
+            1.6,
+            5,
+            2.1,
+            7,
+            2.6,
+            10,
+            3.2,
+          ],
+          'line-blur': 0.35,
+        },
       })
 
       map.addLayer({
@@ -951,29 +994,6 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
             1.8,
           ],
           'line-blur': 0,
-        },
-      })
-
-      map.addLayer({
-        id: RINGS_PULSE_LAYER,
-        type: 'line',
-        source: RINGS_SOURCE,
-        filter: ['==', ['get', 'role'], 'pulse'],
-        paint: {
-          'line-color': ['get', 'color'],
-          'line-opacity': 0.45,
-          'line-width': [
-            'interpolate',
-            ['linear'],
-            ['zoom'],
-            3,
-            1.1,
-            6,
-            1.7,
-            10,
-            2.4,
-          ],
-          'line-blur': 1.8,
         },
       })
 
