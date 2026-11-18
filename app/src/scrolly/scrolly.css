@@ -62,11 +62,7 @@
   pointer-events: auto;
   width: 100%;
   padding: 1.1rem 1.2rem 1.25rem;
-  background: linear-gradient(
-    135deg,
-    rgba(3, 5, 10, 0.88) 0%,
-    rgba(5, 10, 18, 0.78) 100%
-  );
+  background: rgba(3, 5, 10, 0.55);
   border: 1px solid rgba(120, 160, 220, 0.22);
   backdrop-filter: blur(10px);
   box-shadow: 0 0 28px rgba(0, 0, 0, 0.35);
@@ -180,7 +176,6 @@
 
 .scrolly-step--hero .scrolly-step__card {
   text-align: center;
-  background: rgba(3, 5, 10, 0.55);
   border-color: rgba(0, 184, 204, 0.25);
 }
 
