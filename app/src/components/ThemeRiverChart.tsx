@@ -97,9 +97,9 @@ export function ThemeRiverChart({
 
   const layout = useMemo(() => {
     if (!payload || payload.cities.length < 2) return null
-    const margin = { top: 18, right: 16, bottom: 28, left: 16 }
-    const innerW = size.w - margin.left - margin.right
-    const innerH = size.h - margin.top - margin.bottom
+    const margin = { top: 18, right: 16, bottom: 28, left: 42 }
+    const innerW = Math.max(40, size.w - margin.left - margin.right)
+    const innerH = Math.max(40, size.h - margin.top - margin.bottom)
     const cities = payload.cities
     const ids = cities.map((c) => c.id)
 
@@ -126,6 +126,7 @@ export function ThemeRiverChart({
     const y = scaleLinear()
       .domain([yMin - pad, yMax + pad])
       .range([innerH, 0])
+      .nice()
 
     const area = d3Area<(typeof series)[0][number]>()
       .x((d) => x(cities[d.data.i].id) ?? 0)
@@ -139,6 +140,7 @@ export function ThemeRiverChart({
     }))
 
     const midY = y(0)
+    const yTicks = y.ticks(5)
     const ticks = payload.countryTicks.map((t) => {
       const id0 = cities[t.i0]?.id
       const id1 = cities[t.i1]?.id
@@ -147,7 +149,7 @@ export function ThemeRiverChart({
       return { ...t, x: (x0 + x1) / 2, x0, x1 }
     })
 
-    return { margin, innerW, innerH, x, y, midY, paths, cities, ticks }
+    return { margin, innerW, innerH, x, y, midY, paths, cities, ticks, yTicks }
   }, [payload, size.w, size.h])
 
   if (!payload || source === 'industry') {
@@ -256,6 +258,20 @@ export function ThemeRiverChart({
               style={{ cursor: activeCity ? 'pointer' : undefined }}
             >
               <g transform={`translate(${layout.margin.left},${layout.margin.top})`}>
+                {layout.yTicks.map((t) => (
+                  <g key={t} transform={`translate(0,${layout.y(t)})`}>
+                    <line
+                      className="theme-river__grid"
+                      x1={0}
+                      x2={layout.innerW}
+                      y1={0}
+                      y2={0}
+                    />
+                    <text className="theme-river__y-tick" x={-8} y={4} textAnchor="end">
+                      {t === 0 ? '0' : formatPeople(Math.abs(t))}
+                    </text>
+                  </g>
+                ))}
                 <line
                   className="theme-river__baseline"
                   x1={0}
