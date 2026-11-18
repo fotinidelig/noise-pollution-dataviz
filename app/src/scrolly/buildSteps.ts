@@ -158,8 +158,8 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       title: 'Places where you might hear birds',
       questions: [],
       body: [
-        `A Grand Canyon fall night near ${hi('15 dB')} sits far below a vacuum cleaner; a Berlin park hour near ${hi('49 dB')} is calm for a city, not silent.`,
-        `From canyon night to a ${hiLoud('vacuum (~70 dB)')} is about ${hi('+55 dB')} — roughly ${hi('five to six doublings')} (~${hi('30–60× as loud')}). From Berlin’s park hour to mapped traffic at ${hiLoud('~75 dB')} is about ${hi('+26 dB')} — roughly ${hi('6× as loud')}.`,
+        `A Grand Canyon fall night near ${hi('15 dB')} is quieter than a ${hi('whisper (~25–30 dB)')}; a Berlin park hour near ${hi('49 dB')} is calm for a city, not silent.`,
+        `From Berlin’s park hour to mapped traffic at ${hiLoud('~75 dB')} is about ${hi('+26 dB')} — roughly ${hi('6× as loud')}.`,
         `Distant bird calls sit around ${hi('44–60 dB')}; dawn-chorus ambient often ${hi('~45–50 dB(A)')} (dense urban choruses higher). Denali (~${hi('18 dB')}) and Haleakalā (~${hi('23 dB')}) leave headroom to hear birds; Stockholm parks (~${hi('55 dB')}) already meet conversation territory — still nowhere near a ${hiLoud('blender (~80–90 dB)')}.`,
       ],
       map: {

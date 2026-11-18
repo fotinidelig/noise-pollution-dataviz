@@ -56,8 +56,9 @@ Among eight Seoul road sites, **Bukahyeon-dong** has the **highest mean** (~**73
 
 ### Calm — Places where you might hear birds
 
-Grand Canyon night ~**15 dB**; Berlin park ~**49 dB**.  
-Canyon → vacuum **+~55 dB ≈ five–six doublings (~30–60×)**; Berlin park → traffic **~75**: **+~26 dB ≈ ~6×**. Distant birds **44–60 dB**; dawn ambient **~45–50**.
+A Grand Canyon fall night near **15 dB** is quieter than a **whisper (~25–30 dB)**; a Berlin park hour near **49 dB** is calm for a city, not silent.  
+From Berlin’s park hour to mapped traffic at **~75 dB** is about **+26 dB** — roughly **6× as loud**.  
+Distant bird calls **44–60 dB**; dawn ambient **~45–50**; Denali / Haleakalā leave headroom to hear birds; Stockholm parks ~**55 dB** — still nowhere near a blender.
 
 ### Explore
 
