@@ -125,8 +125,7 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       title: `Hong Kong: ${hk.pct_valid_gt70.toFixed(0)}% of mapped area above 70 dB`,
       questions: [],
       body: [
-        `On the ${hk.year} Hong Kong traffic-noise map, about ${hi(`${hk.pct_valid_gt70.toFixed(0)}%`)} of the mapped territory sits above ${hiLoud('70 dB')} — roughly ${hi(`${hk.area_km2_gt70.toFixed(0)} km²`)} — past a vacuum cleaner, painted across the city rather than at a single mic.`,
-        `The loudest places reach about ${hiDb(hk.max_db)}: from ${hiLoud('70 dB')} that is about ${hi('+27 dB')}, or roughly ${hi('6–8× as loud')} (about two-and-a-half to three doublings) — ${hiLoud('past a blender')}.`,
+        `On the ${hk.year} Hong Kong ${hi('citywide traffic-noise map')} (modelled area levels, not one microphone), about ${hi(`${hk.pct_valid_gt70.toFixed(0)}%`)} of the mapped territory sits above ${hiLoud('70 dB')} — roughly ${hi(`${hk.area_km2_gt70.toFixed(0)} km²`)} — past a ${hiLoud('vacuum cleaner')}.`,
       ],
       map: {
         center: [hk.lon, hk.lat],

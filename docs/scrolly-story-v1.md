@@ -48,8 +48,7 @@ In **2026**, night noise at **fixed outdoor noise monitoring station 6** sits ar
 
 ### Hong Kong (2020)
 
-~**23%** of mapped territory above **70 dB** (~**97 km²**). Loudest ~**97 dB**.  
-From **70 → 97**: **+~27 dB ≈ ~6–8× as loud** (~2½–3 doublings); past a blender.
+On the **2020** Hong Kong **citywide traffic-noise map** (modelled area levels, not one microphone), about **23%** of the mapped territory sits above **70 dB** — roughly **97 km²** — past a **vacuum cleaner**.
 
 ### Seoul (2024)
 
