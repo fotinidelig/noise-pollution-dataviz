@@ -10,12 +10,14 @@ export const RING_BASE_KM = 1.2
 export const RING_VERTICES = 48
 /** Extra expanding pulse rings beyond the last static ring. */
 export const PULSE_OUTER_COUNT = 6
-/** Outer pulse step when zoomed in (km). */
-export const PULSE_STEP_KM = 1.6
-/** Outer pulse step at country overview — must clearly exceed the country blob. */
-export const PULSE_STEP_KM_OVERVIEW = 16
-/** Extra clearance past last static radius before the first overview pulse ring. */
-export const PULSE_OVERVIEW_CLEARANCE_FRAC = 0.55
+/**
+ * Outer pulse extent is a fraction of each agglomeration’s max static radius
+ * (smaller clusters → smaller waves). City zoom stays tight; overview still clears the blob.
+ */
+export const PULSE_CITY_CLEARANCE_FRAC = 0.08
+export const PULSE_CITY_EXTENT_FRAC = 0.38
+export const PULSE_OVERVIEW_CLEARANCE_FRAC = 0.5
+export const PULSE_OVERVIEW_EXTENT_FRAC = 2.2
 /** Below this zoom, pulse only on far outer rings (stack twins collapse to a blob). */
 export const PULSE_STACK_MIN_ZOOM = 5.4
 
@@ -83,7 +85,6 @@ export function buildEqualSpacedRings(args: {
   let ringIndex = 0
   const zoom = args.zoom ?? 6
   const pulseStack = zoom >= PULSE_STACK_MIN_ZOOM
-  const pulseStep = pulseStack ? PULSE_STEP_KM : PULSE_STEP_KM_OVERVIEW
 
   const pushPulse = (radiusKm: number, index: number) => {
     features.push({
@@ -146,13 +147,22 @@ export function buildEqualSpacedRings(args: {
       ? RING_BASE_KM + (ringIndex - 1) * RING_STEP_KM
       : RING_BASE_KM
 
-  // Outer wave — at overview, start well past the country-cluster radius
+  // Outer wave — proportional to this cluster’s max static radius
   let pulseIndex = pulseStack ? ringIndex : 0
-  const overviewClearance = pulseStack
-    ? 0
-    : Math.max(pulseStep, lastStaticRadius * PULSE_OVERVIEW_CLEARANCE_FRAC)
+  const clearanceFrac = pulseStack
+    ? PULSE_CITY_CLEARANCE_FRAC
+    : PULSE_OVERVIEW_CLEARANCE_FRAC
+  const extentFrac = pulseStack
+    ? PULSE_CITY_EXTENT_FRAC
+    : PULSE_OVERVIEW_EXTENT_FRAC
+  const clearance = lastStaticRadius * clearanceFrac
+  const span = Math.max(clearance, lastStaticRadius * extentFrac)
+  const step =
+    PULSE_OUTER_COUNT > 1
+      ? (span - clearance) / (PULSE_OUTER_COUNT - 1)
+      : span
   for (let i = 0; i < PULSE_OUTER_COUNT; i++) {
-    const radiusKm = lastStaticRadius + overviewClearance + i * pulseStep
+    const radiusKm = lastStaticRadius + clearance + i * step
     pushPulse(radiusKm, pulseIndex)
     pulseIndex += 1
   }
