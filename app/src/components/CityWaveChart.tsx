@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { scaleLinear, scalePoint } from 'd3-scale'
-import { curveCatmullRom, line as d3Line } from 'd3-shape'
+import { scaleLinear } from 'd3-scale'
+import { curveMonotoneY, line as d3Line } from 'd3-shape'
 import {
   LDEN_BANDS,
   LNIGHT_BANDS,
@@ -78,7 +78,12 @@ function lerpColor(a: string, b: string, t: number): string {
   return `rgb(${mix[0]}, ${mix[1]}, ${mix[2]})`
 }
 
-function sampleCatmullRom(
+/**
+ * Sample a people×dB path. Use monotone-Y so dB stays ordered
+ * (low → bottom, high → top) — Catmull-Rom overshoots into a U when
+ * people peak in mid bands.
+ */
+function sampleWavePath(
   anchors: { x: number; y: number; color: string }[],
   segmentsPerSpan = 18,
 ): Pt[] {
@@ -86,7 +91,7 @@ function sampleCatmullRom(
   const line = d3Line<{ x: number; y: number }>()
     .x((d) => d.x)
     .y((d) => d.y)
-    .curve(curveCatmullRom.alpha(0.9))
+    .curve(curveMonotoneY)
   const d = line(anchors)
   if (!d || typeof document === 'undefined') {
     const out: Pt[] = []
@@ -153,11 +158,30 @@ export function CityWaveChart({
   const active = useMemo(() => {
     const series = hoverSeries ?? pinnedSeries
     const id = hoveredId ?? pinnedId
-    if (series && series.points.length) {
+    const order = new Map<string, number>(bandKeys.map((b, i) => [b, i]))
+
+    const normalize = (
+      raw: { band: string; label: string; color: string; people: number }[],
+      id0: string,
+      name: string,
+      total: number,
+    ) => {
+      // Keep ascending dB order; drop zero / missing loud bands
+      const points = raw
+        .filter((p) => p.people > 0)
+        .sort((a, b) => (order.get(a.band) ?? 0) - (order.get(b.band) ?? 0))
+      if (!points.length) return null
       return {
-        ...series,
-        localMax: Math.max(1, ...series.points.map((p) => p.people)),
+        id: id0,
+        name,
+        total,
+        points,
+        localMax: Math.max(1, ...points.map((p) => p.people)),
       }
+    }
+
+    if (series && series.points.length) {
+      return normalize(series.points, series.id, series.name, series.total)
     }
     if (!id) return null
     const city = cities.find((c) => c.id === id)
@@ -174,13 +198,7 @@ export function CityWaveChart({
         people: hit?.people ?? 0,
       }
     })
-    return {
-      id: city.id,
-      name: city.agglomeration,
-      total: tip.total,
-      points,
-      localMax: Math.max(1, ...points.map((p) => p.people)),
-    }
+    return normalize(points, city.id, city.agglomeration, tip.total)
   }, [
     hoverSeries,
     pinnedSeries,
@@ -196,27 +214,25 @@ export function CityWaveChart({
   const innerW = Math.max(40, size.w - pad.left - pad.right)
   const innerH = Math.max(40, size.h - pad.top - pad.bottom)
 
-  // Low dB at bottom, high dB at top
-  const y = scalePoint<string>()
-    .domain(bandKeys)
-    .range([innerH, 0])
-    .padding(0.35)
-
-  const x = scaleLinear()
-    .domain([0, active?.localMax ?? 1])
-    .nice()
-    .range([0, innerW])
-
   const anchors = useMemo(() => {
-    if (!active) return []
-    return active.points.map((p) => ({
+    if (!active?.points.length) return []
+    const n = active.points.length
+    // Index scale: lowest present dB → bottom, highest → top (no zero bands)
+    const y = scaleLinear()
+      .domain([0, Math.max(1, n - 1)])
+      .range([innerH, 0])
+    const x = scaleLinear()
+      .domain([0, active.localMax])
+      .nice()
+      .range([0, innerW])
+    return active.points.map((p, i) => ({
       x: x(p.people),
-      y: y(p.band) ?? 0,
+      y: y(i),
       color: p.color,
     }))
-  }, [active, x, y])
+  }, [active, innerW, innerH])
 
-  const samples = useMemo(() => sampleCatmullRom(anchors, 22), [anchors])
+  const samples = useMemo(() => sampleWavePath(anchors, 22), [anchors])
 
   if (!active || !sidecar) return null
 
