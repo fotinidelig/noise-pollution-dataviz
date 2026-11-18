@@ -86,13 +86,16 @@ function meanDb(metric: NoiseMetric, bands: { band: string; people: number }[]) 
 
 function buildTooltipHtml(
   title: string,
-  subtitle: string,
-  source: NoiseSource,
+  cityCount: number,
   metric: NoiseMetric,
   bands: { band: string; label: string; color: string; people: number }[],
 ) {
   const total = bands.reduce((s, b) => s + b.people, 0)
   const mean = meanDb(metric, bands)
+  const citiesLabel = `${cityCount} ${cityCount === 1 ? 'city' : 'cities'}`
+  const subParts: string[] = []
+  if (mean != null) subParts.push(`<span class="tip-mean">~${mean} dB</span>`)
+  subParts.push(citiesLabel)
   const rows = bands
     .filter((b) => b.people > 0)
     .map(
@@ -104,8 +107,7 @@ function buildTooltipHtml(
   return `
     <div class="tip">
       <div class="tip-title">${title}</div>
-      <div class="tip-sub">${subtitle}</div>
-      <div class="tip-meta">${source} · ${metric}${mean != null ? ` · ~${mean} dB mean` : ''}</div>
+      <div class="tip-sub">${subParts.join(' · ')}</div>
       <div class="tip-total">${formatPeople(total)} people in mapped bands</div>
       <div class="tip-bands">${rows || '<div class="tip-empty">No exposure reported</div>'}</div>
     </div>
@@ -1342,8 +1344,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
           .setHTML(
             buildTooltipHtml(
               series.name,
-              `${props.cityCount ?? '?'} agglomerations · country total`,
-              src,
+              Number(props.cityCount ?? 0) || 0,
               met,
               series.points.map((b) => ({ ...b, rings: 0 })),
             ),
@@ -1388,8 +1389,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
           .setHTML(
             buildTooltipHtml(
               series.name,
-              'aggregated · click to zoom in',
-              src,
+              leaves.length,
               met,
               bands.map((b) => ({ ...b, rings: 0 })),
             ),
@@ -1416,8 +1416,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
         .setHTML(
           buildTooltipHtml(
             String(props.agglomeration ?? ''),
-            `${props.country ?? ''} · ${formatPeople(Number(props.inhabitants ?? 0))} inhab.`,
-            src,
+            1,
             met,
             bands.map((b) => ({ ...b, rings: 0 })),
           ),

@@ -60,12 +60,8 @@ type Pt = { x: number; y: number; color: string; t: number }
 const LDEN_KEYS = ['55-59', '60-64', '65-69', '70-74', '>75'] as const
 const LNIGHT_KEYS = ['50-54', '55-59', '60-64', '65-69', '>70'] as const
 
-function formatPeople(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
-  if (n >= 10_000) return `${Math.round(n / 1000)}k`
-  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`
-  return String(Math.round(n))
-}
+/** Uniform stroke for every segment — abstract sidecar line. */
+const STROKE_WIDTH = 2.4
 
 function lerpColor(a: string, b: string, t: number): string {
   const parse = (hex: string) => {
@@ -133,14 +129,7 @@ export function CityWaveChart({
   sidecar = null,
 }: Props) {
   const plotRef = useRef<HTMLDivElement | null>(null)
-  const [size, setSize] = useState({ w: 200, h: 200 })
-  const [bandTip, setBandTip] = useState<{
-    label: string
-    people: number
-    color: string
-    x: number
-    y: number
-  } | null>(null)
+  const [size, setSize] = useState({ w: 160, h: 200 })
 
   useEffect(() => {
     const el = plotRef.current
@@ -149,8 +138,8 @@ export function CityWaveChart({
       const cr = entries[0]?.contentRect
       if (!cr) return
       setSize({
-        w: Math.max(120, Math.floor(cr.width)),
-        h: Math.max(100, Math.floor(cr.height)),
+        w: Math.max(80, Math.floor(cr.width)),
+        h: Math.max(80, Math.floor(cr.height)),
       })
     })
     ro.observe(el)
@@ -203,18 +192,14 @@ export function CityWaveChart({
     bandMeta,
   ])
 
-  useEffect(() => {
-    setBandTip(null)
-  }, [active?.id, source, metric])
-
-  const pad = { top: 8, right: 28, bottom: 22, left: 40 }
+  const pad = { top: 10, right: 14, bottom: 10, left: 10 }
   const innerW = Math.max(40, size.w - pad.left - pad.right)
-  const innerH = Math.max(80, size.h - pad.top - pad.bottom)
+  const innerH = Math.max(40, size.h - pad.top - pad.bottom)
 
   const y = scalePoint<string>()
     .domain(bandKeys)
     .range([0, innerH])
-    .padding(0.4)
+    .padding(0.35)
 
   const x = scaleLinear()
     .domain([0, active?.localMax ?? 1])
@@ -227,113 +212,34 @@ export function CityWaveChart({
       x: x(p.people),
       y: y(p.band) ?? 0,
       color: p.color,
-      people: p.people,
-      band: p.band,
-      label: p.label,
     }))
   }, [active, x, y])
 
   const samples = useMemo(() => sampleCatmullRom(anchors, 22), [anchors])
 
-  const glowPath = useMemo(() => {
-    if (anchors.length < 2) return null
-    return d3Line<(typeof anchors)[number]>()
-      .x((d) => d.x)
-      .y((d) => d.y)
-      .curve(curveCatmullRom.alpha(0.9))(anchors)
-  }, [anchors])
-
-  const maxAnchor = useMemo(() => {
-    if (!anchors.length) return null
-    return anchors.reduce((best, p) => (p.people > best.people ? p : best), anchors[0])
-  }, [anchors])
-
-  const xTicks = x.ticks(3).filter((t) => t < (active?.localMax ?? 0) * 0.92)
-
   if (!active || !sidecar) return null
 
   return (
     <div
-      className={`wave-panel wave-panel--sidecar has-series${pinned ? ' is-pinned' : ''}`}
-      aria-label="People by dB band"
+      className={`wave-panel wave-panel--sidecar${pinned ? ' is-pinned' : ''}`}
+      aria-hidden="true"
       style={{
         left: sidecar.left,
         top: sidecar.top,
         height: sidecar.height,
       }}
     >
-      <div className="wave-panel__head">
-        <span className="wave-panel__meta">
-          people × dB
-          {pinned ? <span className="wave-pin-badge">pinned</span> : null}
-        </span>
-      </div>
       <div className="wave-panel__plot" ref={plotRef}>
         <svg
           className="wave-svg"
           width={size.w}
           height={size.h}
           role="img"
-          aria-label="Sound-wave profile for selected agglomeration"
+          aria-label="People by dB band"
         >
           <g transform={`translate(${pad.left},${pad.top})`}>
-            <line className="wave-axis" x1={0} x2={0} y1={0} y2={innerH} />
-            <line
-              className="wave-axis"
-              x1={0}
-              x2={innerW}
-              y1={innerH}
-              y2={innerH}
-            />
-
-            {bandKeys.map((b, i) => {
-              const py = y(b)
-              if (py == null) return null
-              return (
-                <g key={b}>
-                  <line
-                    className="wave-band-grid"
-                    x1={0}
-                    x2={innerW}
-                    y1={py}
-                    y2={py}
-                  />
-                  <text
-                    className="wave-band-label"
-                    x={-8}
-                    y={py}
-                    textAnchor="end"
-                    dominantBaseline="middle"
-                  >
-                    {bandMeta[i]?.label.replace(' dB', '') ?? b}
-                  </text>
-                </g>
-              )
-            })}
-
-            {xTicks.map((t) => (
-              <g key={t}>
-                <line
-                  className="wave-band-grid"
-                  x1={x(t)}
-                  x2={x(t)}
-                  y1={0}
-                  y2={innerH}
-                />
-                <text
-                  className="wave-x-label"
-                  x={x(t)}
-                  y={innerH + 16}
-                  textAnchor="middle"
-                >
-                  {formatPeople(t)}
-                </text>
-              </g>
-            ))}
-
             {samples.length > 1 ? (
               <g className="wave-active">
-                {glowPath ? <path className="wave-glow" d={glowPath} /> : null}
                 {samples.slice(0, -1).map((a, i) => {
                   const b = samples[i + 1]
                   return (
@@ -345,85 +251,14 @@ export function CityWaveChart({
                       x2={b.x}
                       y2={b.y}
                       stroke={a.color}
+                      strokeWidth={STROKE_WIDTH}
                     />
                   )
                 })}
-
-                {maxAnchor ? (
-                  <g className="wave-max">
-                    <line
-                      className="wave-max-guide"
-                      x1={maxAnchor.x}
-                      y1={maxAnchor.y}
-                      x2={innerW}
-                      y2={maxAnchor.y}
-                    />
-                    <text
-                      className="wave-max-label"
-                      x={innerW + 4}
-                      y={maxAnchor.y}
-                      dominantBaseline="middle"
-                    >
-                      {formatPeople(maxAnchor.people)}
-                    </text>
-                  </g>
-                ) : null}
-
-                {anchors.map((p) => (
-                  <g key={p.band}>
-                    <circle
-                      className="wave-dot-hit"
-                      cx={p.x}
-                      cy={p.y}
-                      r={10}
-                      onMouseEnter={() =>
-                        setBandTip({
-                          label: p.label,
-                          people: p.people,
-                          color: p.color,
-                          x: pad.left + p.x,
-                          y: pad.top + p.y,
-                        })
-                      }
-                      onMouseLeave={() => setBandTip(null)}
-                    />
-                    <circle
-                      className="wave-dot"
-                      cx={p.x}
-                      cy={p.y}
-                      r={3.4}
-                      fill={p.color}
-                      pointerEvents="none"
-                    />
-                  </g>
-                ))}
               </g>
             ) : null}
           </g>
         </svg>
-
-        {bandTip ? (
-          <div
-            className="wave-band-tip"
-            style={{
-              left: Math.min(bandTip.x + 12, size.w - 120),
-              top: Math.max(8, bandTip.y - 28),
-            }}
-          >
-            <span
-              className="wave-band-tip__swatch"
-              style={{ background: bandTip.color }}
-            />
-            <span>{bandTip.label}</span>
-            <strong>{formatPeople(bandTip.people)}</strong>
-          </div>
-        ) : null}
-      </div>
-      <div className="wave-hover-label">
-        {active.name}
-        <span className="wave-hover-total">
-          {formatPeople(active.total)} people
-        </span>
       </div>
     </div>
   )

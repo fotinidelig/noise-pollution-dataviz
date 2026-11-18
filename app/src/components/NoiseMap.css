@@ -171,7 +171,6 @@
 }
 
 .tip-sub,
-.tip-meta,
 .tip-total,
 .tip-note,
 .tip-empty {
@@ -179,8 +178,12 @@
   font-size: 1rem;
 }
 
-.tip-meta {
-  margin-top: 0.2rem;
+.tip-sub {
+  margin-top: 0.15rem;
+}
+
+.tip-mean {
+  color: #00e5ff;
 }
 
 .tip-total {

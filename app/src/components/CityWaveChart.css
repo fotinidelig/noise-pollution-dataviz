@@ -5,71 +5,22 @@
   pointer-events: none;
 }
 
-/* Sidecar: same height as map tooltip, attached to its right edge */
+/* Abstract line docked to the tooltip — no chrome */
 .wave-panel--sidecar {
-  display: flex;
-  flex-direction: column;
-  width: min(200px, 28vw);
+  display: block;
+  width: min(160px, 22vw);
   bottom: auto;
   right: auto;
-  background: rgba(6, 10, 18, 0.94);
-  border: 1px solid rgba(0, 229, 255, 0.35);
-  box-shadow: 0 0 20px rgba(0, 229, 255, 0.12);
-  backdrop-filter: blur(8px);
-  overflow: hidden;
-}
-
-.wave-panel.has-series {
-  pointer-events: auto;
-}
-
-.wave-panel.is-pinned {
-  border-color: rgba(0, 229, 255, 0.55);
-  box-shadow: 0 0 18px rgba(0, 229, 255, 0.16);
-}
-
-.wave-panel__head {
-  display: flex;
-  justify-content: flex-end;
-  align-items: baseline;
-  gap: 0.5rem;
-  padding: 0.35rem 0.5rem 0.1rem;
-  color: #9db0cc;
-  font-size: 0.9rem;
-  letter-spacing: 0.06em;
-  flex: 0 0 auto;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  overflow: visible;
   pointer-events: none;
 }
 
-.wave-panel__meta {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  color: #c8d6ee;
-  font-size: 0.95rem;
-  text-transform: none;
-  letter-spacing: 0.02em;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  text-align: right;
-}
-
-.wave-pin-badge {
-  flex: 0 0 auto;
-  padding: 0.05rem 0.3rem;
-  border: 1px solid rgba(0, 229, 255, 0.4);
-  color: #00e5ff;
-  font-size: 0.75rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
 .wave-panel__plot {
-  flex: 1 1 auto;
-  min-height: 0;
   width: 100%;
+  height: 100%;
   position: relative;
 }
 
@@ -77,24 +28,7 @@
   display: block;
   width: 100%;
   height: 100%;
-}
-
-.wave-axis {
-  stroke: rgba(160, 185, 220, 0.35);
-  stroke-width: 1;
-}
-
-.wave-band-grid {
-  stroke: rgba(140, 170, 210, 0.1);
-  stroke-width: 1;
-  stroke-dasharray: 2 4;
-}
-
-.wave-band-label,
-.wave-x-label {
-  fill: #7a8eaa;
-  font-size: 11px;
-  font-family: "VT323", monospace;
+  overflow: visible;
 }
 
 .wave-active {
@@ -110,99 +44,14 @@
   }
 }
 
-.wave-glow {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.18);
-  stroke-width: 6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  filter: blur(1.5px);
-}
-
 .wave-seg {
   fill: none;
-  stroke-width: 2.4;
   stroke-linecap: round;
   stroke-linejoin: round;
-}
-
-.wave-dot {
-  stroke: rgba(3, 5, 10, 0.85);
-  stroke-width: 1;
-  filter: drop-shadow(0 0 5px rgba(0, 229, 255, 0.35));
-}
-
-.wave-dot-hit {
-  fill: transparent;
-  cursor: help;
-}
-
-.wave-max-guide {
-  stroke: rgba(232, 240, 255, 0.35);
-  stroke-width: 1;
-  stroke-dasharray: 3 3;
-}
-
-.wave-max-label {
-  fill: #e8f0ff;
-  font-size: 12px;
-  font-family: "VT323", monospace;
-  paint-order: stroke;
-  stroke: rgba(3, 5, 10, 0.85);
-  stroke-width: 3px;
-}
-
-.wave-band-tip {
-  position: absolute;
-  z-index: 5;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.2rem 0.4rem;
-  background: rgba(6, 10, 18, 0.94);
-  border: 1px solid rgba(0, 229, 255, 0.35);
-  color: #e8f0ff;
-  font-size: 0.95rem;
-  pointer-events: none;
-  white-space: nowrap;
-}
-
-.wave-band-tip__swatch {
-  width: 0.55rem;
-  height: 0.55rem;
-  border-radius: 999px;
-  box-shadow: 0 0 6px currentColor;
-}
-
-.wave-band-tip strong {
-  color: #00e5ff;
-  font-weight: 400;
-}
-
-.wave-hover-label {
-  position: absolute;
-  left: 0.4rem;
-  right: 0.4rem;
-  bottom: 0.3rem;
-  display: flex;
-  justify-content: space-between;
-  gap: 0.4rem;
-  padding: 0.15rem 0.3rem;
-  color: #e8f0ff;
-  font-size: 0.95rem;
-  background: rgba(5, 8, 16, 0.75);
-  border: 1px solid rgba(0, 229, 255, 0.25);
-  pointer-events: none;
-  white-space: nowrap;
-  overflow: hidden;
-}
-
-.wave-hover-total {
-  color: #00e5ff;
 }
 
 @media (max-width: 720px) {
   .wave-panel--sidecar {
-    width: min(150px, 40vw);
+    width: min(120px, 32vw);
   }
 }
