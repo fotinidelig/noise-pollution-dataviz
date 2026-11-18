@@ -16,6 +16,8 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
 
   const whoAbove = formatPeople(eu.people_exposed_lden_end_bands)
   const ha = formatPeople(eu.people_highly_annoyed)
+  const dePeople = formatPeople(de.high_band_people_germany)
+  const berlinPeople = formatPeople(de.high_band_people_berlin)
 
   return [
     {
@@ -39,9 +41,7 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       title: 'Above WHO guidance — and highly annoyed',
       questions: [],
       body: [
-        `Start with the continent. About ${hi(whoAbove)} people in European cities live in official noise bands that already sit above ${hi('WHO road-traffic guidance')} — the maps only begin counting once levels are past those guidelines.`,
-        `From the same maps, roughly ${hi(ha)} people are ${hi('highly annoyed')} by road, rail, or aircraft noise. That is a health burden, not just a count of loud places.`,
-        'Next we zoom into Germany’s top high-dB band — and how much of it sits in one city.',
+        `About ${hi(whoAbove)} people in European cities live in official noise bands that already sit above ${hi('WHO road-traffic guidance')}. From the same maps, roughly ${hi(ha)} people are ${hi('highly annoyed')} by road, rail, or aircraft noise.`,
       ],
       map: {
         center: [10, 50],
@@ -55,12 +55,11 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       id: 'germany',
       railLabel: 'Germany',
       year: de.year_label,
-      title: `${formatPeople(de.high_band_people_germany)} people on high dBs — ${de.berlin_share_of_germany_pct}% in Berlin`,
+      title: `${dePeople} people on high dBs — ${de.berlin_share_of_germany_pct}% in Berlin`,
       questions: [],
       body: [
-        `Leave the WHO count for a moment and look only at the top high-dB band (above ${hi('75 dB')}, day–evening–night long-term). In German agglomerations that is about ${hi(formatPeople(de.high_band_people_germany))} people — Berlin alone accounts for ${hi(formatPeople(de.high_band_people_berlin))}, or ${hi(`${de.berlin_share_of_germany_pct}%`)} of Germany’s high-band total.`,
-        `${hi('Seventy-five dB')} sits between a ${hi('vacuum cleaner (~70 dB)')} and a ${hi('blender (~80–90 dB)')}. Louder places lean toward the blender.`,
-        'Those Europe-wide maps are yearly averages. To hear what a single night can feel like, we drop into measured road sites — first Paris.',
+        `In German cities, about ${hi(dePeople)} people live with long-term day–evening–night averages above ${hi('75 dB')}. Of them, about ${hi(berlinPeople)} — ${hi(`${de.berlin_share_of_germany_pct}%`)} — are in Berlin.`,
+        `${hi('75 dB')} sits between a ${hi('vacuum cleaner (~70 dB)')} and a ${hi('blender (~80–90 dB)')}. Louder places lean toward the blender.`,
       ],
       map: {
         center: [de.lon, de.lat],
@@ -79,7 +78,6 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       body: [
         `In ${paris.year}, night noise at the loudest Paris road site in this set — ${hi(paris.loudest_site)} — reaches about ${hi(`${paris.max_db.toFixed(1)} dB`)}.`,
         `For scale: ${hi(vacuumBlenderCompare(paris.max_db))}.`,
-        'Paris gives one night snapshot on a ring road. Madrid’s network shows how a typical night and a peak night can diverge at the same station.',
       ],
       map: {
         center: [paris.lon, paris.lat],
@@ -93,12 +91,11 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       id: 'madrid',
       railLabel: 'Madrid',
       year: madrid.year,
-      title: `Madrid night: station ${madrid.loudest_station_id} peaks near ${madrid.max_db_peak.toFixed(0)} dB`,
+      title: `Madrid night: outdoor station ${madrid.loudest_station_id} peaks near ${madrid.max_db_peak.toFixed(0)} dB`,
       questions: [],
       body: [
-        `In ${madrid.year}, night noise at monitoring station ${hi(String(madrid.loudest_station_id))} sits around ${hi(`${madrid.max_db_median.toFixed(0)} dB`)} on a typical night, with peaks near ${hi(`${madrid.max_db_peak.toFixed(0)} dB`)}.`,
+        `In ${madrid.year}, night noise at ${hi(`fixed outdoor noise monitoring station ${madrid.loudest_station_id}`)} sits around ${hi(`${madrid.max_db_median.toFixed(0)} dB`)} on a typical night, with peaks near ${hi(`${madrid.max_db_peak.toFixed(0)} dB`)}.`,
         `Typical: ${hi(vacuumBlenderCompare(madrid.max_db_median))}. Peak: ${hi(vacuumBlenderCompare(madrid.max_db_peak))}.`,
-        'Point monitors tell one address. Hong Kong instead maps peak traffic noise across the territory — how much ground sits above vacuum-cleaner levels?',
       ],
       map: {
         center: [madrid.lon, madrid.lat],
@@ -115,9 +112,8 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       title: `Hong Kong: ${hk.pct_valid_gt70.toFixed(0)}% of mapped area above 70 dB`,
       questions: [],
       body: [
-        `On the ${hk.year} Hong Kong traffic-noise map, about ${hi(`${hk.pct_valid_gt70.toFixed(1)}%`)} of valid cells exceed ${hi('70 dB')} (~${hi(`${hk.area_km2_gt70.toFixed(0)} km²`)}) — peak traffic noise past a vacuum cleaner, painted across the city rather than at a single mic.`,
-        `The loudest cells reach ~${hi(`${hk.max_db.toFixed(0)} dB`)} — ${hi(vacuumBlenderCompare(hk.max_db))}.`,
-        'From a continuous surface we go back to a handful of road sites — this time in Seoul — with bubble size showing each place’s mean level.',
+        `On the ${hk.year} Hong Kong traffic-noise map, about ${hi(`${hk.pct_valid_gt70.toFixed(0)}%`)} of the mapped territory sits above ${hi('70 dB')} — roughly ${hi(`${hk.area_km2_gt70.toFixed(0)} km²`)} — peak traffic noise past a vacuum cleaner, painted across the city rather than at a single mic.`,
+        `The loudest places on the map reach about ${hi(`${hk.max_db.toFixed(0)} dB`)} — ${hi(vacuumBlenderCompare(hk.max_db))}.`,
       ],
       map: {
         center: [hk.lon, hk.lat],
@@ -131,12 +127,11 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       id: 'seoul',
       railLabel: 'Seoul',
       year: seoul.year,
-      title: `Seoul road sites: ${seoul.loudest_site} leads`,
+      title: `Seoul: highest mean at ${seoul.loudest_site}`,
       questions: [],
       body: [
-        `In ${seoul.year}, ${hi(seoul.loudest_site)} leads this Seoul road set (mean ~${hi(`${seoul.max_db_median.toFixed(0)} dB`)}). The highest single reading is about ${hi(`${seoul.max_db_peak.toFixed(0)} dB`)}${seoul.peak_site ? ` at ${hi(seoul.peak_site)}` : ''} — daily road noise at these places.`,
-        `Mean at the lead site: ${hi(vacuumBlenderCompare(seoul.max_db_median))}. Peak reading: ${hi(vacuumBlenderCompare(seoul.max_db_peak))}. Bubbles use Latin names; positions are approximate neighborhood geocodes.`,
-        'That closes the path from Europe’s burden maps to city measurements. Dismiss any card with ×, or open explore, to pan the map freely.',
+        `Among eight Seoul road sites in ${seoul.year}, ${hi(seoul.loudest_site)} has the ${hi('highest mean')} — about ${hi(`${seoul.max_db_median.toFixed(0)} dB`)}. The ${hi('highest single reading')} is about ${hi(`${seoul.max_db_peak.toFixed(0)} dB`)}${seoul.peak_site ? ` at ${hi(seoul.peak_site)}` : ''}.`,
+        `Mean at ${seoul.loudest_site}: ${hi(vacuumBlenderCompare(seoul.max_db_median))}. Peak reading: ${hi(vacuumBlenderCompare(seoul.max_db_peak))}. Bubble size shows each site’s mean; positions are approximate.`,
       ],
       map: {
         center: [seoul.lon, seoul.lat],
