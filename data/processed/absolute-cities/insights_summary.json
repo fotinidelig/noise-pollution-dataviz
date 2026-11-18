@@ -1,0 +1,77 @@
+{
+  "madrid": {
+    "focus_ids": [
+      6,
+      28,
+      24
+    ],
+    "loudest": 6,
+    "distinctive": 28,
+    "calmest": 24,
+    "loudest_median": 66.4,
+    "distinctive_median": 59.9,
+    "distinctive_spread": 24.099999999999994,
+    "calmest_median": 45.4,
+    "city_first": 63.7,
+    "year_first": 1998,
+    "city_last": 55.7,
+    "year_last": 2026,
+    "n_stations": 36
+  },
+  "paris": {
+    "latest_year": 2025,
+    "n_sites": 17,
+    "loudest": {
+      "site": "Périphérique Vincennes",
+      "db": 77.5
+    },
+    "calmest": {
+      "site": "13 rue Frémicourt (enrob-clas)",
+      "db": 62.7
+    },
+    "median_ln": 66.5,
+    "focus_sites": [
+      "Périphérique Vincennes",
+      "Périphérique Auteuil",
+      "13 rue Frémicourt (enrob-clas)"
+    ]
+  },
+  "korea_seoul": {
+    "n_sites": 8,
+    "loudest": {
+      "측정지점": "북아현동",
+      "법적": "나",
+      "leq_median": 73.38
+    },
+    "calmest": {
+      "측정지점": "성북초교",
+      "법적": "나",
+      "leq_median": 64.62
+    },
+    "median_of_medians": 71.2125,
+    "zone_counts": {
+      "나": 5,
+      "가": 3
+    },
+    "year": 2024
+  },
+  "hong_kong": {
+    "shape_full": [
+      3744,
+      4855
+    ],
+    "shape_ds": [
+      468,
+      607
+    ],
+    "step": 8,
+    "n_valid": 65890,
+    "p50": 59.5991236525,
+    "p90": 76.80056498446001,
+    "min": 30.0,
+    "max": 96.1128570747,
+    "pct_gt70": 22.923053574138716,
+    "pct_gt75": 12.950371831840949,
+    "pct_gt80": 5.82485961450903
+  }
+}

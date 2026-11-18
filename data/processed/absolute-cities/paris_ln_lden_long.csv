@@ -1,0 +1,315 @@
+year,site,metric,db
+2015,Périphérique Auteuil,Lden,87.1
+2024,Périphérique Auteuil,Lden,83.5
+2022,Périphérique Auteuil,Lden,83.3
+2025,Périphérique Auteuil,Lden,82.2
+2016,Périphérique Auteuil,Lden,87.2
+2021,Périphérique Auteuil,Lden,83.5
+2014,Périphérique Auteuil,Lden,87.0
+2017,Périphérique Auteuil,Lden,87.3
+2023,Périphérique Auteuil,Lden,84.1
+2012,Périphérique Auteuil,Lden,88.0
+2013,Périphérique Auteuil,Lden,87.9
+2019,Périphérique Auteuil,Lden,85.8
+2020,Périphérique Auteuil,Lden,83.8
+2018,Périphérique Auteuil,Lden,86.8
+2015,Périphérique Auteuil,Ln,79.7
+2024,Périphérique Auteuil,Ln,76.2
+2022,Périphérique Auteuil,Ln,76.4
+2025,Périphérique Auteuil,Ln,74.8
+2016,Périphérique Auteuil,Ln,80.0
+2021,Périphérique Auteuil,Ln,76.0
+2014,Périphérique Auteuil,Ln,79.6
+2017,Périphérique Auteuil,Ln,80.0
+2023,Périphérique Auteuil,Ln,77.1
+2012,Périphérique Auteuil,Ln,80.6
+2013,Périphérique Auteuil,Ln,80.6
+2019,Périphérique Auteuil,Ln,78.6
+2020,Périphérique Auteuil,Ln,76.2
+2018,Périphérique Auteuil,Ln,79.6
+2015,Périphérique Vincennes,Lden,83.4
+2024,Périphérique Vincennes,Lden,85.8
+2022,Périphérique Vincennes,Lden,85.8
+2025,Périphérique Vincennes,Lden,84.1
+2016,Périphérique Vincennes,Lden,84.4
+2021,Périphérique Vincennes,Lden,85.4
+2014,Périphérique Vincennes,Lden,83.1
+2017,Périphérique Vincennes,Lden,85.3
+2023,Périphérique Vincennes,Lden,86.0
+2012,Périphérique Vincennes,Lden,86.2
+2013,Périphérique Vincennes,Lden,83.6
+2019,Périphérique Vincennes,Lden,84.5
+2020,Périphérique Vincennes,Lden,84.2
+2018,Périphérique Vincennes,Lden,86.2
+2015,Périphérique Vincennes,Ln,76.6
+2024,Périphérique Vincennes,Ln,79.3
+2022,Périphérique Vincennes,Ln,79.3
+2025,Périphérique Vincennes,Ln,77.5
+2016,Périphérique Vincennes,Ln,77.7
+2021,Périphérique Vincennes,Ln,78.8
+2014,Périphérique Vincennes,Ln,76.4
+2017,Périphérique Vincennes,Ln,78.7
+2023,Périphérique Vincennes,Ln,79.7
+2012,Périphérique Vincennes,Ln,79.5
+2013,Périphérique Vincennes,Ln,76.9
+2019,Périphérique Vincennes,Ln,78.0
+2020,Périphérique Vincennes,Ln,77.4
+2018,Périphérique Vincennes,Ln,79.5
+2024,malesherbes,Lden,74.0
+2025,malesherbes,Lden,73.9
+2024,malesherbes,Ln,66.5
+2025,malesherbes,Ln,66.4
+2024,88 rue de Courcelles (enrob-clas),Lden,71.8
+2022,88 rue de Courcelles (enrob-clas),Lden,72.1
+2025,88 rue de Courcelles (enrob-clas),Lden,72.4
+2021,88 rue de Courcelles (enrob-clas),Lden,71.6
+2023,88 rue de Courcelles (enrob-clas),Lden,72.0
+2019,88 rue de Courcelles (enrob-clas),Lden,73.1
+2020,88 rue de Courcelles (enrob-clas),Lden,71.5
+2018,88 rue de Courcelles (enrob-clas),Lden,73.3
+2024,88 rue de Courcelles (enrob-clas),Ln,63.9
+2022,88 rue de Courcelles (enrob-clas),Ln,64.4
+2025,88 rue de Courcelles (enrob-clas),Ln,65.1
+2021,88 rue de Courcelles (enrob-clas),Ln,63.4
+2023,88 rue de Courcelles (enrob-clas),Ln,64.4
+2019,88 rue de Courcelles (enrob-clas),Ln,65.3
+2020,88 rue de Courcelles (enrob-clas),Ln,63.2
+2018,88 rue de Courcelles (enrob-clas),Ln,65.4
+2024,62 rue de Courcelles (enrob-pho),Lden,71.5
+2022,62 rue de Courcelles (enrob-pho),Lden,71.6
+2025,62 rue de Courcelles (enrob-pho),Lden,71.8
+2021,62 rue de Courcelles (enrob-pho),Lden,72.0
+2023,62 rue de Courcelles (enrob-pho),Lden,71.7
+2019,62 rue de Courcelles (enrob-pho),Lden,72.3
+2020,62 rue de Courcelles (enrob-pho),Lden,70.6
+2018,62 rue de Courcelles (enrob-pho),Lden,72.3
+2024,62 rue de Courcelles (enrob-pho),Ln,63.4
+2022,62 rue de Courcelles (enrob-pho),Ln,63.4
+2025,62 rue de Courcelles (enrob-pho),Ln,64.1
+2021,62 rue de Courcelles (enrob-pho),Ln,63.4
+2023,62 rue de Courcelles (enrob-pho),Ln,63.7
+2019,62 rue de Courcelles (enrob-pho),Ln,64.0
+2020,62 rue de Courcelles (enrob-pho),Ln,61.7
+2018,62 rue de Courcelles (enrob-pho),Ln,64.0
+2015,74 rue Pierre Soulié,Lden,78.9
+2011,74 rue Pierre Soulié,Lden,80.1
+2024,74 rue Pierre Soulié,Lden,76.5
+2022,74 rue Pierre Soulié,Lden,75.7
+2025,74 rue Pierre Soulié,Lden,75.0
+2016,74 rue Pierre Soulié,Lden,79.6
+2021,74 rue Pierre Soulié,Lden,76.4
+2014,74 rue Pierre Soulié,Lden,78.8
+2017,74 rue Pierre Soulié,Lden,79.7
+2023,74 rue Pierre Soulié,Lden,76.4
+2012,74 rue Pierre Soulié,Lden,81.4
+2013,74 rue Pierre Soulié,Lden,81.3
+2019,74 rue Pierre Soulié,Lden,78.9
+2020,74 rue Pierre Soulié,Lden,77.3
+2018,74 rue Pierre Soulié,Lden,79.6
+2015,74 rue Pierre Soulié,Ln,72.2
+2011,74 rue Pierre Soulié,Ln,73.4
+2024,74 rue Pierre Soulié,Ln,69.7
+2022,74 rue Pierre Soulié,Ln,68.9
+2025,74 rue Pierre Soulié,Ln,68.1
+2016,74 rue Pierre Soulié,Ln,72.9
+2021,74 rue Pierre Soulié,Ln,69.4
+2014,74 rue Pierre Soulié,Ln,72.1
+2017,74 rue Pierre Soulié,Ln,73.0
+2023,74 rue Pierre Soulié,Ln,69.6
+2012,74 rue Pierre Soulié,Ln,74.8
+2013,74 rue Pierre Soulié,Ln,74.6
+2019,74 rue Pierre Soulié,Ln,72.2
+2020,74 rue Pierre Soulié,Ln,70.5
+2018,74 rue Pierre Soulié,Ln,72.9
+2024,21 boulevard Poissonière,Lden,73.0
+2022,21 boulevard Poissonière,Lden,76.6
+2025,21 boulevard Poissonière,Lden,74.3
+2023,21 boulevard Poissonière,Lden,74.9
+2024,21 boulevard Poissonière,Ln,66.0
+2022,21 boulevard Poissonière,Ln,70.0
+2025,21 boulevard Poissonière,Ln,67.6
+2023,21 boulevard Poissonière,Ln,67.8
+2015,102 boulevard de Sébastopol,Lden,77.9
+2024,102 boulevard de Sébastopol,Lden,75.6
+2022,102 boulevard de Sébastopol,Lden,75.9
+2025,102 boulevard de Sébastopol,Lden,75.2
+2016,102 boulevard de Sébastopol,Lden,78.0
+2021,102 boulevard de Sébastopol,Lden,75.4
+2017,102 boulevard de Sébastopol,Lden,78.1
+2023,102 boulevard de Sébastopol,Lden,76.1
+2019,102 boulevard de Sébastopol,Lden,78.0
+2020,102 boulevard de Sébastopol,Lden,76.2
+2018,102 boulevard de Sébastopol,Lden,77.7
+2015,102 boulevard de Sébastopol,Ln,70.4
+2024,102 boulevard de Sébastopol,Ln,68.0
+2022,102 boulevard de Sébastopol,Ln,68.2
+2025,102 boulevard de Sébastopol,Ln,67.7
+2016,102 boulevard de Sébastopol,Ln,70.7
+2021,102 boulevard de Sébastopol,Ln,67.8
+2017,102 boulevard de Sébastopol,Ln,70.8
+2023,102 boulevard de Sébastopol,Ln,68.3
+2019,102 boulevard de Sébastopol,Ln,70.6
+2020,102 boulevard de Sébastopol,Ln,68.7
+2018,102 boulevard de Sébastopol,Ln,70.3
+2015,anatolefrance,Lden,76.9
+2024,anatolefrance,Lden,73.5
+2022,anatolefrance,Lden,74.6
+2025,anatolefrance,Lden,73.4
+2016,anatolefrance,Lden,77.1
+2021,anatolefrance,Lden,74.7
+2014,anatolefrance,Lden,77.4
+2017,anatolefrance,Lden,76.9
+2023,anatolefrance,Lden,73.9
+2012,anatolefrance,Lden,76.9
+2013,anatolefrance,Lden,78.2
+2019,anatolefrance,Lden,81.2
+2020,anatolefrance,Lden,74.9
+2018,anatolefrance,Lden,76.6
+2015,anatolefrance,Ln,70.0
+2024,anatolefrance,Ln,66.3
+2022,anatolefrance,Ln,67.4
+2025,anatolefrance,Ln,66.5
+2016,anatolefrance,Ln,70.3
+2021,anatolefrance,Ln,67.1
+2014,anatolefrance,Ln,70.5
+2017,anatolefrance,Ln,69.9
+2023,anatolefrance,Ln,66.6
+2012,anatolefrance,Ln,69.4
+2013,anatolefrance,Ln,71.4
+2019,anatolefrance,Ln,74.5
+2020,anatolefrance,Ln,67.4
+2018,anatolefrance,Ln,69.6
+2015,88 rue de Rivoli,Lden,76.6
+2024,88 rue de Rivoli,Lden,71.5
+2022,88 rue de Rivoli,Lden,71.1
+2025,88 rue de Rivoli,Lden,71.2
+2016,88 rue de Rivoli,Lden,76.6
+2021,88 rue de Rivoli,Lden,74.0
+2017,88 rue de Rivoli,Lden,76.2
+2023,88 rue de Rivoli,Lden,71.7
+2019,88 rue de Rivoli,Lden,76.0
+2020,88 rue de Rivoli,Lden,73.4
+2018,88 rue de Rivoli,Lden,76.0
+2015,88 rue de Rivoli,Ln,69.3
+2024,88 rue de Rivoli,Ln,63.9
+2022,88 rue de Rivoli,Ln,63.5
+2025,88 rue de Rivoli,Ln,63.7
+2016,88 rue de Rivoli,Ln,69.4
+2021,88 rue de Rivoli,Ln,66.8
+2017,88 rue de Rivoli,Ln,69.0
+2023,88 rue de Rivoli,Ln,63.6
+2019,88 rue de Rivoli,Ln,68.6
+2020,88 rue de Rivoli,Ln,65.4
+2018,88 rue de Rivoli,Ln,68.8
+2024,gesvres,Lden,76.6
+2022,gesvres,Lden,76.9
+2025,gesvres,Lden,76.4
+2021,gesvres,Lden,76.9
+2023,gesvres,Lden,77.1
+2024,gesvres,Ln,69.2
+2022,gesvres,Ln,69.6
+2025,gesvres,Ln,69.2
+2021,gesvres,Ln,69.5
+2023,gesvres,Ln,69.9
+2024,246 boulevard Saint-Germain,Lden,75.8
+2022,246 boulevard Saint-Germain,Lden,76.6
+2025,246 boulevard Saint-Germain,Lden,75.8
+2023,246 boulevard Saint-Germain,Lden,75.8
+2024,246 boulevard Saint-Germain,Ln,68.2
+2022,246 boulevard Saint-Germain,Ln,68.9
+2025,246 boulevard Saint-Germain,Ln,68.3
+2023,246 boulevard Saint-Germain,Ln,67.8
+2015,4 place St Michel,Lden,74.6
+2011,4 place St Michel,Lden,75.3
+2024,4 place St Michel,Lden,72.0
+2022,4 place St Michel,Lden,72.4
+2025,4 place St Michel,Lden,72.5
+2016,4 place St Michel,Lden,73.8
+2021,4 place St Michel,Lden,72.2
+2014,4 place St Michel,Lden,74.9
+2017,4 place St Michel,Lden,73.6
+2023,4 place St Michel,Lden,73.6
+2012,4 place St Michel,Lden,75.3
+2013,4 place St Michel,Lden,74.5
+2019,4 place St Michel,Lden,74.5
+2020,4 place St Michel,Lden,72.6
+2010,4 place St Michel,Lden,76.8
+2018,4 place St Michel,Lden,74.2
+2015,4 place St Michel,Ln,67.1
+2011,4 place St Michel,Ln,67.9
+2024,4 place St Michel,Ln,64.3
+2022,4 place St Michel,Ln,64.9
+2025,4 place St Michel,Ln,65.2
+2016,4 place St Michel,Ln,66.2
+2021,4 place St Michel,Ln,64.3
+2014,4 place St Michel,Ln,67.5
+2017,4 place St Michel,Ln,66.0
+2023,4 place St Michel,Ln,66.7
+2012,4 place St Michel,Ln,68.0
+2013,4 place St Michel,Ln,67.1
+2019,4 place St Michel,Ln,67.0
+2020,4 place St Michel,Ln,64.5
+2010,4 place St Michel,Ln,70.1
+2018,4 place St Michel,Ln,66.7
+2024,bastille,Lden,73.8
+2022,bastille,Lden,74.5
+2025,bastille,Lden,74.0
+2021,bastille,Lden,73.2
+2023,bastille,Lden,74.4
+2019,bastille,Lden,75.2
+2020,bastille,Lden,72.2
+2018,bastille,Lden,76.8
+2024,bastille,Ln,66.2
+2022,bastille,Ln,66.9
+2025,bastille,Ln,66.6
+2021,bastille,Ln,65.2
+2023,bastille,Ln,66.7
+2019,bastille,Ln,67.4
+2020,bastille,Ln,64.1
+2018,bastille,Ln,69.6
+2024,37 rue Frémicourt (enrob-pho),Lden,66.2
+2022,37 rue Frémicourt (enrob-pho),Lden,70.4
+2025,37 rue Frémicourt (enrob-pho),Lden,71.3
+2021,37 rue Frémicourt (enrob-pho),Lden,70.0
+2023,37 rue Frémicourt (enrob-pho),Lden,70.5
+2020,37 rue Frémicourt (enrob-pho),Lden,69.4
+2018,37 rue Frémicourt (enrob-pho),Lden,72.0
+2024,37 rue Frémicourt (enrob-pho),Ln,57.9
+2022,37 rue Frémicourt (enrob-pho),Ln,62.1
+2025,37 rue Frémicourt (enrob-pho),Ln,63.1
+2021,37 rue Frémicourt (enrob-pho),Ln,61.0
+2023,37 rue Frémicourt (enrob-pho),Ln,62.2
+2020,37 rue Frémicourt (enrob-pho),Ln,60.8
+2018,37 rue Frémicourt (enrob-pho),Ln,63.8
+2024,13 rue Frémicourt (enrob-clas),Lden,70.2
+2022,13 rue Frémicourt (enrob-clas),Lden,70.0
+2025,13 rue Frémicourt (enrob-clas),Lden,70.6
+2021,13 rue Frémicourt (enrob-clas),Lden,70.2
+2023,13 rue Frémicourt (enrob-clas),Lden,69.7
+2019,13 rue Frémicourt (enrob-clas),Lden,71.0
+2020,13 rue Frémicourt (enrob-clas),Lden,70.4
+2018,13 rue Frémicourt (enrob-clas),Lden,69.5
+2024,13 rue Frémicourt (enrob-clas),Ln,62.2
+2022,13 rue Frémicourt (enrob-clas),Ln,62.0
+2025,13 rue Frémicourt (enrob-clas),Ln,62.7
+2021,13 rue Frémicourt (enrob-clas),Ln,61.5
+2023,13 rue Frémicourt (enrob-clas),Ln,61.7
+2019,13 rue Frémicourt (enrob-clas),Ln,63.0
+2020,13 rue Frémicourt (enrob-clas),Ln,61.8
+2018,13 rue Frémicourt (enrob-clas),Ln,61.1
+2024,214 rue Lecourbe,Lden,72.0
+2022,214 rue Lecourbe,Lden,71.9
+2025,214 rue Lecourbe,Lden,71.9
+2021,214 rue Lecourbe,Lden,71.4
+2023,214 rue Lecourbe,Lden,71.6
+2019,214 rue Lecourbe,Lden,73.0
+2020,214 rue Lecourbe,Lden,71.2
+2018,214 rue Lecourbe,Lden,72.6
+2024,214 rue Lecourbe,Ln,64.4
+2022,214 rue Lecourbe,Ln,64.1
+2025,214 rue Lecourbe,Ln,64.2
+2021,214 rue Lecourbe,Ln,63.6
+2023,214 rue Lecourbe,Ln,64.2
+2019,214 rue Lecourbe,Ln,65.5
+2020,214 rue Lecourbe,Ln,63.3
+2018,214 rue Lecourbe,Ln,64.5
