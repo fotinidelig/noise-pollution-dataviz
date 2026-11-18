@@ -1334,7 +1334,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
           popup
             .setLngLat(e.lngLat)
             .setHTML(
-              `<div class="tip-name">${String(p.name_en ?? '')}</div><div class="tip-total">${Number(p.mean_db).toFixed(1)} dB mean</div>`,
+              `<div class="tip tip--seoul"><span class="tip-seoul-line"><span class="tip-seoul-name">${String(p.name_en ?? '')}</span><span class="tip-seoul-sep" aria-hidden="true">·</span><span class="tip-seoul-db">${Number(p.mean_db).toFixed(1)} dB noise</span></span></div>`,
             )
             .addTo(map)
           return

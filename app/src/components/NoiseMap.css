@@ -150,6 +150,36 @@
   min-width: 200px;
 }
 
+/* Compact Seoul site tip — one centered line */
+.tip--seoul {
+  min-width: 0;
+  padding: 0.55rem 0.85rem;
+  text-align: center;
+}
+
+.tip-seoul-line {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  font-size: 1.05rem;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.tip-seoul-name {
+  color: #e8f0ff;
+}
+
+.tip-seoul-sep {
+  color: #7a8eaa;
+}
+
+.tip-seoul-db {
+  color: #00e5ff;
+}
+
 .tip-title {
   font-size: 1.35rem;
   line-height: 1.1;
