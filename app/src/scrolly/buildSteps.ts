@@ -1,9 +1,20 @@
 import type { StoryMetrics, StoryStep } from './storyTypes'
 import { formatPeople, vacuumBlenderCompare } from './storyTypes'
 
-/** Wrap a phrase for colored insight spans (`**…**` → `.scrolly-hi`). */
+/** Cyan body highlight (`**…**` → `.scrolly-hi`). */
 function hi(s: string) {
   return `**${s}**`
+}
+
+/** Magenta — vacuum / blender / ≥70 dB loudness (`***…***` → `.scrolly-hi--loud`). */
+function hiLoud(s: string) {
+  return `***${s}***`
+}
+
+/** dB figure: magenta from vacuum territory (~70+) upward. */
+function hiDb(db: number, digits = 0) {
+  const label = `${db.toFixed(digits)} dB`
+  return db >= 70 ? hiLoud(label) : hi(label)
 }
 
 export function buildSteps(m: StoryMetrics): StoryStep[] {
@@ -58,8 +69,8 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       title: `${dePeople} people on high dBs — ${de.berlin_share_of_germany_pct}% in Berlin`,
       questions: [],
       body: [
-        `In German cities, about ${hi(dePeople)} people live with long-term day–evening–night averages above ${hi('75 dB')}. Of them, about ${hi(berlinPeople)} — ${hi(`${de.berlin_share_of_germany_pct}%`)} — are in Berlin.`,
-        `${hi('75 dB')} sits between a ${hi('vacuum cleaner (~70 dB)')} and a ${hi('blender (~80–90 dB)')}. Louder places lean toward the blender.`,
+        `In German cities, about ${hi(dePeople)} people live with long-term day–evening–night averages above ${hiLoud('75 dB')}. Of them, about ${hi(berlinPeople)} — ${hi(`${de.berlin_share_of_germany_pct}%`)} — are in Berlin.`,
+        `${hiLoud('75 dB')} sits between a ${hiLoud('vacuum cleaner (~70 dB)')} and a ${hiLoud('blender (~80–90 dB)')}. Louder places lean toward the blender.`,
       ],
       map: {
         center: [de.lon, de.lat],
@@ -76,8 +87,8 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       title: `Paris night: ${paris.max_db.toFixed(0)} dB at ${paris.loudest_site}`,
       questions: [],
       body: [
-        `In ${paris.year}, night noise at the loudest Paris road site in this set — ${hi(paris.loudest_site)} — reaches about ${hi(`${paris.max_db.toFixed(1)} dB`)}.`,
-        `For scale: ${hi(vacuumBlenderCompare(paris.max_db))}.`,
+        `In ${paris.year}, night noise at the loudest Paris road site in this set — ${hi(paris.loudest_site)} — reaches about ${hiDb(paris.max_db, 1)}.`,
+        `For scale: ${hiLoud(vacuumBlenderCompare(paris.max_db))}.`,
       ],
       map: {
         center: [paris.lon, paris.lat],
@@ -94,8 +105,8 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       title: `Madrid night: outdoor station ${madrid.loudest_station_id} peaks near ${madrid.max_db_peak.toFixed(0)} dB`,
       questions: [],
       body: [
-        `In ${madrid.year}, night noise at ${hi(`fixed outdoor noise monitoring station ${madrid.loudest_station_id}`)} sits around ${hi(`${madrid.max_db_median.toFixed(0)} dB`)} on a typical night, with peaks near ${hi(`${madrid.max_db_peak.toFixed(0)} dB`)}.`,
-        `Typical: ${hi(vacuumBlenderCompare(madrid.max_db_median))}. Peak: ${hi(vacuumBlenderCompare(madrid.max_db_peak))}.`,
+        `In ${madrid.year}, night noise at ${hi(`fixed outdoor noise monitoring station ${madrid.loudest_station_id}`)} sits around ${hiDb(madrid.max_db_median)} on a typical night, with peaks near ${hiDb(madrid.max_db_peak)}.`,
+        `Typical: ${hiLoud(vacuumBlenderCompare(madrid.max_db_median))}. Peak: ${hiLoud(vacuumBlenderCompare(madrid.max_db_peak))}.`,
       ],
       map: {
         center: [madrid.lon, madrid.lat],
@@ -112,8 +123,8 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       title: `Hong Kong: ${hk.pct_valid_gt70.toFixed(0)}% of mapped area above 70 dB`,
       questions: [],
       body: [
-        `On the ${hk.year} Hong Kong traffic-noise map, about ${hi(`${hk.pct_valid_gt70.toFixed(0)}%`)} of the mapped territory sits above ${hi('70 dB')} — roughly ${hi(`${hk.area_km2_gt70.toFixed(0)} km²`)} — peak traffic noise past a vacuum cleaner, painted across the city rather than at a single mic.`,
-        `The loudest places on the map reach about ${hi(`${hk.max_db.toFixed(0)} dB`)} — ${hi(vacuumBlenderCompare(hk.max_db))}.`,
+        `On the ${hk.year} Hong Kong traffic-noise map, about ${hi(`${hk.pct_valid_gt70.toFixed(0)}%`)} of the mapped territory sits above ${hiLoud('70 dB')} — roughly ${hi(`${hk.area_km2_gt70.toFixed(0)} km²`)} — peak traffic noise past a vacuum cleaner, painted across the city rather than at a single mic.`,
+        `The loudest places on the map reach about ${hiDb(hk.max_db)} — ${hiLoud(vacuumBlenderCompare(hk.max_db))}.`,
       ],
       map: {
         center: [hk.lon, hk.lat],
@@ -130,8 +141,8 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       title: `Seoul: highest mean at ${seoul.loudest_site}`,
       questions: [],
       body: [
-        `Among eight Seoul road sites in ${seoul.year}, ${hi(seoul.loudest_site)} has the ${hi('highest mean')} — about ${hi(`${seoul.max_db_median.toFixed(0)} dB`)}. The ${hi('highest single reading')} is about ${hi(`${seoul.max_db_peak.toFixed(0)} dB`)}${seoul.peak_site ? ` at ${hi(seoul.peak_site)}` : ''}.`,
-        `Mean at ${seoul.loudest_site}: ${hi(vacuumBlenderCompare(seoul.max_db_median))}. Peak reading: ${hi(vacuumBlenderCompare(seoul.max_db_peak))}. Bubble size shows each site’s mean; positions are approximate.`,
+        `Among eight Seoul road sites in ${seoul.year}, ${hi(seoul.loudest_site)} has the ${hi('highest mean')} — about ${hiDb(seoul.max_db_median)}. The ${hi('highest single reading')} is about ${hiDb(seoul.max_db_peak)}${seoul.peak_site ? ` at ${hi(seoul.peak_site)}` : ''}.`,
+        `Mean at ${seoul.loudest_site}: ${hiLoud(vacuumBlenderCompare(seoul.max_db_median))}. Peak reading: ${hiLoud(vacuumBlenderCompare(seoul.max_db_peak))}. Bubble size shows each site’s mean; positions are approximate.`,
       ],
       map: {
         center: [seoul.lon, seoul.lat],
@@ -149,7 +160,7 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       body: [
         `A Grand Canyon fall night near ${hi('15 dB')} sits far below a vacuum cleaner; a Berlin park hour near ${hi('49 dB')} is calm for a city, not silent.`,
         `Denali Birch Creek (~${hi('18 dB')}) and Haleakalā Nuʻu (~${hi('23 dB')}) sit near a ${hi('whisper (~20–30 dB)')}; a quiet-forest sample (~${hi('29 dB')}) and Poland’s Silent Route (~${hi('33 dB')}) land around a ${hi('quiet room (~30–40 dB)')}.`,
-        `Hoh River Trail (~${hi('34–38 dB')}) still undercuts casual ${hi('conversation (~60 dB)')}; Stockholm city parks (~${hi('55 dB')}) creep closer — still nowhere near a ${hi('blender (~80–90 dB)')}.`,
+        `Hoh River Trail (~${hi('34–38 dB')}) still undercuts casual ${hi('conversation (~60 dB)')}; Stockholm city parks (~${hi('55 dB')}) creep closer — still nowhere near a ${hiLoud('blender (~80–90 dB)')}.`,
       ],
       map: {
         center: [-40, 45],

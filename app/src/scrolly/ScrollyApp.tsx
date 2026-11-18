@@ -172,6 +172,10 @@ export function ScrollyApp() {
                         className="scrolly-step__body"
                         dangerouslySetInnerHTML={{
                           __html: p
+                            .replace(
+                              /\*\*\*(.+?)\*\*\*/g,
+                              '<span class="scrolly-hi scrolly-hi--loud">$1</span>',
+                            )
                             .replace(/\*\*(.+?)\*\*/g, '<span class="scrolly-hi">$1</span>')
                             .replace(/\n/g, '<br/>'),
                         }}

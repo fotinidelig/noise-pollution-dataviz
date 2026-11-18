@@ -213,14 +213,14 @@
 }
 
 .scrolly-step__body .scrolly-hi {
-  color: #4DD4E6;
+  color: #00B8CC;
   font-weight: 400;
   text-shadow: 0 0 12px rgba(0, 184, 204, 0.35);
 }
 
-.scrolly-step__body .scrolly-hi:nth-of-type(even) {
-  color: #F56DC0;
-  text-shadow: 0 0 12px rgba(245, 109, 192, 0.35);
+.scrolly-step__body .scrolly-hi--loud {
+  color: #F500AB;
+  text-shadow: 0 0 12px rgba(245, 0, 171, 0.35);
 }
 
 .scrolly-rail {
