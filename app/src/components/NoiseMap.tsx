@@ -1352,7 +1352,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
           popup
             .setLngLat(e.lngLat)
             .setHTML(
-              `<div class="tip-name">Peak traffic noise</div><div class="tip-total">${db.toFixed(0)} dB</div>`,
+              `<div class="tip-total">${db.toFixed(0)}dB</div>`,
             )
             .addTo(map)
           return
