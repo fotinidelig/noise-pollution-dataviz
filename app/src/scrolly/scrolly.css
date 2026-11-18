@@ -57,6 +57,31 @@
   align-items: center;
 }
 
+/* Calm beat: wider, higher card so the bottom scatter stays clear. */
+.scrolly-step--calm {
+  align-items: flex-start;
+  padding-top: clamp(4.5rem, 10vh, 7rem);
+  padding-bottom: clamp(14rem, 38vh, 22rem);
+}
+
+.scrolly-step--calm .scrolly-step__stack {
+  max-width: min(680px, 94vw);
+}
+
+.scrolly-step--calm .scrolly-step__card {
+  padding: 0.9rem 1.15rem 1rem;
+}
+
+.scrolly-step--calm .scrolly-step__title {
+  font-size: clamp(1.45rem, 2.8vw, 2.05rem);
+}
+
+.scrolly-step--calm .scrolly-step__body {
+  font-size: 1rem;
+  line-height: 1.28;
+  margin-top: 0.35rem;
+}
+
 .scrolly-step__card {
   position: relative;
   pointer-events: auto;
@@ -323,6 +348,16 @@
   .scrolly-step {
     padding: 1.25rem 0.85rem 1.25rem 3.2rem;
     align-items: flex-end;
+  }
+
+  .scrolly-step--calm {
+    align-items: flex-start;
+    padding-top: 3.5rem;
+    padding-bottom: 13rem;
+  }
+
+  .scrolly-step--calm .scrolly-step__stack {
+    max-width: min(96vw, 560px);
   }
 
   .scrolly-rail__label {

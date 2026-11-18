@@ -144,7 +144,7 @@ export function ScrollyApp() {
           return (
             <section
               key={step.id}
-              className={`scrolly-step${step.id === 'hero' ? ' scrolly-step--hero' : ''}${isActiveCard ? ' is-active' : ''}`}
+              className={`scrolly-step${step.id === 'hero' ? ' scrolly-step--hero' : ''}${step.id === 'calm' ? ' scrolly-step--calm' : ''}${isActiveCard ? ' is-active' : ''}`}
               data-step-id={step.id}
               ref={(el) => {
                 stepRefs.current[step.id] = el
