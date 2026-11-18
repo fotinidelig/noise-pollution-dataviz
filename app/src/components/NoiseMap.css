@@ -56,6 +56,17 @@
   gap: 0.55rem;
 }
 
+.noise-controls--story .active-readonly {
+  display: inline-flex;
+  padding: 0.4rem 0.75rem;
+  color: #9db0cc;
+  border: 1px solid rgba(120, 160, 220, 0.22);
+  background: rgba(8, 12, 24, 0.72);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 1rem;
+}
+
 .seg {
   display: inline-flex;
   padding: 0.2rem;

@@ -1,0 +1,105 @@
+{
+  "europe": {
+    "year_label": 2021,
+    "people_highly_annoyed": 12504398.18,
+    "people_highly_sleep_disturbed": 3273423.403,
+    "by_source_ha": {
+      "aircraft": 640430,
+      "rail": 1427108,
+      "road": 10436861
+    },
+    "by_source_hsd": {
+      "aircraft": 57318,
+      "rail": 617598,
+      "road": 2598508
+    },
+    "people_exposed_lden_end_bands": 74093700.0,
+    "people_exposed_lnight_end_bands": 51473600.0
+  },
+  "germany": {
+    "agglomeration": "Cologne",
+    "id": "Germany|Cologne",
+    "lon": 6.95,
+    "lat": 50.93333,
+    "band": ">75",
+    "metric": "Lden",
+    "source": "road",
+    "people_gt75": 12200.0,
+    "year_label": 2021,
+    "common_sound": {
+      "sound_name": "Aircraft cabin in cruise",
+      "db_min": 72.0,
+      "db_max": 83.0,
+      "mid": 77.5
+    }
+  },
+  "paris": {
+    "year": 2025,
+    "metric": "Ln",
+    "loudest_site": "Périphérique Vincennes",
+    "max_db": 77.5,
+    "lon": 2.395,
+    "lat": 48.835,
+    "common_sound": {
+      "sound_name": "Aircraft cabin in cruise",
+      "db_min": 72.0,
+      "db_max": 83.0,
+      "mid": 77.5
+    }
+  },
+  "madrid": {
+    "year": 2026,
+    "metric": "night_LAeq",
+    "focus_ids": [
+      6,
+      28,
+      24
+    ],
+    "loudest_station_id": 6,
+    "max_db_median": 64.4,
+    "max_db_peak": 80.4,
+    "peak_station_id": 6,
+    "lon": -3.7038,
+    "lat": 40.4168,
+    "common_sound": {
+      "sound_name": "Normal conversation",
+      "db_min": 60.0,
+      "db_max": 65.0,
+      "mid": 62.5
+    }
+  },
+  "hong_kong": {
+    "year": 2020,
+    "metric": "L10_1h_4m",
+    "max_db": 96.8301222742,
+    "pct_valid_gt70": 22.965544020030954,
+    "area_km2_gt70": 96.94,
+    "n_cells_gt70": 969391,
+    "cell_size_m": 10,
+    "method": "Count valid raster cells with L10>70; each cell 10×10 m → area_km2. Not road-km (no centerline).",
+    "lon": 114.1694,
+    "lat": 22.3193,
+    "common_sound": {
+      "sound_name": "Jet flyover outdoors (≈1000 ft)",
+      "db_min": 88.0,
+      "db_max": 103.0,
+      "mid": 95.5
+    }
+  },
+  "seoul": {
+    "year": 2024,
+    "metric": "daily_Leq_road",
+    "loudest_site": "북아현동",
+    "max_db_median": 73.38,
+    "max_db_peak": 76.57,
+    "peak_site": "숙명여고 앞",
+    "lon": 126.978,
+    "lat": 37.5665,
+    "common_sound": {
+      "sound_name": "Vacuum cleaner",
+      "db_min": 70.0,
+      "db_max": 70.0,
+      "mid": 70.0
+    }
+  }
+}

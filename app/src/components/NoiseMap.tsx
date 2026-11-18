@@ -117,7 +117,21 @@ async function getClusterLeaves(
   return source.getClusterLeaves(clusterId, Infinity, 0)
 }
 
-export function NoiseMap() {
+export type StoryMapControl = {
+  stepId: string
+  center: [number, number]
+  zoom: number
+  source?: NoiseSource
+  metric?: NoiseMetric
+  highlightId?: string | null
+  explore?: boolean
+}
+
+type NoiseMapProps = {
+  story?: StoryMapControl | null
+}
+
+export function NoiseMap({ story = null }: NoiseMapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<maplibregl.Map | null>(null)
   const popupRef = useRef<maplibregl.Popup | null>(null)
@@ -126,6 +140,11 @@ export function NoiseMap() {
   const metricRef = useRef<NoiseMetric>('Lden')
   const rebuildTimer = useRef<number | null>(null)
   const countryModeRef = useRef(false)
+  const lastStoryStep = useRef<string | null>(null)
+
+  // Standalone map = explore; scrolly steps lock until the final explore beat
+  const explore = !story || Boolean(story.explore)
+  const storyLocked = Boolean(story) && !explore
 
   const [source, setSource] = useState<NoiseSource>('road')
   const [metric, setMetric] = useState<NoiseMetric>('Lden')
@@ -148,7 +167,7 @@ export function NoiseMap() {
   pinnedIdRef.current = pinnedId
   hoveredIdRef.current = hoveredId
 
-  const focusId = hoveredId ?? pinnedId
+  const focusId = hoveredId ?? pinnedId ?? (storyLocked ? story?.highlightId ?? null : null)
   focusIdRef.current = focusId
 
   /** Apply ring/label dimming immediately (do not wait for React paint effect). */
@@ -248,6 +267,43 @@ export function NoiseMap() {
     setHoveredId(id)
     setHoverSeries(series)
   }
+
+  // Sync story camera / layer locks (scrolly)
+  useEffect(() => {
+    if (!story) return
+    if (story.source) setSource(story.source)
+    if (story.metric) setMetric(story.metric)
+    const map = mapRef.current
+    if (!map) return
+    if (lastStoryStep.current === story.stepId) {
+      applyFocusPaint(story.highlightId ?? focusIdRef.current)
+      return
+    }
+    lastStoryStep.current = story.stepId
+    map.easeTo({
+      center: story.center,
+      zoom: story.zoom,
+      duration: 1200,
+      essential: true,
+    })
+    if (story.highlightId) {
+      hoveredIdRef.current = null
+      focusIdRef.current = story.highlightId
+      applyFocusPaint(story.highlightId)
+    } else if (!story.explore) {
+      applyFocusPaint(null)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    story?.stepId,
+    story?.center?.[0],
+    story?.center?.[1],
+    story?.zoom,
+    story?.source,
+    story?.metric,
+    story?.highlightId,
+    story?.explore,
+  ])
 
   const countryAggs = useMemo(
     () => buildCountryAggregates(chartCities, source, metric),
@@ -973,34 +1029,42 @@ export function NoiseMap() {
           <p className="noise-eyebrow">EEA END 2022</p>
           <h1>Europe environmental noise</h1>
         </div>
-        <div className="noise-controls" role="group" aria-label="Noise layer controls">
-          <div className="seg" role="radiogroup" aria-label="Source">
-            {SOURCES.map((s) => (
-              <button
-                key={s.id}
-                type="button"
-                className={source === s.id ? 'active' : ''}
-                aria-pressed={source === s.id}
-                onClick={() => setSource(s.id)}
-              >
-                {s.label}
-              </button>
-            ))}
+        {explore ? (
+          <div className="noise-controls" role="group" aria-label="Noise layer controls">
+            <div className="seg" role="radiogroup" aria-label="Source">
+              {SOURCES.map((s) => (
+                <button
+                  key={s.id}
+                  type="button"
+                  className={source === s.id ? 'active' : ''}
+                  aria-pressed={source === s.id}
+                  onClick={() => setSource(s.id)}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+            <div className="seg metric" role="radiogroup" aria-label="Metric">
+              {METRICS.map((m) => (
+                <button
+                  key={m.id}
+                  type="button"
+                  className={metric === m.id ? 'active' : ''}
+                  aria-pressed={metric === m.id}
+                  onClick={() => setMetric(m.id)}
+                >
+                  {m.label}
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="seg metric" role="radiogroup" aria-label="Metric">
-            {METRICS.map((m) => (
-              <button
-                key={m.id}
-                type="button"
-                className={metric === m.id ? 'active' : ''}
-                aria-pressed={metric === m.id}
-                onClick={() => setMetric(m.id)}
-              >
-                {m.label}
-              </button>
-            ))}
+        ) : (
+          <div className="noise-controls noise-controls--story">
+            <span className="seg active-readonly">
+              {source} · {metric}
+            </span>
           </div>
-        </div>
+        )}
       </header>
 
       <div className="noise-canvas-wrap">
@@ -1017,7 +1081,7 @@ export function NoiseMap() {
             pinned={Boolean(pinnedId)}
           />
         ) : null}
-        {streamData ? (
+        {streamData && explore ? (
           <ThemeRiverChart
             data={streamData}
             source={source}

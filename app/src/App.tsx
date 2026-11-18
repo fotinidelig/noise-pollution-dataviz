@@ -1,12 +1,8 @@
-import { NoiseMap } from './components/NoiseMap'
+import { ScrollyApp } from './scrolly/ScrollyApp'
 import './App.css'
 
 function App() {
-  return (
-    <main className="app-root">
-      <NoiseMap />
-    </main>
-  )
+  return <ScrollyApp />
 }
 
 export default App
