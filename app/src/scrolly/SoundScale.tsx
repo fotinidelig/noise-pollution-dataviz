@@ -127,7 +127,12 @@ export function SoundScale({ anchors = STORY_SOUND_ANCHORS }: Props) {
             aria-label={`Play ${a.label}, about ${a.db} decibels`}
             title="Click to play sample"
           >
-            <span className="sound-scale__dot" />
+            <span className="sound-scale__pulse" aria-hidden="true">
+              <span className="sound-scale__pulse-ring" />
+              <span className="sound-scale__pulse-ring" />
+              <span className="sound-scale__pulse-ring" />
+              <span className="sound-scale__pulse-core" />
+            </span>
             <span className="sound-scale__label">{a.label}</span>
             <span className="sound-scale__db">
               {a.dbNote ?? `~${a.db}`} dB
