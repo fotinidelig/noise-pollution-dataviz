@@ -2,7 +2,9 @@
 
 Companion to [`common-sounds-db-levels.md`](./common-sounds-db-levels.md) for Fotini’s noise-pollution scrollytelling: **quiet anchors** to contrast with loud cities.
 
-**Data file:** [`calm-quiet-place-levels.csv`](./calm-quiet-place-levels.csv) — **22 place rows**.
+**Data file:** [`calm-quiet-place-levels.csv`](./calm-quiet-place-levels.csv) — **22 place rows** (research inventory).
+
+**App map/chart (`app/public/data/calm_spaces.json`):** **13 measured sites** only — EASA-cited park hours (Norra Djurgården, Tiergarten, Trondheim), Stockholm JASA sites, Silent Route, JASA quiet-forest demo, NPS Type-1 monitors (Denali, GRCA031, Haleakalā Nuʻu, Olympic Hoh + Hurricane Ridge existing & natural). **Excluded from the viz:** END/policy thresholds (Dublin, Vienna, Italy…), EEA QSI modelled quiet, synthesis floors, interpretive-only crater/trail citations without instrumented companions.
 
 ---
 

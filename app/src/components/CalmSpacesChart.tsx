@@ -19,6 +19,14 @@ type Props = {
 const DAY = '#7eb8a8'
 const NIGHT = '#5b7fbf'
 
+/** Light common-sound guides (Fotini can drop/edit). Mid of published ranges. */
+const SOUND_REFS: { id: string; label: string; db: number }[] = [
+  { id: 'whisper', label: 'whisper', db: 27.5 },
+  { id: 'library', label: 'quiet room', db: 30 },
+  { id: 'birds', label: 'distant birds', db: 44 },
+  { id: 'quiet-home', label: 'quiet home', db: 50 },
+]
+
 export function CalmSpacesChart({
   data,
   focusId,
@@ -156,13 +164,17 @@ export function CalmSpacesChart({
       aria-label="Calm spaces scatter — day and night levels by place"
     >
       <div className="calm-chart__head">
-        <span className="calm-chart__title">
-          Calm spaces — quieter places to visit
-          <span className="calm-chart__legend">
-            <span className="calm-chart__swatch calm-chart__swatch--day" /> day
-            <span className="calm-chart__swatch calm-chart__swatch--night" /> night
+        <div className="calm-chart__head-main">
+          <span className="calm-chart__title">
+            Calm spaces — quieter places to visit
           </span>
-        </span>
+          <span className="calm-chart__legend" aria-hidden={false}>
+            <span className="calm-chart__swatch calm-chart__swatch--day" />
+            <span className="calm-chart__legend-label">day</span>
+            <span className="calm-chart__swatch calm-chart__swatch--night" />
+            <span className="calm-chart__legend-label">night</span>
+          </span>
+        </div>
         <button
           type="button"
           className="calm-chart__toggle calm-chart__toggle--hide"
@@ -194,11 +206,35 @@ export function CalmSpacesChart({
                 y1={0}
                 y2={0}
               />
-              <text className="calm-chart__y-tick" x={-8} y={3} textAnchor="end">
+              <text className="calm-chart__y-tick" x={-8} y={4} textAnchor="end">
                 {t}
               </text>
             </g>
           ))}
+          {SOUND_REFS.filter(
+            (r) => r.db >= layout.y.domain()[0] && r.db <= layout.y.domain()[1],
+          ).map((r) => {
+            const y = layout.y(r.db)
+            return (
+              <g key={r.id} className="calm-chart__ref" transform={`translate(0,${y})`}>
+                <line
+                  className="calm-chart__ref-line"
+                  x1={0}
+                  x2={layout.innerW}
+                  y1={0}
+                  y2={0}
+                />
+                <text
+                  className="calm-chart__ref-label"
+                  x={layout.innerW - 2}
+                  y={-4}
+                  textAnchor="end"
+                >
+                  {r.label}
+                </text>
+              </g>
+            )
+          })}
           {layout.bands.map((b) => (
             <text
               key={b.continent}
@@ -228,27 +264,17 @@ export function CalmSpacesChart({
               />
             )
           })}
-          {/* sparse place labels — loudest/quietest + focus */}
-          {ordered.map((p, i) => {
-            const show =
-              activeId === p.id ||
-              i === 0 ||
-              i === ordered.length - 1 ||
-              (p.storytelling_rank != null && p.storytelling_rank <= 3)
-            if (!show) return null
-            const cx = layout.x(p.id) ?? 0
-            return (
-              <text
-                key={`lbl-${p.id}`}
-                className={`calm-chart__label${activeId === p.id ? ' is-focus' : ''}`}
-                x={cx}
-                y={-4}
-                textAnchor="middle"
-              >
-                {p.shortLabel}
-              </text>
-            )
-          })}
+          {/* Place name only while hovered / focused from map */}
+          {activePlace ? (
+            <text
+              className="calm-chart__label is-focus"
+              x={layout.x(activePlace.id) ?? 0}
+              y={-6}
+              textAnchor="middle"
+            >
+              {activePlace.shortLabel}
+            </text>
+          ) : null}
         </g>
       </svg>
       {activePlace ? (

@@ -38,44 +38,53 @@
   flex: 0 0 auto;
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: flex-start;
   gap: 0.75rem;
-  padding: 0.35rem 0.65rem 0;
+  padding: 0.45rem 0.75rem 0.15rem;
   color: #b7c9bc;
-  font-size: 0.95rem;
-  letter-spacing: 0.04em;
   pointer-events: none;
 }
 
-.calm-chart__title {
+.calm-chart__head-main {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.65rem 1rem;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.calm-chart__title {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: #cfe0d4;
+  color: #e8f2ea;
+  font-size: 1.15rem;
+  letter-spacing: 0.03em;
+  line-height: 1.2;
 }
 
 .calm-chart__legend {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  color: #8fa39a;
-  font-size: 0.82rem;
-  letter-spacing: 0.08em;
+  gap: 0.4rem 0.55rem;
+  color: #b7c9bc;
+  font-size: 1rem;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   white-space: nowrap;
 }
 
+.calm-chart__legend-label {
+  margin-right: 0.35rem;
+  color: #cfe0d4;
+}
+
 .calm-chart__swatch {
   display: inline-block;
-  width: 0.55rem;
-  height: 0.55rem;
+  width: 0.7rem;
+  height: 0.7rem;
   border-radius: 50%;
-  margin-right: 0.15rem;
   vertical-align: middle;
+  flex: 0 0 auto;
 }
 
 .calm-chart__swatch--day {
@@ -132,17 +141,32 @@
 }
 
 .calm-chart__y-tick {
-  fill: #8fa39a;
+  fill: #b7c9bc;
   font-family: "VT323", "Courier New", monospace;
-  font-size: 11px;
+  font-size: 14px;
 }
 
 .calm-chart__band {
   fill: #9eb5a8;
   font-family: "VT323", "Courier New", monospace;
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.calm-chart__ref-line {
+  stroke: rgba(200, 210, 200, 0.22);
+  stroke-width: 1;
+  stroke-dasharray: 4 5;
+  pointer-events: none;
+}
+
+.calm-chart__ref-label {
+  fill: rgba(183, 201, 188, 0.72);
+  font-family: "VT323", "Courier New", monospace;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  pointer-events: none;
 }
 
 .calm-chart__dot {
@@ -154,14 +178,18 @@
 }
 
 .calm-chart__label {
-  fill: #9eb5a8;
+  fill: #e8f4ec;
   font-family: "VT323", "Courier New", monospace;
-  font-size: 10px;
+  font-size: 15px;
+  letter-spacing: 0.02em;
   pointer-events: none;
+  paint-order: stroke;
+  stroke: rgba(12, 22, 26, 0.85);
+  stroke-width: 3px;
 }
 
 .calm-chart__label.is-focus {
-  fill: #e8f4ec;
+  fill: #f2f7f3;
 }
 
 .calm-chart__tip {
@@ -169,25 +197,27 @@
   right: 0.75rem;
   bottom: 2.6rem;
   z-index: 6;
-  min-width: 150px;
-  max-width: 220px;
-  padding: 0.45rem 0.6rem;
-  background: rgba(12, 22, 26, 0.92);
-  border: 1px solid rgba(126, 184, 168, 0.4);
+  min-width: 168px;
+  max-width: 260px;
+  padding: 0.55rem 0.7rem;
+  background: rgba(12, 22, 26, 0.94);
+  border: 1px solid rgba(126, 184, 168, 0.45);
   pointer-events: none;
-  font-size: 1rem;
+  font-size: 1.05rem;
   color: #cfe0d4;
 }
 
 .calm-chart__tip .tip-name {
   color: #f2f7f3;
-  font-size: 1.12rem;
+  font-size: 1.35rem;
+  line-height: 1.15;
+  letter-spacing: 0.02em;
 }
 
 .calm-chart__tip .tip-sub {
-  color: #8fa39a;
-  font-size: 0.88rem;
-  margin-bottom: 0.28rem;
+  color: #a8bdb2;
+  font-size: 1rem;
+  margin: 0.2rem 0 0.4rem;
 }
 
 .calm-chart__tip .tip-row {
@@ -205,9 +235,18 @@
 }
 
 .calm-chart__tip .tip-metric {
-  margin-top: 0.25rem;
-  color: #7f9288;
-  font-size: 0.82rem;
+  margin-top: 0.35rem;
+  color: #8fa39a;
+  font-size: 0.95rem;
+  line-height: 1.25;
+}
+
+.calm-chart__tip .tip-row {
+  font-size: 1.08rem;
+}
+
+.calm-chart__tip .tip-row strong {
+  font-size: 1.15rem;
 }
 
 @media (max-width: 720px) {
@@ -222,7 +261,15 @@
     max-height: 1.75rem;
   }
 
+  .calm-chart__title {
+    font-size: 1.05rem;
+  }
+
   .calm-chart__legend {
-    display: none;
+    font-size: 0.95rem;
+  }
+
+  .calm-chart__tip .tip-name {
+    font-size: 1.2rem;
   }
 }
