@@ -45,8 +45,8 @@ const STREAM_KEYS = ['ha', 'hsd'] as const
 type StreamKey = (typeof STREAM_KEYS)[number]
 
 const STREAM_COLORS: Record<StreamKey, { fill: string; stroke: string }> = {
-  ha: { fill: 'rgba(255, 0, 229, 0.55)', stroke: '#ff00e5' },
-  hsd: { fill: 'rgba(0, 229, 255, 0.5)', stroke: '#00e5ff' },
+  ha: { fill: 'rgba(245, 0, 171, 0.55)', stroke: '#F500AB' },
+  hsd: { fill: 'rgba(0, 184, 204, 0.5)', stroke: '#00B8CC' },
 }
 
 function formatPeople(n: number): string {

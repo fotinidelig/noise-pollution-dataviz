@@ -26,7 +26,7 @@ body,
 body {
   min-width: 320px;
   background:
-    radial-gradient(90% 60% at 15% -10%, rgba(0, 229, 255, 0.08), transparent 55%),
+    radial-gradient(90% 60% at 15% -10%, rgba(0, 184, 204, 0.08), transparent 55%),
     radial-gradient(70% 50% at 100% 0%, rgba(255, 23, 68, 0.06), transparent 50%),
     #03050a;
 }

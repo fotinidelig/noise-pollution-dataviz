@@ -124,8 +124,8 @@
 .scrolly-scroll-cue__chevron {
   width: 0.7rem;
   height: 0.7rem;
-  border-right: 2px solid #5ef0ff;
-  border-bottom: 2px solid #5ef0ff;
+  border-right: 2px solid #4DD4E6;
+  border-bottom: 2px solid #4DD4E6;
   transform: rotate(45deg);
   margin-top: 0.1rem;
 }
@@ -166,7 +166,7 @@
 .scrolly-step__close:hover,
 .scrolly-step__close:focus-visible {
   color: #e8f0ff;
-  outline: 1px solid rgba(0, 229, 255, 0.45);
+  outline: 1px solid rgba(0, 184, 204, 0.45);
 }
 
 .scrolly-root.is-dismissed .scrolly-steps {
@@ -181,12 +181,12 @@
 .scrolly-step--hero .scrolly-step__card {
   text-align: center;
   background: rgba(3, 5, 10, 0.55);
-  border-color: rgba(0, 229, 255, 0.25);
+  border-color: rgba(0, 184, 204, 0.25);
 }
 
 .scrolly-step__year {
   margin: 0 0 0.35rem;
-  color: #00e5ff;
+  color: #00B8CC;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   font-size: 0.95rem;
@@ -198,7 +198,7 @@
   font-size: clamp(1.6rem, 3.2vw, 2.35rem);
   line-height: 1.05;
   letter-spacing: 0.02em;
-  text-shadow: 0 0 18px rgba(0, 229, 255, 0.22);
+  text-shadow: 0 0 18px rgba(0, 184, 204, 0.22);
 }
 
 .scrolly-step--hero .scrolly-step__title {
@@ -213,14 +213,14 @@
 }
 
 .scrolly-step__body .scrolly-hi {
-  color: #5ef0ff;
+  color: #4DD4E6;
   font-weight: 400;
-  text-shadow: 0 0 12px rgba(0, 229, 255, 0.35);
+  text-shadow: 0 0 12px rgba(0, 184, 204, 0.35);
 }
 
 .scrolly-step__body .scrolly-hi:nth-of-type(even) {
-  color: #ff6df5;
-  text-shadow: 0 0 12px rgba(255, 109, 245, 0.35);
+  color: #F56DC0;
+  text-shadow: 0 0 12px rgba(245, 109, 192, 0.35);
 }
 
 .scrolly-rail {
@@ -287,8 +287,8 @@
 }
 
 .scrolly-rail__stop.is-past .scrolly-rail__dot {
-  background: #5ef0ff;
-  border-color: rgba(94, 240, 255, 0.7);
+  background: #4DD4E6;
+  border-color: rgba(77, 212, 230, 0.7);
   opacity: 0.7;
 }
 
@@ -297,9 +297,9 @@
 }
 
 .scrolly-rail__stop.is-active .scrolly-rail__dot {
-  background: #ff00e5;
-  border-color: #ff6df5;
-  box-shadow: 0 0 10px rgba(255, 0, 229, 0.65);
+  background: #F500AB;
+  border-color: #F56DC0;
+  box-shadow: 0 0 10px rgba(245, 0, 171, 0.65);
 }
 
 .scrolly-rail__label {

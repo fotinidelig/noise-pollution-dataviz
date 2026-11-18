@@ -861,9 +861,9 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
                 74,
                 32,
               ],
-              'circle-color': '#ff6df5',
+              'circle-color': '#F56DC0',
               'circle-opacity': 0.72,
-              'circle-stroke-color': '#00e5ff',
+              'circle-stroke-color': '#00B8CC',
               'circle-stroke-width': 1.6,
             },
           })

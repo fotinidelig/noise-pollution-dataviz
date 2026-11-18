@@ -73,7 +73,7 @@
   font-size: clamp(1.85rem, 3.4vw, 2.6rem);
   letter-spacing: 0.02em;
   line-height: 1.05;
-  text-shadow: 0 0 18px rgba(0, 229, 255, 0.28);
+  text-shadow: 0 0 18px rgba(0, 184, 204, 0.28);
 }
 
 .noise-eyebrow {
@@ -127,13 +127,13 @@
 
 .seg button.active {
   color: #041018;
-  background: linear-gradient(120deg, #00e5ff, #76ff03);
-  box-shadow: 0 0 16px rgba(0, 229, 255, 0.35);
+  background: linear-gradient(120deg, #00B8CC, #00CC66);
+  box-shadow: 0 0 16px rgba(0, 184, 204, 0.35);
 }
 
 .seg.metric button.active {
-  background: linear-gradient(120deg, #ff00e5, #00e5ff);
-  box-shadow: 0 0 16px rgba(255, 0, 229, 0.35);
+  background: linear-gradient(120deg, #F500AB, #00B8CC);
+  box-shadow: 0 0 16px rgba(245, 0, 171, 0.35);
 }
 
 .noise-canvas-wrap {
@@ -169,8 +169,8 @@
 .noise-tip .maplibregl-popup-content {
   padding: 0;
   background: rgba(6, 10, 18, 0.94);
-  border: 1px solid rgba(0, 229, 255, 0.35);
-  box-shadow: 0 0 24px rgba(0, 229, 255, 0.12);
+  border: 1px solid rgba(0, 184, 204, 0.35);
+  box-shadow: 0 0 24px rgba(0, 184, 204, 0.12);
   color: #e8f0ff;
   font-family: "VT323", monospace;
 }
@@ -211,7 +211,7 @@
 }
 
 .tip-seoul-db {
-  color: #00e5ff;
+  color: #00B8CC;
 }
 
 .tip-title {
@@ -232,12 +232,12 @@
 }
 
 .tip-mean {
-  color: #00e5ff;
+  color: #00B8CC;
 }
 
 .tip-total {
   margin: 0.35rem 0 0.45rem;
-  color: #00e5ff;
+  color: #00B8CC;
 }
 
 .tip-bands {
