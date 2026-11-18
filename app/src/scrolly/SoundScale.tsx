@@ -73,14 +73,6 @@ export function SoundScale({ anchors = STORY_SOUND_ANCHORS }: Props) {
     () => [...anchors].sort((a, b) => a.db - b.db),
     [anchors],
   )
-  const minDb = sorted[0]?.db ?? 40
-  const maxDb = sorted[sorted.length - 1]?.db ?? 120
-  const pad = 4
-  const domainMin = minDb - pad
-  const domainMax = maxDb + pad
-
-  const pct = (db: number) =>
-    ((db - domainMin) / (domainMax - domainMin)) * 100
 
   useEffect(() => {
     return () => {
@@ -119,34 +111,30 @@ export function SoundScale({ anchors = STORY_SOUND_ANCHORS }: Props) {
 
   return (
     <div className="sound-scale" aria-label="Sound levels from quiet to loud">
-      <div className="sound-scale__axis" role="list">
-        <div className="sound-scale__rail" aria-hidden="true" />
-        <div className="sound-scale__ends" aria-hidden="true">
-          <span>quieter</span>
-          <span>louder</span>
-        </div>
-        {sorted.map((a, i) => (
+      <div className="sound-scale__ends" aria-hidden="true">
+        <span>quieter</span>
+        <span>louder</span>
+      </div>
+      <div className="sound-scale__row" role="list">
+        {sorted.map((a) => (
           <button
             key={a.id}
             type="button"
             role="listitem"
-            className={`sound-scale__mark${i % 2 ? ' is-above' : ' is-below'}${a.highlight ? ' is-highlight' : ''}${playingId === a.id ? ' is-playing' : ''}`}
-            style={{ left: `${pct(a.db)}%` }}
+            className={`sound-scale__mark${a.highlight ? ' is-highlight' : ''}${playingId === a.id ? ' is-playing' : ''}`}
             onClick={() => void play(a)}
             aria-pressed={playingId === a.id}
             aria-label={`Play ${a.label}, about ${a.db} decibels`}
             title="Click to play sample"
           >
-            <span className="sound-scale__meta">
-              <span className="sound-scale__label">{a.label}</span>
-              <span className="sound-scale__db">
-                {a.dbNote ?? `~${a.db}`} dB
-              </span>
-              <span className="sound-scale__play">
-                {playingId === a.id ? 'playing' : 'play'}
-              </span>
-            </span>
             <span className="sound-scale__dot" />
+            <span className="sound-scale__label">{a.label}</span>
+            <span className="sound-scale__db">
+              {a.dbNote ?? `~${a.db}`} dB
+            </span>
+            <span className="sound-scale__play">
+              {playingId === a.id ? 'playing' : 'play'}
+            </span>
           </button>
         ))}
       </div>

@@ -26,6 +26,23 @@
 **Do you hear the birds?**  
 Or are our cities too loud? We’ll look at noise levels around Europe and the world to find out.
 
+### Sounds — But what does noise look like? *(2nd beat, right after intro)*
+
+**People experiencing sleep disturbances are exposed to more than 70 dB.**
+
+Horizontal quiet→loud ladder (equally spaced markers; click-to-play `app/public/audio/*.mp3`):
+
+| Label | Anchor | Clip |
+| --- | --- | --- |
+| Water stream | ~40–50 dB | `water-stream.mp3` |
+| Birds | ~44–60 dB | `birds-singing.mp3` |
+| Vacuum | **~70 dB** (HSD threshold highlight) | `vacuum-cleaner.mp3` (Freesound 76618) |
+| Motorcycle | ~90 dB | `motorcycle-passing.mp3` |
+| Helicopter | ~105 dB | `helicopter.mp3` |
+| Rock concert | ~90–130 dB | `rock-concert.mp3` |
+
+Browser playback is **not** calibrated SPL — clips show character; labels carry the dB anchors. Clips are peak-normalized to a shared max amplitude.
+
 ### Europe (2021) — People are quite annoyed by the noise
 
 About **74.1 million** people in European cities live in official **noise levels** that already sit above **WHO road-traffic guidance (~53 dB)**. Roughly **12.5 million** people are **highly annoyed** by road, rail, or aircraft noise.  
@@ -45,25 +62,6 @@ On the **2021** END **road** maps for the **Paris** agglomeration (`France|Paris
 ### Madrid (2026)
 
 In **2026**, night noise at **fixed outdoor noise monitoring station 6** sits around **64 dB** on a typical night, with peaks near **80 dB**. Yes, that's **2 times** the noise of a **vacuum cleaner**.
-
-### Sounds — But what does noise look like?
-
-Placed after Madrid (vacuum / sleep framing) and before Hong Kong.
-
-**People experiencing sleep disturbances are exposed to more than 70 dB.**
-
-Horizontal quiet→loud ladder with click-to-play samples (`app/public/audio/*.mp3`):
-
-| Label | Anchor | Clip |
-| --- | --- | --- |
-| Water stream | ~40–50 dB | `water-stream.mp3` |
-| Birds | ~44–60 dB | `birds-singing.mp3` |
-| Vacuum | **~70 dB** (HSD threshold highlight) | `vacuum-cleaner.mp3` |
-| Motorcycle | ~90 dB | `motorcycle-passing.mp3` |
-| Helicopter | ~105 dB | `helicopter.mp3` |
-| Rock concert | ~90–130 dB | `rock-concert.mp3` |
-
-Browser playback is **not** calibrated SPL — clips show character; labels carry the dB anchors (see agent-store `story-sound-samples.md` / `docs/common-sounds-db-levels.md`).
 
 ### Hong Kong (2020)
 
