@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "note": "Approx coords. Concrete measured / monitored dB only (no END designation thresholds; no EEA QSI modelled quiet). Includes EASA-cited park hours, Nilsson & Berglund Stockholm sites, Silent Route, JASA forest demo, NPS Type-1 monitors. Day and/or night when reported.",
+  "note": "Approx coords. Concrete measured / monitored dB only (no END designation thresholds; no EEA QSI modelled quiet). Includes EASA-cited park hours, Nilsson & Berglund Stockholm sites, Silent Route, NPS Type-1 monitors. Day and/or night when reported. Excludes unnamed JASA quiet-forest demo.",
   "places": [
     {
       "id": "denali-birch-creek",
@@ -119,23 +119,6 @@
       "metric": "LAeq (route mean)",
       "year": "2022–2023",
       "storytelling_rank": 5,
-      "kind": "measured"
-    },
-    {
-      "id": "quiet-forest-jasa",
-      "label": "Quiet forest (JASA demo)",
-      "shortLabel": "Quiet forest",
-      "country": "Europe",
-      "city": "study forest",
-      "continent": "Europe",
-      "setting": "nature",
-      "lon": 8.4,
-      "lat": 47.8,
-      "day_db": 28.7,
-      "night_db": null,
-      "metric": "LAeq,60s",
-      "year": "2013",
-      "storytelling_rank": null,
       "kind": "measured"
     },
     {

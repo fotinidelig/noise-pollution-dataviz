@@ -4,7 +4,7 @@ Companion to [`common-sounds-db-levels.md`](./common-sounds-db-levels.md) for Fo
 
 **Data file:** [`calm-quiet-place-levels.csv`](./calm-quiet-place-levels.csv) — **22 place rows** (research inventory).
 
-**App map/chart (`app/public/data/calm_spaces.json`):** **13 measured sites** only — EASA-cited park hours (Norra Djurgården, Tiergarten, Trondheim), Stockholm JASA sites, Silent Route, JASA quiet-forest demo, NPS Type-1 monitors (Denali, GRCA031, Haleakalā Nuʻu, Olympic Hoh + Hurricane Ridge existing & natural). **Excluded from the viz:** END/policy thresholds (Dublin, Vienna, Italy…), EEA QSI modelled quiet, synthesis floors, interpretive-only crater/trail citations without instrumented companions.
+**App map/chart (`app/public/data/calm_spaces.json`):** **12 measured sites** only — EASA-cited park hours (Norra Djurgården, Tiergarten, Trondheim), Stockholm JASA sites, Silent Route, NPS Type-1 monitors (Denali, GRCA031, Haleakalā Nuʻu, Olympic Hoh + Hurricane Ridge existing & natural). **Excluded from the viz:** unnamed JASA quiet-forest demo (no public locality), END/policy thresholds (Dublin, Vienna, Italy…), EEA QSI modelled quiet, synthesis floors, interpretive-only crater/trail citations without instrumented companions.
 
 ---
 
@@ -47,7 +47,7 @@ Companion to [`common-sounds-db-levels.md`](./common-sounds-db-levels.md) for Fo
 | Denali NP — Birch Creek | USA | wilderness | L50 (existing); Lnat | **17.7**; Lnat **17.6** | 2013 | Very quiet inland site; aircraft rare vs road corridor sites. | [NPS DENA NRDS 2015/989](https://parkplanning.nps.gov/showFile.cfm?projectID=94730&sfid=424997) |
 | Olympic NP — Hoh River Trail (OLYM001) | USA | wilderness (river forest) | L50 (existing ambient) | Overall **~38**; day/night also ~**38** / **~34** | 2010 (winter) | River runoff raises median; still **~83%** natural sounds audible; not “silent,” but wild. | [NPS IRMA DownloadFile/560226](https://irma.nps.gov/DataStore/DownloadFile/560226) |
 | Olympic NP — Hurricane Ridge (OLYM003) | USA | wilderness / alpine | L50 natural ambient (day) | **~15.4** (natural); existing day L50 **~24.4** | 2010 (winter) | Road closed during campaign → unusually low anthropogenic contribution. | [NPS IRMA DownloadFile/560226](https://irma.nps.gov/DataStore/DownloadFile/560226) |
-| Quiet forest (lab/field JASA demonstration) | (study forest; not named locality) | nature | LAeq,60s | **28.7** | 2013 | Peer-reviewed demonstration of very quiet forest mid-band SPLs (often &lt;20 dB mid frequencies). | [JASA](https://doi.org/10.1121/1.4799667) |
+| Quiet forest (lab/field JASA demonstration) | (study forest; not named locality) | nature | LAeq,60s | **28.7** | 2013 | Peer-reviewed demonstration of very quiet forest mid-band SPLs (often &lt;20 dB mid frequencies). **Not on the app map** (unnamed locality). | [JASA](https://doi.org/10.1121/1.4799667) |
 
 **Also useful (not a single place):** EEA Report 14/2016 maps **potential** rural quiet areas (~**18%** of Europe “quiet”; Nordic countries highest share) — model/proxy, not site LAeq. [EEA publication](https://www.eea.europa.eu/en/analysis/publications/quiet-areas-in-europe).
 
