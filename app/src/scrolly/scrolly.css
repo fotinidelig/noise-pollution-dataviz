@@ -39,7 +39,8 @@
   min-height: 100svh;
   display: flex;
   align-items: center;
-  padding: 2rem 1.25rem 2rem 4.5rem;
+  /* Clear fixed rail + labels (EUROPE / GERMANY / …) under IBM Plex Sans. */
+  padding: 2rem 1.25rem 2rem 7.75rem;
   pointer-events: none;
 }
 
@@ -196,7 +197,9 @@
 
 .scrolly-step--hero {
   justify-content: center;
-  padding-left: 1.25rem;
+  /* Still leave room for the rail; keep card visually centered. */
+  padding-left: 7.75rem;
+  padding-right: 1.25rem;
 }
 
 .scrolly-step--hero .scrolly-step__card {
@@ -347,8 +350,12 @@
 
 @media (max-width: 720px) {
   .scrolly-step {
-    padding: 1.25rem 0.85rem 1.25rem 3.2rem;
+    padding: 1.25rem 0.85rem 1.25rem 3.4rem;
     align-items: flex-end;
+  }
+
+  .scrolly-step--hero {
+    padding-left: 3.4rem;
   }
 
   .scrolly-step--calm {
