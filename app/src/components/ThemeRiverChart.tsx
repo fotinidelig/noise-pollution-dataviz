@@ -63,20 +63,29 @@ export function ThemeRiverChart({ data, source, focusId, onHoverCity }: Props) {
   const lastNotifiedId = useRef<string | null>(null)
   const [size, setSize] = useState({ w: 800, h: 168 })
   const [localHover, setLocalHover] = useState<string | null>(null)
+  const [collapsed, setCollapsed] = useState(false)
 
   const payload = data?.bySource?.[source] ?? null
 
   useEffect(() => {
     const el = wrapRef.current
-    if (!el) return
+    if (!el || collapsed) return
+    const apply = (width: number, height: number) => {
+      setSize({
+        w: Math.max(320, width),
+        h: Math.max(120, height),
+      })
+    }
+    const rect = el.getBoundingClientRect()
+    apply(rect.width, rect.height)
     const ro = new ResizeObserver((entries) => {
       const r = entries[0]?.contentRect
-      if (!r) return
-      setSize({ w: Math.max(320, r.width), h: Math.max(120, r.height) })
+      if (!r || r.height < 80) return
+      apply(r.width, r.height)
     })
     ro.observe(el)
     return () => ro.disconnect()
-  }, [])
+  }, [collapsed])
 
   const layout = useMemo(() => {
     if (!payload || payload.cities.length < 2) return null
@@ -141,17 +150,20 @@ export function ThemeRiverChart({ data, source, focusId, onHoverCity }: Props) {
     )
   }
 
-  if (!layout) return null
+  if (!layout && !collapsed) return null
 
   const activeId = localHover ?? focusId
-  const activeIdx = activeId
-    ? layout.cities.findIndex((c) => c.id === activeId)
-    : -1
-  const activeCity = activeIdx >= 0 ? layout.cities[activeIdx] : null
+  const activeIdx =
+    layout && activeId
+      ? layout.cities.findIndex((c) => c.id === activeId)
+      : -1
+  const activeCity =
+    layout && activeIdx >= 0 ? layout.cities[activeIdx] : null
   const ruleX =
-    activeCity != null ? (layout.x(activeCity.id) ?? null) : null
+    layout && activeCity != null ? (layout.x(activeCity.id) ?? null) : null
 
   const onMove = (ev: React.MouseEvent<SVGSVGElement>) => {
+    if (!layout) return
     const svg = ev.currentTarget
     const rect = svg.getBoundingClientRect()
     const px = ev.clientX - rect.left - layout.margin.left
@@ -182,90 +194,119 @@ export function ThemeRiverChart({ data, source, focusId, onHoverCity }: Props) {
 
   return (
     <div
-      className="theme-river"
+      className={`theme-river${collapsed ? ' theme-river--collapsed' : ''}`}
       ref={wrapRef}
       aria-label="Highly annoyed (HA) and highly sleep disturbed (HSD) ThemeRiver"
     >
-      <div className="theme-river__head">
-        <span className="theme-river__title">
-          People highly annoyed (
-          <span className="theme-river__term theme-river__term--ha">HA</span>) /
-          highly sleep disturbed (
-          <span className="theme-river__term theme-river__term--hsd">HSD</span>) by{' '}
-          {source} noise
-        </span>
-      </div>
-      <svg
-        className="theme-river__svg"
-        width={size.w}
-        height={size.h}
-        onMouseMove={onMove}
-        onMouseLeave={onLeave}
-        role="img"
-      >
-        <g transform={`translate(${layout.margin.left},${layout.margin.top})`}>
-          <line
-            className="theme-river__baseline"
-            x1={0}
-            x2={layout.innerW}
-            y1={layout.midY}
-            y2={layout.midY}
-          />
-          {layout.paths.map((p) => (
-            <path
-              key={p.key}
-              className={`theme-river__stream theme-river__stream--${p.key}`}
-              d={p.d}
-              fill={STREAM_COLORS[p.key].fill}
-              stroke={STREAM_COLORS[p.key].stroke}
-            />
-          ))}
-          {ruleX != null ? (
-            <line
-              className="theme-river__rule"
-              x1={ruleX}
-              x2={ruleX}
-              y1={0}
-              y2={layout.innerH}
-            />
-          ) : null}
-          {layout.ticks.map((t, ti) => {
-            // Drop overlapping country labels when the river is dense
-            const prev = layout.ticks[ti - 1]
-            if (prev && Math.abs(t.x - prev.x) < 42) return null
-            const label =
-              layout.ticks.length > 18 && t.country.length > 10
-                ? t.country.slice(0, 3).toUpperCase()
-                : t.country
-            return (
-              <g key={t.country} transform={`translate(${t.x},${layout.innerH + 12})`}>
-                <text className="theme-river__tick" textAnchor="middle">
-                  {label}
-                </text>
-              </g>
-            )
-          })}
-        </g>
-      </svg>
-      {activeCity ? (
-        <div
-          className="theme-river__tip"
-          style={{
-            // Sit to the right of the vertical cursor (no horizontal clamp into the viz)
-            left:
-              ruleX != null ? layout.margin.left + ruleX + 10 : 12,
-          }}
+      {collapsed ? (
+        <button
+          type="button"
+          className="theme-river__toggle theme-river__toggle--show"
+          aria-expanded={false}
+          onClick={() => setCollapsed(false)}
         >
-          <div className="tip-name">{activeCity.agglomeration}</div>
-          <div className="tip-sub">{activeCity.country}</div>
-          <div className="tip-row ha">
-            HA <strong>{formatPeople(activeCity.ha)}</strong>
+          show
+        </button>
+      ) : (
+        <>
+          <div className="theme-river__head">
+            <span className="theme-river__title">
+              People highly annoyed (
+              <span className="theme-river__term theme-river__term--ha">HA</span>) /
+              highly sleep disturbed (
+              <span className="theme-river__term theme-river__term--hsd">HSD</span>) by{' '}
+              {source} noise
+            </span>
+            <button
+              type="button"
+              className="theme-river__toggle theme-river__toggle--hide"
+              aria-expanded={true}
+              onClick={() => {
+                setLocalHover(null)
+                lastNotifiedId.current = null
+                onHoverCity(null)
+                setCollapsed(true)
+              }}
+            >
+              hide
+            </button>
           </div>
-          <div className="tip-row hsd">
-            HSD <strong>{formatPeople(activeCity.hsd)}</strong>
-          </div>
-        </div>
-      ) : null}
+          {layout ? (
+            <svg
+              className="theme-river__svg"
+              width={size.w}
+              height={size.h}
+              onMouseMove={onMove}
+              onMouseLeave={onLeave}
+              role="img"
+            >
+              <g transform={`translate(${layout.margin.left},${layout.margin.top})`}>
+                <line
+                  className="theme-river__baseline"
+                  x1={0}
+                  x2={layout.innerW}
+                  y1={layout.midY}
+                  y2={layout.midY}
+                />
+                {layout.paths.map((p) => (
+                  <path
+                    key={p.key}
+                    className={`theme-river__stream theme-river__stream--${p.key}`}
+                    d={p.d}
+                    fill={STREAM_COLORS[p.key].fill}
+                    stroke={STREAM_COLORS[p.key].stroke}
+                  />
+                ))}
+                {ruleX != null ? (
+                  <line
+                    className="theme-river__rule"
+                    x1={ruleX}
+                    x2={ruleX}
+                    y1={0}
+                    y2={layout.innerH}
+                  />
+                ) : null}
+                {layout.ticks.map((t, ti) => {
+                  const prev = layout.ticks[ti - 1]
+                  if (prev && Math.abs(t.x - prev.x) < 42) return null
+                  const label =
+                    layout.ticks.length > 18 && t.country.length > 10
+                      ? t.country.slice(0, 3).toUpperCase()
+                      : t.country
+                  return (
+                    <g
+                      key={t.country}
+                      transform={`translate(${t.x},${layout.innerH + 12})`}
+                    >
+                      <text className="theme-river__tick" textAnchor="middle">
+                        {label}
+                      </text>
+                    </g>
+                  )
+                })}
+              </g>
+            </svg>
+          ) : null}
+          {activeCity ? (
+            <div
+              className="theme-river__tip"
+              style={{
+                left:
+                  ruleX != null ? layout!.margin.left + ruleX + 10 : 12,
+              }}
+            >
+              <div className="tip-name">{activeCity.agglomeration}</div>
+              <div className="tip-sub">{activeCity.country}</div>
+              <div className="tip-row ha">
+                HA <strong>{formatPeople(activeCity.ha)}</strong>
+              </div>
+              <div className="tip-row hsd">
+                HSD <strong>{formatPeople(activeCity.hsd)}</strong>
+              </div>
+            </div>
+          ) : null}
+        </>
+      )}
     </div>
   )
 }

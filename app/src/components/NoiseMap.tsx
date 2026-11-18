@@ -11,7 +11,6 @@ import {
   type NoiseSource,
 } from '../lib/noiseStyle'
 import {
-  MAX_UNITS_PER_COUNTRY_FOR_COUNTRY_VIEW,
   buildCountryAggregates,
   countriesToGeoJSON,
   seriesFromBands,
@@ -50,6 +49,16 @@ const HIT_LAYER = 'aggl-hit'
 const LABEL_LAYER = 'aggl-labels'
 const COUNTRY_HIT_LAYER = 'aggl-country-hit'
 const COUNTRY_LABEL_LAYER = 'aggl-country-labels'
+/** Matches `rebuildRings` country-view cutoff (`zoom < 5`). */
+const COUNTRY_VIEW_MAX_ZOOM = 5
+/** Matches cities GeoJSON `clusterMaxZoom`. */
+const CITY_CLUSTER_MAX_ZOOM = 8
+/** First drill past country rings → city/cluster rings (same band as manual zoom). */
+const COUNTRY_DRILL_ZOOM = COUNTRY_VIEW_MAX_ZOOM + 0.65
+/** Drill past clustered points → individual city rings. */
+const CITY_DRILL_ZOOM = CITY_CLUSTER_MAX_ZOOM + 0.55
+const DRILL_ZOOM_STEP = 1.45
+const DRILL_DURATION_MS = 950
 const dataUrl = (path: string) => {
   const base = import.meta.env.BASE_URL || '/'
   const p = path.startsWith('/') ? path.slice(1) : path
@@ -144,6 +153,71 @@ async function getClusterLeaves(
   return source.getClusterLeaves(clusterId, Infinity, 0)
 }
 
+/** Step zoom like manual scroll: at least `floor`, else +DRILL_ZOOM_STEP. */
+function nextDrillZoom(currentZoom: number, floor: number): number {
+  return Math.min(12, Math.max(currentZoom + DRILL_ZOOM_STEP, floor))
+}
+
+function easeDrillTo(
+  map: maplibregl.Map,
+  center: [number, number],
+  floorZoom: number,
+) {
+  map.easeTo({
+    center,
+    zoom: nextDrillZoom(map.getZoom(), floorZoom),
+    duration: DRILL_DURATION_MS,
+    essential: true,
+  })
+}
+
+/** Fit a country’s cities, capped so the first click lands in the cluster band. */
+function fitCountryDrill(
+  map: maplibregl.Map,
+  cities: ChartCity[],
+  country: string,
+  fallback: [number, number],
+) {
+  const pts = cities.filter(
+    (c) =>
+      c.country === country &&
+      typeof c.lon === 'number' &&
+      typeof c.lat === 'number',
+  )
+  if (pts.length === 0) {
+    easeDrillTo(map, fallback, COUNTRY_DRILL_ZOOM)
+    return
+  }
+  if (pts.length === 1) {
+    easeDrillTo(map, [pts[0].lon as number, pts[0].lat as number], COUNTRY_DRILL_ZOOM)
+    return
+  }
+  const firstLon = pts[0].lon as number
+  const firstLat = pts[0].lat as number
+  const bounds = new maplibregl.LngLatBounds(
+    [firstLon, firstLat],
+    [firstLon, firstLat],
+  )
+  for (const p of pts) bounds.extend([p.lon as number, p.lat as number])
+  const z = map.getZoom()
+  // Stay below city-leaf zoom so France → fewer clusters, not every city.
+  const maxZoom = Math.min(
+    CITY_CLUSTER_MAX_ZOOM - 0.35,
+    Math.max(COUNTRY_DRILL_ZOOM + 0.85, z + DRILL_ZOOM_STEP),
+  )
+  map.fitBounds(bounds, {
+    padding: { top: 88, bottom: 72, left: 120, right: 72 },
+    maxZoom,
+    duration: DRILL_DURATION_MS,
+    essential: true,
+  })
+}
+
+type DrillHit = {
+  geometry: { type: 'Point'; coordinates: [number, number] | number[] }
+  properties: Record<string, unknown> | null
+}
+
 export type StoryMapControl = {
   stepId: string
   center: [number, number]
@@ -168,6 +242,8 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
   const sourceRef = useRef<NoiseSource>('road')
   const metricRef = useRef<NoiseMetric>('Lden')
   const rebuildTimer = useRef<number | null>(null)
+  const rebuildRetryTimer = useRef<number | null>(null)
+  const rebuildEmptyRetries = useRef(0)
   const countryModeRef = useRef(false)
   const lastStoryStep = useRef<string | null>(null)
   const pulsePhaseRef = useRef(0)
@@ -179,6 +255,8 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
   // Standalone map = explore; scrolly steps lock until the final explore beat
   const explore = !story || Boolean(story.explore)
   const storyLocked = Boolean(story) && !explore
+  const exploreRef = useRef(explore)
+  exploreRef.current = explore
 
   const [source, setSource] = useState<NoiseSource>('road')
   const [metric, setMetric] = useState<NoiseMetric>('Lden')
@@ -807,7 +885,6 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
 
     // Clustered + unclustered points for the current zoom
     const rendered = map.querySourceFeatures(CITIES_SOURCE)
-    const unitsByCountry = new Map<string, number>()
     const seenClusters = new Set<number>()
     const seenCities = new Set<string>()
     type CityUnit = {
@@ -837,17 +914,11 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
           continue
         }
         const tips: ChartSeries[] = []
-        const countries = new Set<string>()
         for (const leaf of leaves) {
           const tip = tipFromProps(leaf.properties?.tooltip, src, met)
           if (tip) tips.push(tip)
-          const c = String(leaf.properties?.country ?? '')
-          if (c) countries.add(c)
         }
         if (!tips.length) continue
-        for (const c of countries) {
-          unitsByCountry.set(c, (unitsByCountry.get(c) ?? 0) + 1)
-        }
         cityUnits.push({
           kind: 'cluster',
           id: `cluster:${clusterId}`,
@@ -863,8 +934,6 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
         seenCities.add(id)
         const tip = tipFromProps(props.tooltip, src, met)
         if (!tip) continue
-        const country = String(props.country ?? '')
-        if (country) unitsByCountry.set(country, (unitsByCountry.get(country) ?? 0) + 1)
         cityUnits.push({
           kind: 'city',
           id,
@@ -877,15 +946,32 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
       }
     }
 
-    // Landing / far zoom: always countries. Otherwise only when each country
-    // has ≤2 city/cluster units on screen.
+    // Far zoom: country rings. Past the threshold: city/cluster rings
+    // (same band as manual zoom / click-drill — France → clusters → cities).
     const zoom = map.getZoom()
-    const sparseEnough =
-      unitsByCountry.size > 0 &&
-      [...unitsByCountry.values()].every(
-        (n) => n <= MAX_UNITS_PER_COUNTRY_FOR_COUNTRY_VIEW,
-      )
-    const useCountryView = zoom < 5 || sparseEnough
+    const useCountryView = zoom < COUNTRY_VIEW_MAX_ZOOM
+
+    // After fitBounds/easeTo, cluster tiles can lag — retry instead of wiping rings.
+    if (!useCountryView && cityUnits.length === 0) {
+      setCountryMode(false)
+      if (rebuildEmptyRetries.current < 24) {
+        rebuildEmptyRetries.current += 1
+        if (rebuildRetryTimer.current != null) {
+          window.clearTimeout(rebuildRetryTimer.current)
+        }
+        rebuildRetryTimer.current = window.setTimeout(() => {
+          rebuildRetryTimer.current = null
+          void rebuildRings()
+        }, 80)
+        return
+      }
+    } else {
+      rebuildEmptyRetries.current = 0
+    }
+    if (rebuildRetryTimer.current != null) {
+      window.clearTimeout(rebuildRetryTimer.current)
+      rebuildRetryTimer.current = null
+    }
 
     const ringFeatures: Feature[] = []
 
@@ -971,7 +1057,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
         data: { type: 'FeatureCollection', features: [] },
         cluster: true,
         clusterRadius: 70,
-        clusterMaxZoom: 8,
+        clusterMaxZoom: CITY_CLUSTER_MAX_ZOOM,
       })
 
       map.addSource(RINGS_SOURCE, {
@@ -1151,6 +1237,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
 
       map.on('moveend', scheduleRebuild)
       map.on('zoomend', scheduleRebuild)
+      map.on('idle', scheduleRebuild)
       map.on('sourcedata', (e) => {
         if (e.sourceId === CITIES_SOURCE && e.isSourceLoaded) scheduleRebuild()
       })
@@ -1163,12 +1250,76 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
       console.warn('[NoiseMap]', e?.error ?? e)
     })
 
-    // Country / city pin; cluster → zoom; empty → unpin
+    // Explore: country/city/cluster click drills zoom (same thresholds as scroll).
+    // Story mode: pin only — never easeTo (keeps scrolly flyTos authoritative).
     map.on('click', (e) => {
+      const canDrill = exploreRef.current
       const hitLayers = countryModeRef.current
         ? [COUNTRY_HIT_LAYER]
         : [HIT_LAYER]
-      const hits = map.queryRenderedFeatures(e.point, { layers: hitLayers })
+      let hits: DrillHit[] = map.queryRenderedFeatures(e.point, {
+        layers: hitLayers,
+      }) as DrillHit[]
+
+      // Rings are larger than hit circles — resolve id from the visible stack.
+      if (!hits.length && map.getLayer(RINGS_LAYER)) {
+        const ringHits = map.queryRenderedFeatures(e.point, {
+          layers: [RINGS_LAYER],
+        })
+        const ringId = String(ringHits[0]?.properties?.id ?? '')
+        if (ringId.startsWith('country:')) {
+          const country = ringId.slice('country:'.length)
+          const agg = countryAggsRef.current.find((a) => a.country === country)
+          if (agg) {
+            hits = [
+              {
+                geometry: { type: 'Point', coordinates: [agg.lon, agg.lat] },
+                properties: {
+                  kind: 'country',
+                  id: agg.id,
+                  country: agg.country,
+                  cityCount: agg.cityCount,
+                  series: JSON.stringify(agg.series),
+                },
+              },
+            ]
+          }
+        } else if (ringId.startsWith('cluster:')) {
+          const clusterId = Number(ringId.slice('cluster:'.length))
+          if (Number.isFinite(clusterId)) {
+            hits = [
+              {
+                geometry: {
+                  type: 'Point',
+                  coordinates: [e.lngLat.lng, e.lngLat.lat],
+                },
+                properties: { cluster: true, cluster_id: clusterId },
+              },
+            ]
+          }
+        } else if (ringId) {
+          const city = citiesRef.current.find((c) => c.id === ringId)
+          if (city && city.lon != null && city.lat != null) {
+            const tip =
+              city.series[`${sourceRef.current}__${metricRef.current}`]
+            hits = [
+              {
+                geometry: {
+                  type: 'Point',
+                  coordinates: [city.lon, city.lat],
+                },
+                properties: {
+                  id: city.id,
+                  agglomeration: city.agglomeration,
+                  country: city.country,
+                  tooltip: tip ? JSON.stringify(tip) : '',
+                },
+              },
+            ]
+          }
+        }
+      }
+
       if (!hits.length) {
         pinnedIdRef.current = null
         setPinnedId(null)
@@ -1182,13 +1333,6 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
       if (props.kind === 'country') {
         const id = String(props.id ?? '')
         if (!id) return
-        if (pinnedIdRef.current === id) {
-          pinnedIdRef.current = null
-          setPinnedId(null)
-          setPinnedSeries(null)
-          applyFocusPaint(hoveredIdRef.current)
-          return
-        }
         let series: HoverSeries | null = null
         try {
           series = JSON.parse(String(props.series || 'null')) as HoverSeries
@@ -1200,28 +1344,40 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
         setPinnedId(id)
         setPinnedSeries(series)
         setMapHover(id, series)
+        if (canDrill) {
+          const coords = (feat.geometry as Point).coordinates as [
+            number,
+            number,
+          ]
+          fitCountryDrill(
+            map,
+            citiesRef.current,
+            String(props.country ?? series.name),
+            coords,
+          )
+        }
         return
       }
 
       if (props.cluster) {
+        if (!canDrill) return
         const clusterId = Number(props.cluster_id)
         const citySource = map.getSource(CITIES_SOURCE) as maplibregl.GeoJSONSource
         void citySource.getClusterExpansionZoom(clusterId).then((zoom) => {
           const coords = (feat.geometry as Point).coordinates as [number, number]
-          map.easeTo({ center: coords, zoom })
+          // Same expansion zoom MapLibre uses for cluster click-to-zoom.
+          map.easeTo({
+            center: coords,
+            zoom,
+            duration: DRILL_DURATION_MS,
+            essential: true,
+          })
         })
         return
       }
 
       const id = String(props.id ?? '')
       if (!id) return
-      if (pinnedIdRef.current === id) {
-        pinnedIdRef.current = null
-        setPinnedId(null)
-        setPinnedSeries(null)
-        applyFocusPaint(hoveredIdRef.current)
-        return
-      }
 
       const src = sourceRef.current
       const met = metricRef.current
@@ -1233,10 +1389,17 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
       setPinnedId(id)
       setPinnedSeries(series)
       setMapHover(id, series)
+      if (canDrill) {
+        const coords = (feat.geometry as Point).coordinates as [number, number]
+        easeDrillTo(map, coords, CITY_DRILL_ZOOM)
+      }
     })
 
     return () => {
       if (rebuildTimer.current != null) window.clearTimeout(rebuildTimer.current)
+      if (rebuildRetryTimer.current != null) {
+        window.clearTimeout(rebuildRetryTimer.current)
+      }
       popup.remove()
       map.remove()
       mapRef.current = null
