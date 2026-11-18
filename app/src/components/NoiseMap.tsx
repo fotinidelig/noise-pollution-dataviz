@@ -174,7 +174,6 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
 
   const [source, setSource] = useState<NoiseSource>('road')
   const [metric, setMetric] = useState<NoiseMetric>('Lden')
-  const [status, setStatus] = useState('Loading map…')
   const [mapReady, setMapReady] = useState(false)
   const [chartCities, setChartCities] = useState<ChartCity[]>([])
   const [streamData, setStreamData] = useState<StreamData | null>(null)
@@ -868,7 +867,6 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
           }),
         )
       }
-      setStatus(`${src} · ${met} · countries`)
     } else {
       setCountryMode(false)
       for (const unit of cityUnits) {
@@ -887,7 +885,6 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
           }),
         )
       }
-      setStatus(`${src} · ${met} · agglomerations`)
     }
 
     const ringSource = map.getSource(RINGS_SOURCE) as maplibregl.GeoJSONSource
@@ -1119,13 +1116,12 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
         if (e.sourceId === CITIES_SOURCE && e.isSourceLoaded) scheduleRebuild()
       })
 
-      setStatus(`${sourceRef.current} · ${metricRef.current} · countries`)
       setMapReady(true)
       scheduleRebuild()
     })
 
-    map.on('error', () => {
-      setStatus('Map error — check console / data assets')
+    map.on('error', (e) => {
+      console.warn('[NoiseMap]', e?.error ?? e)
     })
 
     // Country / city pin; cluster → zoom; empty → unpin
@@ -1233,7 +1229,6 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
       setPinnedId(null)
       setPinnedSeries(null)
       map.getCanvas().style.cursor = ''
-      setStatus(`${source} · ${metric}`)
       scheduleRebuild()
     }
     if (map.isStyleLoaded() && map.getSource(CITIES_SOURCE)) apply()
@@ -1531,7 +1526,6 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
             onHoverCity={onStreamHoverCity}
           />
         ) : null}
-        <p className="noise-status">{status}</p>
       </div>
     </section>
   )
