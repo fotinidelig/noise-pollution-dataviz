@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { NoiseMap, type StoryMapControl } from '../components/NoiseMap'
 import { buildSteps } from './buildSteps'
 import { ProgressRail } from './ProgressRail'
+import { SoundScale } from './SoundScale'
 import type { StoryMetrics, StoryStepId } from './storyTypes'
 import './scrolly.css'
 
@@ -144,7 +145,7 @@ export function ScrollyApp() {
           return (
             <section
               key={step.id}
-              className={`scrolly-step${step.id === 'hero' ? ' scrolly-step--hero' : ''}${step.id === 'calm' ? ' scrolly-step--calm' : ''}${isActiveCard ? ' is-active' : ''}`}
+              className={`scrolly-step${step.id === 'hero' ? ' scrolly-step--hero' : ''}${step.id === 'sounds' ? ' scrolly-step--sounds' : ''}${step.id === 'calm' ? ' scrolly-step--calm' : ''}${isActiveCard ? ' is-active' : ''}`}
               data-step-id={step.id}
               ref={(el) => {
                 stepRefs.current[step.id] = el
@@ -202,6 +203,7 @@ export function ScrollyApp() {
                         }}
                       />
                     ))}
+                    {step.id === 'sounds' ? <SoundScale /> : null}
                   </div>
                   {isActiveCard && step.id === 'hongkong' ? (
                     <div

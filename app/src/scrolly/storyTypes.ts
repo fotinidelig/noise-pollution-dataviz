@@ -115,6 +115,7 @@ export type StoryStepId =
   | 'germany'
   | 'paris'
   | 'madrid'
+  | 'sounds'
   | 'hongkong'
   | 'seoul'
   | 'calm'

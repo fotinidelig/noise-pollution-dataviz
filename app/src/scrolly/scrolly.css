@@ -58,6 +58,15 @@
   align-items: center;
 }
 
+/* Sound ladder: wide enough for quiet→loud markers + play hits. */
+.scrolly-step--sounds .scrolly-step__stack {
+  max-width: min(760px, 94vw);
+}
+
+.scrolly-step--sounds .scrolly-step__card {
+  padding-bottom: 1rem;
+}
+
 /* Calm beat: wider, higher card so the bottom scatter stays clear. */
 .scrolly-step--calm {
   align-items: flex-start;

@@ -46,9 +46,29 @@ On the **2021** END **road** maps for the **Paris** agglomeration (`France|Paris
 
 In **2026**, night noise at **fixed outdoor noise monitoring station 6** sits around **64 dB** on a typical night, with peaks near **80 dB**. Yes, that's **2 times** the noise of a **vacuum cleaner**.
 
+### Sounds — But what does noise look like?
+
+Placed after Madrid (vacuum / sleep framing) and before Hong Kong.
+
+**People experiencing sleep disturbances are exposed to more than 70 dB.**
+
+Horizontal quiet→loud ladder with click-to-play samples (`app/public/audio/*.mp3`):
+
+| Label | Anchor | Clip |
+| --- | --- | --- |
+| Water stream | ~40–50 dB | `water-stream.mp3` |
+| Birds | ~44–60 dB | `birds-singing.mp3` |
+| Vacuum | **~70 dB** (HSD threshold highlight) | `vacuum-cleaner.mp3` |
+| Motorcycle | ~90 dB | `motorcycle-passing.mp3` |
+| Helicopter | ~105 dB | `helicopter.mp3` |
+| Rock concert | ~90–130 dB | `rock-concert.mp3` |
+
+Browser playback is **not** calibrated SPL — clips show character; labels carry the dB anchors (see agent-store `story-sound-samples.md` / `docs/common-sounds-db-levels.md`).
+
 ### Hong Kong (2020)
 
-On the **2020** Hong Kong **citywide traffic-noise map** (modelled area levels, not one microphone), about **23%** of the mapped territory sits above **70 dB** — roughly **97 km²** — past a **vacuum cleaner**.
+Title: **Hong Kong: ≥1 million people above 70 dB road traffic** (UNEP Frontiers 2022).  
+On the **2020** Hong Kong **citywide traffic-noise map** (modelled area levels, not one microphone), about **23%** of the mapped territory sits above **70 dB** — roughly **97 km²**.
 
 ### Seoul (2024)
 

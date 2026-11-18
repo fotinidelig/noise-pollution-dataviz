@@ -134,6 +134,22 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       },
     },
     {
+      id: 'sounds',
+      railLabel: 'Sounds',
+      title: 'But what does noise look like?',
+      questions: [],
+      body: [
+        `People experiencing ${hi('sleep disturbances')} are exposed to more than ${hiLoud('70 dB')}.`,
+      ],
+      map: {
+        center: [10, 50],
+        zoom: 3.3,
+        source: 'road',
+        metric: 'Lden',
+        highlightId: null,
+      },
+    },
+    {
       id: 'hongkong',
       railLabel: 'Hong Kong',
       year: hk.year,
