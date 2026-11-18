@@ -1054,6 +1054,32 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     setMapHover(id, seriesFromBands(id, city.agglomeration, tip.bands))
   }
 
+  /** ThemeRiver click → pin + same city drill zoom as map agglomeration click. */
+  const onStreamSelectCity = (id: string) => {
+    const map = mapRef.current
+    const city = citiesRef.current.find((c) => c.id === id)
+    if (!map || !city || city.lon == null || city.lat == null) return
+
+    const tip = city.series[`${sourceRef.current}__${metricRef.current}`]
+    const series = tip
+      ? seriesFromBands(id, city.agglomeration, tip.bands)
+      : ({
+          id,
+          name: city.agglomeration,
+          total: 0,
+          points: [],
+        } satisfies HoverSeries)
+
+    pinnedIdRef.current = id
+    setPinnedId(id)
+    setPinnedSeries(series)
+    setMapHover(id, series)
+
+    // Stream chart is Explore-only; still guard for safety.
+    if (!exploreRef.current) return
+    easeDrillTo(map, [city.lon, city.lat], CITY_DRILL_ZOOM)
+  }
+
   const setCountryMode = (on: boolean) => {
     const map = mapRef.current
     if (!map) return
@@ -1992,6 +2018,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
             source={source}
             focusId={focusId}
             onHoverCity={onStreamHoverCity}
+            onSelectCity={onStreamSelectCity}
           />
         ) : null}
       </div>

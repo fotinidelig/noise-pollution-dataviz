@@ -39,6 +39,8 @@ type Props = {
   /** Live hover / pin from map or this chart */
   focusId: string | null
   onHoverCity: (id: string | null) => void
+  /** Click hovered agglomeration → map fly/zoom (Explore). */
+  onSelectCity?: (id: string) => void
 }
 
 const STREAM_KEYS = ['ha', 'hsd'] as const
@@ -58,7 +60,13 @@ function formatPeople(n: number): string {
 
 type StackRow = { i: number; ha: number; hsd: number }
 
-export function ThemeRiverChart({ data, source, focusId, onHoverCity }: Props) {
+export function ThemeRiverChart({
+  data,
+  source,
+  focusId,
+  onHoverCity,
+  onSelectCity,
+}: Props) {
   const wrapRef = useRef<HTMLDivElement | null>(null)
   const lastNotifiedId = useRef<string | null>(null)
   const [size, setSize] = useState({ w: 800, h: 168 })
@@ -192,6 +200,11 @@ export function ThemeRiverChart({ data, source, focusId, onHoverCity }: Props) {
     onHoverCity(null)
   }
 
+  const onClick = () => {
+    if (!activeCity || !onSelectCity) return
+    onSelectCity(activeCity.id)
+  }
+
   return (
     <div
       className={`theme-river${collapsed ? ' theme-river--collapsed' : ''}`}
@@ -238,7 +251,9 @@ export function ThemeRiverChart({ data, source, focusId, onHoverCity }: Props) {
               height={size.h}
               onMouseMove={onMove}
               onMouseLeave={onLeave}
+              onClick={onClick}
               role="img"
+              style={{ cursor: activeCity ? 'pointer' : undefined }}
             >
               <g transform={`translate(${layout.margin.left},${layout.margin.top})`}>
                 <line
