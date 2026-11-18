@@ -34,11 +34,11 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
     {
       id: 'hero',
       railLabel: 'Intro',
-      title: 'do you hear the birds?',
-      subtitle:
-        'We’ll look at noise levels around Europe and the world to find out.',
+      title: 'Do you hear the birds?',
       questions: [],
-      body: [],
+      body: [
+        'Or are our cities too loud? We’ll look at noise levels around Europe and the world to find out.',
+      ],
       map: {
         center: [10, 50],
         zoom: 3.2,
@@ -51,11 +51,11 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       id: 'europe',
       railLabel: 'Europe',
       year: eu.year_label,
-      title: 'Above WHO guidance — and highly annoyed',
+      title: 'People are quite annoyed by the noise',
       questions: [],
       body: [
-        `About ${hi(whoAbove)} people in European cities live in official noise bands that already sit above ${hi('WHO road-traffic guidance')} (~${hi('53 dB')}). From the same maps, roughly ${hi(ha)} people are ${hi('highly annoyed')} by road, rail, or aircraft noise.`,
-        `As a rule of thumb, each ${hi('+10 dB')} sounds about ${hi('twice as loud')}. Mapped high exposure at ${hiLoud('≥75 dB')} is about ${hi('+20 dB')} above the END lower band near ${hi('55 dB')} — roughly ${hi('4× as loud')}. That is the world those highly annoyed people live in.`,
+        `About ${hi(whoAbove)} people in European cities live in official noise levels that already sit above ${hi('WHO road-traffic guidance')} (~${hi('53 dB')}). Roughly ${hi(ha)} people are ${hi('highly annoyed')} by road, rail, or aircraft noise.`,
+        `As a rule of thumb, each ${hi('+10 dB')} sounds about ${hi('twice')} as loud. Exposure at ${hiLoud('≥75 dB')} is about ${hi('4×')} as loud as ${hi('55dB')}. That is the world those highly annoyed people live in.`,
       ],
       map: {
         center: [10, 50],

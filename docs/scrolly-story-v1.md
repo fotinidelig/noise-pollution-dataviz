@@ -21,10 +21,15 @@
 
 **Rule (state once on Europe):** each **+10 dB ≈ twice as loud** (NIDCD rule of thumb). Express contrasts as doubling steps; round with “about / roughly”. Magenta only for very loud sounds. Do **not** claim browser audio is calibrated.
 
-### Europe (2021)
+### Intro
 
-About **74.1 million** people sit above **WHO road-traffic guidance (~53 dB)**. Roughly **12.5 million** are **highly annoyed**.  
-**+10 dB ≈ twice as loud.** Mapped **≥75 dB** vs END lower band **~55 dB** is **+20 dB ≈ ~4× as loud** — the multi-doubling world of HA exposure.
+**Do you hear the birds?**  
+Or are our cities too loud? We’ll look at noise levels around Europe and the world to find out.
+
+### Europe (2021) — People are quite annoyed by the noise
+
+About **74.1 million** people in European cities live in official **noise levels** that already sit above **WHO road-traffic guidance (~53 dB)**. Roughly **12.5 million** people are **highly annoyed** by road, rail, or aircraft noise.  
+As a rule of thumb, each **+10 dB** sounds about **twice** as loud. Exposure at **≥75 dB** is about **4×** as loud as **55dB**. That is the world those highly annoyed people live in.
 
 ### Germany · Berlin (2021)
 
