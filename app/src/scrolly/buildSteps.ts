@@ -147,8 +147,9 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       title: 'Toward quieter places',
       questions: [],
       body: [
-        `After the loud cities, measured calm anchors — wilderness monitors and city parks — show places people can still visit. Larger bubbles are ${hi('quieter')}; day and night appear when both were recorded.`,
         `A Grand Canyon fall night near ${hi('15 dB')} sits far below a vacuum cleaner; a Berlin park hour near ${hi('49 dB')} is calm for a city, not silent.`,
+        `Denali Birch Creek (~${hi('18 dB')}) and Haleakalā Nuʻu (~${hi('23 dB')}) sit near a ${hi('whisper (~20–30 dB)')}; a quiet-forest sample (~${hi('29 dB')}) and Poland’s Silent Route (~${hi('33 dB')}) land around a ${hi('quiet room (~30–40 dB)')}.`,
+        `Hoh River Trail (~${hi('34–38 dB')}) still undercuts casual ${hi('conversation (~60 dB)')}; Stockholm city parks (~${hi('55 dB')}) creep closer — still nowhere near a ${hi('blender (~80–90 dB)')}.`,
       ],
       map: {
         center: [-40, 45],
