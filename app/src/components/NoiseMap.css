@@ -6,6 +6,40 @@
   font-family: "VT323", "Courier New", monospace;
 }
 
+/* Softer, lighter calm-spaces beat */
+.noise-shell--calm {
+  color: #e8f2ea;
+}
+
+.noise-shell--calm .noise-top {
+  background: linear-gradient(
+    180deg,
+    rgba(22, 32, 36, 0.82) 0%,
+    rgba(22, 32, 36, 0.35) 55%,
+    transparent 100%
+  );
+}
+
+.noise-shell--calm .noise-brand h1 {
+  text-shadow: 0 0 18px rgba(126, 184, 168, 0.28);
+}
+
+.noise-shell--calm .noise-eyebrow {
+  color: #8fa39a;
+}
+
+.tip--calm .tip-title {
+  color: #e8f2ea;
+}
+
+.tip--calm .tip-calm-day {
+  color: #7eb8a8;
+}
+
+.tip--calm .tip-calm-night {
+  color: #8eb0e0;
+}
+
 .noise-top {
   position: absolute;
   z-index: 3;

@@ -50,6 +50,7 @@ export function ScrollyApp() {
     }),
     [unlocked.hongkong, unlocked.seoul, activeId],
   )
+  const calmStep = !dismissed && active?.id === 'calm'
 
   useEffect(() => {
     if (activeId === 'hongkong' || activeId === 'seoul') {
@@ -93,6 +94,7 @@ export function ScrollyApp() {
         highlightId: active.map.highlightId ?? null,
         explore: Boolean(active.explore) || dismissed,
         stepId: dismissed ? 'explore' : active.id,
+        calm: calmStep && !dismissed,
         overlays,
       }
     : null
@@ -116,7 +118,9 @@ export function ScrollyApp() {
   }
 
   const showScrollCue =
-    !dismissed && active?.id !== 'explore' && active?.id !== undefined
+    !dismissed &&
+    active?.id !== 'explore' &&
+    active?.id !== undefined
 
   if (!metrics || !steps.length) {
     return (

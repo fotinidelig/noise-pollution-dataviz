@@ -1,0 +1,228 @@
+.calm-chart {
+  position: absolute;
+  z-index: 4;
+  left: 50%;
+  bottom: 0.55rem;
+  transform: translateX(-50%);
+  width: min(920px, calc(100vw - 11rem));
+  height: clamp(168px, 24vh, 220px);
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(
+    180deg,
+    rgba(236, 242, 236, 0.12) 0%,
+    rgba(18, 28, 32, 0.72) 32%,
+    rgba(12, 22, 26, 0.9) 100%
+  );
+  border: 1px solid rgba(160, 190, 170, 0.28);
+  backdrop-filter: blur(8px);
+  overflow: visible;
+  transition:
+    height 220ms ease,
+    background 220ms ease;
+}
+
+.calm-chart.calm-chart--collapsed {
+  height: 1.85rem;
+  min-height: 1.85rem;
+  max-height: 1.85rem;
+  overflow: hidden;
+  align-items: stretch;
+  justify-content: center;
+  background: rgba(18, 28, 32, 0.85);
+  border-color: rgba(160, 190, 170, 0.32);
+}
+
+.calm-chart__head {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.35rem 0.65rem 0;
+  color: #b7c9bc;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+}
+
+.calm-chart__title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem 1rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #cfe0d4;
+}
+
+.calm-chart__legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: #8fa39a;
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.calm-chart__swatch {
+  display: inline-block;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  margin-right: 0.15rem;
+  vertical-align: middle;
+}
+
+.calm-chart__swatch--day {
+  background: #7eb8a8;
+}
+
+.calm-chart__swatch--night {
+  background: #5b7fbf;
+}
+
+.calm-chart__toggle {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 0.15rem 0.55rem;
+  border: 1px solid rgba(160, 190, 170, 0.35);
+  background: rgba(12, 22, 26, 0.55);
+  color: #d5e4da;
+  font: inherit;
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.calm-chart__toggle:hover,
+.calm-chart__toggle:focus-visible {
+  color: #f2f7f3;
+  border-color: rgba(126, 184, 168, 0.65);
+  outline: none;
+}
+
+.calm-chart__toggle--show {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  letter-spacing: 0.18em;
+  color: #a8bdb2;
+}
+
+.calm-chart__svg {
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: crosshair;
+  overflow: visible;
+}
+
+.calm-chart__grid {
+  stroke: rgba(180, 200, 190, 0.12);
+  stroke-width: 1;
+}
+
+.calm-chart__y-tick {
+  fill: #8fa39a;
+  font-family: "VT323", "Courier New", monospace;
+  font-size: 11px;
+}
+
+.calm-chart__band {
+  fill: #9eb5a8;
+  font-family: "VT323", "Courier New", monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.calm-chart__dot {
+  transition: opacity 120ms ease;
+}
+
+.calm-chart__dot.is-focus {
+  stroke-width: 1.6;
+}
+
+.calm-chart__label {
+  fill: #9eb5a8;
+  font-family: "VT323", "Courier New", monospace;
+  font-size: 10px;
+  pointer-events: none;
+}
+
+.calm-chart__label.is-focus {
+  fill: #e8f4ec;
+}
+
+.calm-chart__tip {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 2.6rem;
+  z-index: 6;
+  min-width: 150px;
+  max-width: 220px;
+  padding: 0.45rem 0.6rem;
+  background: rgba(12, 22, 26, 0.92);
+  border: 1px solid rgba(126, 184, 168, 0.4);
+  pointer-events: none;
+  font-size: 1rem;
+  color: #cfe0d4;
+}
+
+.calm-chart__tip .tip-name {
+  color: #f2f7f3;
+  font-size: 1.12rem;
+}
+
+.calm-chart__tip .tip-sub {
+  color: #8fa39a;
+  font-size: 0.88rem;
+  margin-bottom: 0.28rem;
+}
+
+.calm-chart__tip .tip-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.calm-chart__tip .tip-row.day strong {
+  color: #7eb8a8;
+}
+
+.calm-chart__tip .tip-row.night strong {
+  color: #8eb0e0;
+}
+
+.calm-chart__tip .tip-metric {
+  margin-top: 0.25rem;
+  color: #7f9288;
+  font-size: 0.82rem;
+}
+
+@media (max-width: 720px) {
+  .calm-chart {
+    width: calc(100vw - 1.2rem);
+    height: 160px;
+  }
+
+  .calm-chart.calm-chart--collapsed {
+    height: 1.75rem;
+    min-height: 1.75rem;
+    max-height: 1.75rem;
+  }
+
+  .calm-chart__legend {
+    display: none;
+  }
+}

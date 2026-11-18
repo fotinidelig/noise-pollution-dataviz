@@ -142,12 +142,29 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       },
     },
     {
+      id: 'calm',
+      railLabel: 'Calm',
+      title: 'Toward quieter places',
+      questions: [],
+      body: [
+        `After the loud cities, measured calm anchors — wilderness monitors and city parks — show places people can still visit. Larger bubbles are ${hi('quieter')}; day and night appear when both were recorded.`,
+        `A Grand Canyon fall night near ${hi('15 dB')} sits far below a vacuum cleaner; a Berlin park hour near ${hi('49 dB')} is calm for a city, not silent.`,
+      ],
+      map: {
+        center: [-40, 45],
+        zoom: 2.4,
+        source: 'road',
+        metric: 'Lden',
+        highlightId: null,
+      },
+    },
+    {
       id: 'explore',
       railLabel: 'Explore',
       title: 'Explore the map',
       questions: [],
       body: [
-        'Pan, zoom, and switch noise source freely. Story flying is paused here — use the rail if you want a beat again.',
+        'Pan, zoom, and switch noise source freely. Story flying is paused here — use the rail if you want a beat again. Toggle Calm spaces to revisit quiet anchors.',
       ],
       map: {
         center: [10, 48],

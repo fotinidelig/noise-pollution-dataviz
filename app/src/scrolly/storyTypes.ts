@@ -112,6 +112,7 @@ export type StoryStepId =
   | 'madrid'
   | 'hongkong'
   | 'seoul'
+  | 'calm'
   | 'explore'
 
 export type StoryStep = {

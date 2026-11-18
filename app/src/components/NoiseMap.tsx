@@ -28,6 +28,11 @@ import {
   type HoverSeries,
 } from './CityWaveChart'
 import { ThemeRiverChart, type StreamData } from './ThemeRiverChart'
+import { CalmSpacesChart } from './CalmSpacesChart'
+import {
+  calmPlacesToGeoJSON,
+  type CalmSpacesData,
+} from '../lib/calmSpaces'
 import './NoiseMap.css'
 
 const CITIES_SOURCE = 'aggl-cities'
@@ -74,6 +79,10 @@ const HK_IMAGE_LAYER = 'hk-l10-layer'
 const SEOUL_SRC = 'seoul-road-sites'
 const SEOUL_CIRCLE_LAYER = 'seoul-road-circles'
 const SEOUL_LABEL_LAYER = 'seoul-road-labels'
+const CALM_URL = dataUrl('data/calm_spaces.json')
+const CALM_SRC = 'calm-spaces'
+const CALM_CIRCLE_LAYER = 'calm-spaces-circles'
+const CALM_LABEL_LAYER = 'calm-spaces-labels'
 
 let workerConfigured = false
 
@@ -226,6 +235,8 @@ export type StoryMapControl = {
   metric?: NoiseMetric
   highlightId?: string | null
   explore?: boolean
+  /** Soft calm-spaces beat — brighter basemap + bubbles. */
+  calm?: boolean
   /** Once unlocked in the story, keep city overlays visible. */
   overlays?: { hongkong?: boolean; seoul?: boolean }
 }
@@ -252,17 +263,24 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
   const paintRingSoundWaveRef = useRef<(activeId?: string | null) => void>(() => {})
   const pulseErrorLoggedRef = useRef(false)
 
-  // Standalone map = explore; scrolly steps lock until the final explore beat
-  const explore = !story || Boolean(story.explore)
-  const storyLocked = Boolean(story) && !explore
-  const exploreRef = useRef(explore)
-  exploreRef.current = explore
-
   const [source, setSource] = useState<NoiseSource>('road')
   const [metric, setMetric] = useState<NoiseMetric>('Lden')
   const [mapReady, setMapReady] = useState(false)
   const [chartCities, setChartCities] = useState<ChartCity[]>([])
   const [streamData, setStreamData] = useState<StreamData | null>(null)
+  const [calmData, setCalmData] = useState<CalmSpacesData | null>(null)
+  /** Explore toggle — story calm step forces on. */
+  const [calmToggle, setCalmToggle] = useState(false)
+  const [calmFocusId, setCalmFocusId] = useState<string | null>(null)
+
+  // Standalone map = explore; scrolly steps lock until the final explore beat
+  const explore = !story || Boolean(story.explore)
+  const storyLocked = Boolean(story) && !explore
+  const exploreRef = useRef(explore)
+  exploreRef.current = explore
+  const calmMode = Boolean(story?.calm) || (explore && calmToggle)
+  const calmModeRef = useRef(calmMode)
+  calmModeRef.current = calmMode
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [hoverSeries, setHoverSeries] = useState<HoverSeries | null>(null)
   const [pinnedId, setPinnedId] = useState<string | null>(null)
@@ -583,6 +601,171 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     }
   }, [mapReady, hoveredId, pinnedId, focusId])
 
+  // Soften dark-matter water/land on the calm story beat (and explore calm toggle)
+  useEffect(() => {
+    if (!mapReady) return
+    const map = mapRef.current
+    if (!map) return
+    const soften = (on: boolean) => {
+      const water = 'water'
+      const land = 'landcover'
+      const bg = 'background'
+      try {
+        if (map.getLayer(bg)) {
+          map.setPaintProperty(
+            bg,
+            'background-color',
+            on ? '#1a2228' : '#0b0e14',
+          )
+        }
+      } catch {
+        /* style variant */
+      }
+      try {
+        if (map.getLayer(water)) {
+          map.setPaintProperty(water, 'fill-color', on ? '#2a3844' : '#0e1620')
+          map.setPaintProperty(water, 'fill-opacity', on ? 0.92 : 1)
+        }
+      } catch {
+        /* */
+      }
+      // Dark-matter also uses waterway / water label variants — lighten if present
+      for (const id of ['waterway', 'waterway_tunnel', 'water_name_line', 'water_name_point']) {
+        try {
+          if (!map.getLayer(id)) continue
+          if (map.getPaintProperty(id, 'line-color') != null) {
+            map.setPaintProperty(id, 'line-color', on ? '#3d5160' : '#1a2834')
+          }
+        } catch {
+          /* */
+        }
+      }
+      try {
+        if (map.getLayer(land)) {
+          map.setPaintProperty(land, 'fill-opacity', on ? 0.55 : 0.8)
+        }
+      } catch {
+        /* */
+      }
+      // Dim noise rings while calm bubbles speak
+      if (map.getLayer(RINGS_LAYER)) {
+        map.setPaintProperty(RINGS_LAYER, 'line-opacity', on ? 0.22 : 0.88)
+      }
+      if (map.getLayer(RINGS_PULSE_LAYER)) {
+        map.setPaintProperty(RINGS_PULSE_LAYER, 'line-opacity', on ? 0.12 : 0.4)
+      }
+    }
+    soften(calmMode)
+  }, [mapReady, calmMode, story?.stepId])
+
+  // Calm space bubbles — story calm step or explore toggle
+  useEffect(() => {
+    if (!mapReady || !calmData) return
+    const map = mapRef.current
+    if (!map) return
+    let cancelled = false
+    const geo = calmPlacesToGeoJSON(calmData.places)
+
+    const ensure = () => {
+      if (cancelled) return
+      if (!map.getSource(CALM_SRC)) {
+        map.addSource(CALM_SRC, { type: 'geojson', data: geo })
+      } else {
+        ;(map.getSource(CALM_SRC) as maplibregl.GeoJSONSource).setData(geo)
+      }
+      if (!map.getLayer(CALM_CIRCLE_LAYER)) {
+        map.addLayer({
+          id: CALM_CIRCLE_LAYER,
+          type: 'circle',
+          source: CALM_SRC,
+          layout: { visibility: calmMode ? 'visible' : 'none' },
+          paint: {
+            // Lower quiet_db → larger bubble
+            'circle-radius': [
+              'interpolate',
+              ['linear'],
+              ['get', 'quiet_db'],
+              10,
+              28,
+              25,
+              20,
+              40,
+              12,
+              55,
+              8,
+            ],
+            'circle-color': '#7eb8a8',
+            'circle-opacity': 0.72,
+            'circle-stroke-color': [
+              'case',
+              ['==', ['get', 'id'], calmFocusId ?? ''],
+              '#f2f7f3',
+              'rgba(236, 244, 236, 0.55)',
+            ],
+            'circle-stroke-width': [
+              'case',
+              ['==', ['get', 'id'], calmFocusId ?? ''],
+              2.2,
+              1.1,
+            ],
+          },
+        })
+      } else {
+        map.setLayoutProperty(
+          CALM_CIRCLE_LAYER,
+          'visibility',
+          calmMode ? 'visible' : 'none',
+        )
+        map.setPaintProperty(CALM_CIRCLE_LAYER, 'circle-stroke-color', [
+          'case',
+          ['==', ['get', 'id'], calmFocusId ?? ''],
+          '#f2f7f3',
+          'rgba(236, 244, 236, 0.55)',
+        ])
+        map.setPaintProperty(CALM_CIRCLE_LAYER, 'circle-stroke-width', [
+          'case',
+          ['==', ['get', 'id'], calmFocusId ?? ''],
+          2.2,
+          1.1,
+        ])
+      }
+      if (!map.getLayer(CALM_LABEL_LAYER)) {
+        map.addLayer({
+          id: CALM_LABEL_LAYER,
+          type: 'symbol',
+          source: CALM_SRC,
+          layout: {
+            visibility: calmMode ? 'visible' : 'none',
+            'text-field': ['get', 'shortLabel'],
+            'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
+            'text-size': 11,
+            'text-offset': [0, 1.35],
+            'text-anchor': 'top',
+            'text-optional': true,
+          },
+          paint: {
+            'text-color': '#d5e4da',
+            'text-halo-color': 'rgba(12,22,26,0.88)',
+            'text-halo-width': 1.2,
+          },
+        })
+      } else {
+        map.setLayoutProperty(
+          CALM_LABEL_LAYER,
+          'visibility',
+          calmMode ? 'visible' : 'none',
+        )
+      }
+    }
+
+    ensure()
+    map.on('style.load', ensure)
+    return () => {
+      cancelled = true
+      map.off('style.load', ensure)
+    }
+  }, [mapReady, calmData, calmMode, calmFocusId])
+
   // Hong Kong raster + Seoul bubbles — unlock once, then keep visible
   useEffect(() => {
     if (!mapReady) return
@@ -825,6 +1008,14 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
       })
       .catch(() => {
         if (!cancelled) setStreamData(null)
+      })
+    fetch(CALM_URL)
+      .then((r) => r.json())
+      .then((data: CalmSpacesData) => {
+        if (!cancelled) setCalmData(data)
+      })
+      .catch(() => {
+        if (!cancelled) setCalmData(null)
       })
     return () => {
       cancelled = true
@@ -1481,6 +1672,49 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     }
 
     const onMove = async (e: maplibregl.MapMouseEvent) => {
+      // Calm spaces bubbles (story beat or explore toggle)
+      if (
+        calmModeRef.current &&
+        map.getLayer(CALM_CIRCLE_LAYER) &&
+        map.getLayoutProperty(CALM_CIRCLE_LAYER, 'visibility') !== 'none'
+      ) {
+        const calmHits = map.queryRenderedFeatures(e.point, {
+          layers: [CALM_CIRCLE_LAYER],
+        })
+        if (calmHits.length) {
+          cancelPendingClear()
+          const p = calmHits[0].properties ?? {}
+          const id = String(p.id ?? '')
+          map.getCanvas().style.cursor = 'pointer'
+          setCalmFocusId(id || null)
+          const day =
+            p.day_db != null && p.day_db !== ''
+              ? Number(p.day_db)
+              : null
+          const night =
+            p.night_db != null && p.night_db !== ''
+              ? Number(p.night_db)
+              : null
+          const parts: string[] = []
+          if (day != null && Number.isFinite(day)) {
+            parts.push(`<span class="tip-calm-day">${day.toFixed(1)} dB day</span>`)
+          }
+          if (night != null && Number.isFinite(night)) {
+            parts.push(
+              `<span class="tip-calm-night">${night.toFixed(1)} dB night</span>`,
+            )
+          }
+          popup
+            .setLngLat(e.lngLat)
+            .setHTML(
+              `<div class="tip tip--calm"><div class="tip-title">${String(p.shortLabel ?? p.label ?? '')}</div><div class="tip-sub">${parts.join(' · ') || String(p.metric ?? '')}</div></div>`,
+            )
+            .addTo(map)
+          return
+        }
+        setCalmFocusId(null)
+      }
+
       // City overlays take tooltip priority when unlocked
       if (
         overlaysRef.current.seoul &&
@@ -1663,11 +1897,15 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
   }, [])
 
   return (
-    <section className="noise-shell">
+    <section className={`noise-shell${calmMode ? ' noise-shell--calm' : ''}`}>
       <header className="noise-top">
         <div className="noise-brand">
-          <p className="noise-eyebrow">EEA END 2022</p>
-          <h1>Europe environmental noise</h1>
+          <p className="noise-eyebrow">
+            {calmMode ? 'Quiet anchors' : 'EEA END 2022'}
+          </p>
+          <h1>
+            {calmMode ? 'Calm spaces' : 'Europe environmental noise'}
+          </h1>
         </div>
         {explore ? (
           <div className="noise-controls" role="group" aria-label="Noise layer controls">
@@ -1697,17 +1935,29 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
                 </button>
               ))}
             </div>
+            <div className="seg" role="group" aria-label="Calm spaces">
+              <button
+                type="button"
+                className={calmToggle ? 'active' : ''}
+                aria-pressed={calmToggle}
+                onClick={() => setCalmToggle((v) => !v)}
+              >
+                Calm spaces
+              </button>
+            </div>
           </div>
         ) : (
           <div className="noise-controls noise-controls--story">
-            <span className="seg active-readonly">Story mode</span>
+            <span className="seg active-readonly">
+              {story?.calm ? 'Calm spaces' : 'Story mode'}
+            </span>
           </div>
         )}
       </header>
 
       <div className="noise-canvas-wrap">
         <div className="noise-canvas" ref={containerRef} />
-        {chartCities.length > 0 && tipAnchor ? (
+        {chartCities.length > 0 && tipAnchor && !calmMode ? (
           <CityWaveChart
             cities={chartCities}
             source={source}
@@ -1720,7 +1970,14 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
             sidecar={tipAnchor}
           />
         ) : null}
-        {streamData && explore ? (
+        {calmData && calmMode ? (
+          <CalmSpacesChart
+            data={calmData}
+            focusId={calmFocusId}
+            onHoverPlace={(id) => setCalmFocusId(id)}
+          />
+        ) : null}
+        {streamData && explore && !calmMode ? (
           <ThemeRiverChart
             data={streamData}
             source={source}
