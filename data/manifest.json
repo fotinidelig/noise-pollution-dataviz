@@ -1,0 +1,7 @@
+{
+  "note": "Contour PMTiles are build artifacts under data/processed/map/ — not shipped in public (ring viz uses agglomeration_chart.json).",
+  "chart": "app/public/data/agglomeration_chart.json",
+  "stream": "app/public/data/agglomeration_ha_hsd_stream.json",
+  "pmtiles_processed": "data/processed/map/end_*.pmtiles",
+  "countries_built": ["CY", "EE", "LT", "LV", "MT", "PT", "RO"]
+}
