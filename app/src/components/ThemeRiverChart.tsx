@@ -251,13 +251,9 @@ export function ThemeRiverChart({ data, source, focusId, onHoverCity }: Props) {
         <div
           className="theme-river__tip"
           style={{
+            // Sit to the right of the vertical cursor (no horizontal clamp into the viz)
             left:
-              ruleX != null
-                ? Math.min(
-                    size.w - 160,
-                    Math.max(8, layout.margin.left + ruleX - 70),
-                  )
-                : 12,
+              ruleX != null ? layout.margin.left + ruleX + 10 : 12,
           }}
         >
           <div className="tip-name">{activeCity.agglomeration}</div>

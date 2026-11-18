@@ -17,7 +17,8 @@
   );
   border: 1px solid rgba(120, 160, 220, 0.2);
   backdrop-filter: blur(8px);
-  overflow: hidden;
+  /* Allow tooltip to paint outside the chart frame */
+  overflow: visible;
 }
 
 .theme-river--empty {
@@ -76,6 +77,7 @@
   height: 100%;
   display: block;
   cursor: crosshair;
+  overflow: visible;
 }
 
 .theme-river__baseline {
@@ -115,8 +117,9 @@
 
 .theme-river__tip {
   position: absolute;
-  bottom: 2.1rem;
-  z-index: 2;
+  /* Mid-band of the stream; may extend above/below the chart box */
+  bottom: 2.4rem;
+  z-index: 6;
   min-width: 140px;
   max-width: 200px;
   padding: 0.4rem 0.55rem;
