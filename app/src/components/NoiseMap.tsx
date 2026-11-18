@@ -615,7 +615,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
           map.setPaintProperty(
             bg,
             'background-color',
-            on ? '#1a2228' : '#0b0e14',
+            on ? '#1a2228' : '#03050a',
           )
         }
       } catch {
@@ -623,7 +623,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
       }
       try {
         if (map.getLayer(water)) {
-          map.setPaintProperty(water, 'fill-color', on ? '#2a3844' : '#0e1620')
+          map.setPaintProperty(water, 'fill-color', on ? '#2a3844' : '#1F2C3C')
           map.setPaintProperty(water, 'fill-opacity', on ? 0.92 : 1)
         }
       } catch {
