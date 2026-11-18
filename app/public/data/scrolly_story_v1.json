@@ -36,38 +36,11 @@
     },
     "frame": "Of people in the top high-dB band (>75) across road/rail/aircraft in German agglomerations, Berlin’s share.",
     "common_sound": {
-      "sound_name": "Busy street / city traffic (roadside snapshot)",
-      "db_min": 75.0,
+      "sound_name": "Between vacuum cleaner and blender",
+      "db_min": 70.0,
       "db_max": 90.0,
-      "mid": 82.5
-    },
-    "common_sound_options_pending": [
-      {
-        "sound_name": "Vacuum cleaner",
-        "db_min": 70,
-        "db_max": 70
-      },
-      {
-        "sound_name": "Busy street / city traffic (roadside snapshot)",
-        "db_min": 75,
-        "db_max": 90
-      },
-      {
-        "sound_name": "Aircraft cabin in cruise",
-        "db_min": 72,
-        "db_max": 83
-      },
-      {
-        "sound_name": "Coffee shop / noisy restaurant",
-        "db_min": 80,
-        "db_max": 80
-      },
-      {
-        "sound_name": "Inside car in city traffic",
-        "db_min": 85,
-        "db_max": 85
-      }
-    ]
+      "mid": 75.0
+    }
   },
   "paris": {
     "year": 2025,
@@ -77,9 +50,9 @@
     "lon": 2.395,
     "lat": 48.835,
     "common_sound": {
-      "sound_name": "Aircraft cabin in cruise",
-      "db_min": 72.0,
-      "db_max": 83.0,
+      "sound_name": "Toward blender (from vacuum)",
+      "db_min": 70.0,
+      "db_max": 90.0,
       "mid": 77.5
     },
     "plain": "night noise at this road site"
@@ -99,12 +72,18 @@
     "lon": -3.7038,
     "lat": 40.4168,
     "common_sound": {
-      "sound_name": "Normal conversation",
-      "db_min": 60.0,
-      "db_max": 65.0,
-      "mid": 62.5
+      "sound_name": "Vacuum cleaner",
+      "db_min": 70.0,
+      "db_max": 70.0,
+      "mid": 70.0
     },
-    "plain": "night noise at this monitoring station"
+    "plain": "night noise at this monitoring station",
+    "common_sound_peak": {
+      "sound_name": "Blender",
+      "db_min": 80.0,
+      "db_max": 90.0,
+      "mid": 85.0
+    }
   },
   "hong_kong": {
     "year": 2020,
@@ -118,28 +97,54 @@
     "lon": 114.1694,
     "lat": 22.3193,
     "common_sound": {
-      "sound_name": "Jet flyover outdoors (≈1000 ft)",
-      "db_min": 88.0,
-      "db_max": 103.0,
-      "mid": 95.5
+      "sound_name": "Blender",
+      "db_min": 80.0,
+      "db_max": 90.0,
+      "mid": 85.0
     },
-    "plain": "peak traffic noise on the 2020 map"
-  },
-  "seoul": {
-    "year": 2024,
-    "metric": "daily_Leq_road",
-    "loudest_site": "북아현동",
-    "max_db_median": 73.38,
-    "max_db_peak": 76.57,
-    "peak_site": "숙명여고 앞",
-    "lon": 126.978,
-    "lat": 37.5665,
-    "common_sound": {
+    "plain": "peak traffic noise on the 2020 map",
+    "common_sound_threshold": {
       "sound_name": "Vacuum cleaner",
       "db_min": 70.0,
       "db_max": 70.0,
       "mid": 70.0
     },
-    "plain": "daily road noise at this site"
+    "overlay": "/data/hong_kong_l10_overlay.json"
+  },
+  "seoul": {
+    "year": 2024,
+    "metric": "daily_Leq_road",
+    "loudest_site": "Bukahyeon-dong",
+    "max_db_median": 73.38,
+    "max_db_peak": 76.57,
+    "peak_site": "Sookmyung Girls' HS (front)",
+    "lon": 126.978,
+    "lat": 37.5665,
+    "common_sound": {
+      "sound_name": "Between vacuum cleaner and blender",
+      "db_min": 70.0,
+      "db_max": 90.0,
+      "mid": 73.4
+    },
+    "plain": "daily road noise at this site",
+    "loudest_site_ko": "북아현동",
+    "peak_site_ko": "숙명여고 앞",
+    "sites_geojson": "/data/seoul_road_sites.geojson",
+    "geocode_caveat": "Coordinates are approximate neighborhood/landmark geocodes, not official monitor footprints."
+  },
+  "common_sounds": {
+    "vacuum": {
+      "sound_name": "Vacuum cleaner",
+      "db_min": 70.0,
+      "db_max": 70.0,
+      "mid": 70.0
+    },
+    "blender": {
+      "sound_name": "Blender",
+      "db_min": 80.0,
+      "db_max": 90.0,
+      "mid": 85.0
+    },
+    "note": "Fotini-locked: ~75 dB ≈ between vacuum (~70) and blender (~80–90); louder sites toward blender."
   }
 }

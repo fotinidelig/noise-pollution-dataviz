@@ -4,8 +4,6 @@ import * as maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import {
   EUROPE_BOUNDS,
-  LDEN_BANDS,
-  LNIGHT_BANDS,
   METRICS,
   SOURCES,
   type NoiseMetric,
@@ -42,6 +40,13 @@ const COUNTRY_HIT_LAYER = 'aggl-country-hit'
 const COUNTRY_LABEL_LAYER = 'aggl-country-labels'
 const CHART_URL = '/data/agglomeration_chart.json'
 const STREAM_URL = '/data/agglomeration_ha_hsd_stream.json'
+const HK_OVERLAY_META_URL = '/data/hong_kong_l10_overlay.json'
+const SEOUL_SITES_URL = '/data/seoul_road_sites.geojson'
+const HK_IMAGE_SRC = 'hk-l10-image'
+const HK_IMAGE_LAYER = 'hk-l10-layer'
+const SEOUL_SRC = 'seoul-road-sites'
+const SEOUL_CIRCLE_LAYER = 'seoul-road-circles'
+const SEOUL_LABEL_LAYER = 'seoul-road-labels'
 
 let workerConfigured = false
 
@@ -304,6 +309,129 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     story?.highlightId,
     story?.explore,
   ])
+
+  // Hong Kong raster + Seoul site bubbles for scrolly city beats
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+
+    const showHk = story?.stepId === 'hongkong'
+    const showSeoul = story?.stepId === 'seoul'
+
+    const setVis = (layerId: string, on: boolean) => {
+      if (!map.getLayer(layerId)) return
+      map.setLayoutProperty(layerId, 'visibility', on ? 'visible' : 'none')
+    }
+
+    const ensureHk = async () => {
+      if (map.getLayer(HK_IMAGE_LAYER)) {
+        setVis(HK_IMAGE_LAYER, showHk)
+        return
+      }
+      if (!showHk) return
+      try {
+        const meta = (await fetch(HK_OVERLAY_META_URL).then((r) => r.json())) as {
+          url: string
+          coordinates: [[number, number], [number, number], [number, number], [number, number]]
+        }
+        if (!map.getSource(HK_IMAGE_SRC)) {
+          map.addSource(HK_IMAGE_SRC, {
+            type: 'image',
+            url: meta.url,
+            coordinates: meta.coordinates,
+          })
+        }
+        if (!map.getLayer(HK_IMAGE_LAYER)) {
+          map.addLayer(
+            {
+              id: HK_IMAGE_LAYER,
+              type: 'raster',
+              source: HK_IMAGE_SRC,
+              paint: { 'raster-opacity': 0.78, 'raster-fade-duration': 0 },
+              layout: { visibility: showHk ? 'visible' : 'none' },
+            },
+            RINGS_LAYER,
+          )
+        }
+      } catch {
+        /* overlay optional */
+      }
+    }
+
+    const ensureSeoul = async () => {
+      if (map.getLayer(SEOUL_CIRCLE_LAYER)) {
+        setVis(SEOUL_CIRCLE_LAYER, showSeoul)
+        setVis(SEOUL_LABEL_LAYER, showSeoul)
+        return
+      }
+      if (!showSeoul) return
+      try {
+        const data = await fetch(SEOUL_SITES_URL).then((r) => r.json())
+        if (!map.getSource(SEOUL_SRC)) {
+          map.addSource(SEOUL_SRC, { type: 'geojson', data })
+        }
+        if (!map.getLayer(SEOUL_CIRCLE_LAYER)) {
+          map.addLayer({
+            id: SEOUL_CIRCLE_LAYER,
+            type: 'circle',
+            source: SEOUL_SRC,
+            layout: { visibility: showSeoul ? 'visible' : 'none' },
+            paint: {
+              'circle-radius': [
+                'interpolate',
+                ['linear'],
+                ['get', 'mean_db'],
+                64,
+                10,
+                70,
+                18,
+                74,
+                28,
+              ],
+              'circle-color': '#ff6df5',
+              'circle-opacity': 0.45,
+              'circle-stroke-color': '#00e5ff',
+              'circle-stroke-width': 1.4,
+            },
+          })
+        }
+        if (!map.getLayer(SEOUL_LABEL_LAYER)) {
+          map.addLayer({
+            id: SEOUL_LABEL_LAYER,
+            type: 'symbol',
+            source: SEOUL_SRC,
+            layout: {
+              visibility: showSeoul ? 'visible' : 'none',
+              'text-field': ['get', 'name_en'],
+              'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
+              'text-size': 12,
+              'text-offset': [0, 1.3],
+              'text-anchor': 'top',
+              'text-optional': true,
+            },
+            paint: {
+              'text-color': '#e8f0ff',
+              'text-halo-color': 'rgba(3,5,10,0.9)',
+              'text-halo-width': 1.2,
+            },
+          })
+        }
+      } catch {
+        /* overlay optional */
+      }
+    }
+
+    const run = () => {
+      void ensureHk()
+      void ensureSeoul()
+      if (map.getLayer(HK_IMAGE_LAYER)) setVis(HK_IMAGE_LAYER, Boolean(showHk))
+      if (map.getLayer(SEOUL_CIRCLE_LAYER)) setVis(SEOUL_CIRCLE_LAYER, Boolean(showSeoul))
+      if (map.getLayer(SEOUL_LABEL_LAYER)) setVis(SEOUL_LABEL_LAYER, Boolean(showSeoul))
+    }
+
+    if (map.isStyleLoaded()) run()
+    else map.once('load', run)
+  }, [story?.stepId])
 
   const countryAggs = useMemo(
     () => buildCountryAggregates(chartCities, source, metric),
@@ -1020,8 +1148,6 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const bands = metric === 'Lden' ? LDEN_BANDS : LNIGHT_BANDS
-
   return (
     <section className="noise-shell">
       <header className="noise-top">
@@ -1060,9 +1186,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
           </div>
         ) : (
           <div className="noise-controls noise-controls--story">
-            <span className="seg active-readonly">
-              {source} · {metric}
-            </span>
+            <span className="seg active-readonly">Story mode</span>
           </div>
         )}
       </header>
@@ -1089,18 +1213,6 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
             onHoverCity={onStreamHoverCity}
           />
         ) : null}
-        <div className="noise-legend" aria-label="dB band legend">
-          {bands.map((b) => (
-            <div key={b.category} className="noise-legend__row">
-              <span className="swatch" style={{ background: b.color }} />
-              <span>{b.label}</span>
-            </div>
-          ))}
-          <p className="noise-legend__note">
-            1 ring = 10k people exposed to these dBs
-          </p>
-          <p className="noise-legend__note">Outer rings = louder</p>
-        </div>
         <p className="noise-status">{status}</p>
       </div>
     </section>

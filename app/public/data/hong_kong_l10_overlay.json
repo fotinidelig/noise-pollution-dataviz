@@ -1,0 +1,25 @@
+{
+  "url": "/data/hong_kong_l10_overlay.png",
+  "coordinates": [
+    [
+      113.86311026332244,
+      22.552901831749605
+    ],
+    [
+      114.33522038476082,
+      22.55312987018313
+    ],
+    [
+      114.33483810493732,
+      22.215028382727787
+    ],
+    [
+      113.8638674561692,
+      22.214804189157768
+    ]
+  ],
+  "vmin": 50.0,
+  "vmax": 85.0,
+  "year": 2020,
+  "note": "Downsampled 2020 Hong Kong traffic peak-noise surface; EPSG:2326\u2192WGS84 corners. Nodata transparent."
+}

@@ -1,6 +1,33 @@
 import type { NoiseMetric, NoiseSource } from '../lib/noiseStyle'
 
+export type CommonSound = {
+  sound_name: string
+  db_min: number
+  db_max: number
+  mid?: number
+}
+
+/** Fotini-locked anchors for loudness compares. */
+export const VACUUM: CommonSound = {
+  sound_name: 'Vacuum cleaner',
+  db_min: 70,
+  db_max: 70,
+  mid: 70,
+}
+
+export const BLENDER: CommonSound = {
+  sound_name: 'Blender',
+  db_min: 80,
+  db_max: 90,
+  mid: 85,
+}
+
 export type StoryMetrics = {
+  common_sounds?: {
+    vacuum: CommonSound
+    blender: CommonSound
+    note?: string
+  }
   europe: {
     year_label: number
     people_highly_annoyed: number
@@ -27,7 +54,7 @@ export type StoryMetrics = {
       berlin_share_of_germany_pct: number | null
     }
     frame?: string
-    common_sound: { sound_name: string; db_min: number; db_max: number }
+    common_sound?: CommonSound
   }
   paris: {
     year: number
@@ -36,7 +63,7 @@ export type StoryMetrics = {
     lon: number
     lat: number
     plain?: string
-    common_sound: { sound_name: string; db_min: number; db_max: number }
+    common_sound?: CommonSound
   }
   madrid: {
     year: number
@@ -46,7 +73,7 @@ export type StoryMetrics = {
     lon: number
     lat: number
     plain?: string
-    common_sound: { sound_name: string; db_min: number; db_max: number }
+    common_sound?: CommonSound
   }
   hong_kong: {
     year: number
@@ -57,17 +84,23 @@ export type StoryMetrics = {
     lat: number
     method: string
     plain?: string
-    common_sound: { sound_name: string; db_min: number; db_max: number }
+    common_sound?: CommonSound
+    overlay?: string
   }
   seoul: {
     year: number
     loudest_site: string
+    loudest_site_ko?: string
+    peak_site?: string
+    peak_site_ko?: string
     max_db_median: number
     max_db_peak: number
     lon: number
     lat: number
     plain?: string
-    common_sound: { sound_name: string; db_min: number; db_max: number }
+    common_sound?: CommonSound
+    sites_geojson?: string
+    geocode_caveat?: string
   }
 }
 
@@ -108,4 +141,22 @@ export function formatPeople(n: number): string {
 export function soundRange(s: { sound_name: string; db_min: number; db_max: number }) {
   if (s.db_min === s.db_max) return `${s.db_min} dB · ${s.sound_name}`
   return `${s.db_min}–${s.db_max} dB · ${s.sound_name}`
+}
+
+/** Map a measured level onto vacuum (~70) ↔ blender (~80–90). */
+export function vacuumBlenderCompare(db: number): string {
+  const rounded = Math.round(db)
+  if (db < 68) {
+    return `quieter than a vacuum cleaner (~70 dB) — around ${rounded} dB`
+  }
+  if (db <= 72) {
+    return `about as loud as a vacuum cleaner (~70 dB)`
+  }
+  if (db < 78) {
+    return `between a vacuum cleaner (~70 dB) and a blender (~80–90 dB) — around ${rounded} dB`
+  }
+  if (db <= 92) {
+    return `toward a blender (~80–90 dB) — around ${rounded} dB`
+  }
+  return `louder than a blender (~80–90 dB) — around ${rounded} dB`
 }

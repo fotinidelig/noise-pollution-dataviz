@@ -1,0 +1,9 @@
+name_ko,name_en,lon,lat,mean_db,leq_median,leq_max,geocode_note,geocode_approx
+북아현동,Bukahyeon-dong,126.9555,37.5643,73.45,73.38,76.25,neighborhood approx,True
+숙명여고 앞,Sookmyung Girls' HS (front),126.9645,37.5458,72.31,72.11,76.57,school front approx,True
+기업은행,IBK / corporate bank site,126.984,37.566,71.55,71.46,73.81,generic CBD-ish; name is bank branch — approx,True
+반포본동,Banpo-bon-dong,126.9955,37.5045,71.13,71.27,74.27,neighborhood approx,True
+삼신빌딩,Samsin Building,127.027,37.4975,71.16,71.155,75.41,building name — Gangnam-ish approx,True
+회기동,Hoegi-dong,127.0575,37.5898,67.97,67.99,72.47,neighborhood approx,True
+불광동,Bulgwang-dong,126.9385,37.6105,65.36,65.22999999999999,68.44,neighborhood approx,True
+성북초교,Seongbuk Elementary,127.0165,37.5895,64.92,64.62,71.31,school approx,True

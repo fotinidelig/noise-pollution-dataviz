@@ -116,46 +116,6 @@
   inset: 0;
 }
 
-.noise-legend {
-  position: absolute;
-  right: 0.85rem;
-  bottom: clamp(10.5rem, 24vh, 13.5rem);
-  z-index: 2;
-  display: grid;
-  gap: 0.3rem;
-  padding: 0.7rem 0.85rem;
-  background: rgba(5, 8, 16, 0.78);
-  border: 1px solid rgba(120, 160, 220, 0.2);
-  backdrop-filter: blur(10px);
-  font-size: 1rem;
-  color: #c5d3ea;
-}
-
-.noise-legend__row {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-}
-
-.noise-legend__note {
-  margin: 0.45rem 0 0;
-  max-width: 14rem;
-  color: #7f92b0;
-  font-size: 0.95rem;
-  line-height: 1.25;
-}
-
-.noise-legend__note + .noise-legend__note {
-  margin-top: 0.2rem;
-}
-
-.swatch {
-  width: 1.1rem;
-  height: 0.45rem;
-  border-radius: 999px;
-  box-shadow: 0 0 10px currentColor;
-}
-
 .noise-status {
   position: absolute;
   right: 0.85rem;

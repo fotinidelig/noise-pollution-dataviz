@@ -44,6 +44,7 @@
 }
 
 .scrolly-step__card {
+  position: relative;
   pointer-events: auto;
   max-width: min(420px, 92vw);
   padding: 1.1rem 1.2rem 1.25rem;
@@ -55,6 +56,33 @@
   border: 1px solid rgba(120, 160, 220, 0.22);
   backdrop-filter: blur(10px);
   box-shadow: 0 0 28px rgba(0, 0, 0, 0.35);
+}
+
+.scrolly-step__close {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.4rem;
+  width: 1.7rem;
+  height: 1.7rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #9db0cc;
+  font: inherit;
+  font-size: 1.45rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+
+.scrolly-step__close:hover,
+.scrolly-step__close:focus-visible {
+  color: #e8f0ff;
+  outline: 1px solid rgba(0, 229, 255, 0.45);
+}
+
+.scrolly-root.is-dismissed .scrolly-steps {
+  pointer-events: none;
 }
 
 .scrolly-step--hero {
@@ -90,17 +118,6 @@
   font-size: clamp(2.2rem, 6vw, 3.6rem);
 }
 
-.scrolly-step__qs {
-  margin: 0 0 0.75rem;
-  padding-left: 1.1rem;
-  color: #ff6df5;
-  font-size: 1.05rem;
-}
-
-.scrolly-step__qs li {
-  margin: 0.25rem 0;
-}
-
 .scrolly-step__body {
   margin: 0.45rem 0 0;
   color: #c5d3ea;
@@ -108,10 +125,15 @@
   line-height: 1.35;
 }
 
-.scrolly-step__body strong {
-  color: #e8f0ff;
+.scrolly-step__body .scrolly-hi {
+  color: #5ef0ff;
   font-weight: 400;
-  text-shadow: 0 0 10px rgba(0, 229, 255, 0.25);
+  text-shadow: 0 0 12px rgba(0, 229, 255, 0.35);
+}
+
+.scrolly-step__body .scrolly-hi:nth-of-type(even) {
+  color: #ff6df5;
+  text-shadow: 0 0 12px rgba(255, 109, 245, 0.35);
 }
 
 .scrolly-rail {
@@ -124,43 +146,63 @@
 }
 
 .scrolly-rail ol {
+  --rail-dot: 0.55rem;
+  --rail-gap: 0.55rem;
   list-style: none;
   margin: 0;
-  padding: 0.5rem 0.35rem;
+  padding: 0;
   display: grid;
-  gap: 0.35rem;
-  background: rgba(3, 5, 10, 0.72);
-  border: 1px solid rgba(120, 160, 220, 0.2);
-  backdrop-filter: blur(8px);
+  gap: var(--rail-gap);
+  position: relative;
+  background: transparent;
+  border: 0;
+}
+
+/* Vertical connector through the stop centers */
+.scrolly-rail ol::before {
+  content: "";
+  position: absolute;
+  left: calc(var(--rail-dot) / 2);
+  top: calc(var(--rail-dot) / 2);
+  bottom: calc(var(--rail-dot) / 2);
+  width: 1px;
+  background: rgba(120, 160, 220, 0.45);
+  transform: translateX(-50%);
+  pointer-events: none;
 }
 
 .scrolly-rail__stop {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.45rem;
   border: 0;
   background: transparent;
   color: #7f92b0;
   cursor: pointer;
-  padding: 0.15rem 0.25rem;
+  padding: 0;
   font: inherit;
   font-size: 0.85rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+  position: relative;
+  z-index: 1;
 }
 
 .scrolly-rail__dot {
-  width: 0.55rem;
-  height: 0.55rem;
+  width: var(--rail-dot);
+  height: var(--rail-dot);
   border-radius: 50%;
   background: #3a4a60;
+  border: 1px solid rgba(120, 160, 220, 0.35);
   box-shadow: none;
   flex: 0 0 auto;
+  box-sizing: border-box;
 }
 
 .scrolly-rail__stop.is-past .scrolly-rail__dot {
   background: #5ef0ff;
-  opacity: 0.55;
+  border-color: rgba(94, 240, 255, 0.7);
+  opacity: 0.7;
 }
 
 .scrolly-rail__stop.is-active {
@@ -169,6 +211,7 @@
 
 .scrolly-rail__stop.is-active .scrolly-rail__dot {
   background: #ff00e5;
+  border-color: #ff6df5;
   box-shadow: 0 0 10px rgba(255, 0, 229, 0.65);
 }
 
@@ -177,6 +220,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.65);
 }
 
 @media (max-width: 720px) {

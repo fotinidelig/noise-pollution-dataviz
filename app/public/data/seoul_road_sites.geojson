@@ -1,0 +1,180 @@
+{
+  "type": "FeatureCollection",
+  "properties": {
+    "year": 2024,
+    "city": "Seoul",
+    "size_encodes": "mean_db",
+    "label_script": "latin",
+    "caveat": "Coordinates are approximate neighborhood/landmark geocodes, not official monitor footprints."
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.9555,
+          37.5643
+        ]
+      },
+      "properties": {
+        "name_ko": "북아현동",
+        "name_en": "Bukahyeon-dong",
+        "lon": 126.9555,
+        "lat": 37.5643,
+        "mean_db": 73.45,
+        "leq_median": 73.38,
+        "leq_max": 76.25,
+        "geocode_note": "neighborhood approx",
+        "geocode_approx": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.9645,
+          37.5458
+        ]
+      },
+      "properties": {
+        "name_ko": "숙명여고 앞",
+        "name_en": "Sookmyung Girls' HS (front)",
+        "lon": 126.9645,
+        "lat": 37.5458,
+        "mean_db": 72.31,
+        "leq_median": 72.11,
+        "leq_max": 76.57,
+        "geocode_note": "school front approx",
+        "geocode_approx": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.984,
+          37.566
+        ]
+      },
+      "properties": {
+        "name_ko": "기업은행",
+        "name_en": "IBK / corporate bank site",
+        "lon": 126.984,
+        "lat": 37.566,
+        "mean_db": 71.55,
+        "leq_median": 71.46,
+        "leq_max": 73.81,
+        "geocode_note": "generic CBD-ish; name is bank branch — approx",
+        "geocode_approx": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.9955,
+          37.5045
+        ]
+      },
+      "properties": {
+        "name_ko": "반포본동",
+        "name_en": "Banpo-bon-dong",
+        "lon": 126.9955,
+        "lat": 37.5045,
+        "mean_db": 71.13,
+        "leq_median": 71.27,
+        "leq_max": 74.27,
+        "geocode_note": "neighborhood approx",
+        "geocode_approx": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          127.027,
+          37.4975
+        ]
+      },
+      "properties": {
+        "name_ko": "삼신빌딩",
+        "name_en": "Samsin Building",
+        "lon": 127.027,
+        "lat": 37.4975,
+        "mean_db": 71.16,
+        "leq_median": 71.155,
+        "leq_max": 75.41,
+        "geocode_note": "building name — Gangnam-ish approx",
+        "geocode_approx": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          127.0575,
+          37.5898
+        ]
+      },
+      "properties": {
+        "name_ko": "회기동",
+        "name_en": "Hoegi-dong",
+        "lon": 127.0575,
+        "lat": 37.5898,
+        "mean_db": 67.97,
+        "leq_median": 67.99,
+        "leq_max": 72.47,
+        "geocode_note": "neighborhood approx",
+        "geocode_approx": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.9385,
+          37.6105
+        ]
+      },
+      "properties": {
+        "name_ko": "불광동",
+        "name_en": "Bulgwang-dong",
+        "lon": 126.9385,
+        "lat": 37.6105,
+        "mean_db": 65.36,
+        "leq_median": 65.22999999999999,
+        "leq_max": 68.44,
+        "geocode_note": "neighborhood approx",
+        "geocode_approx": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          127.0165,
+          37.5895
+        ]
+      },
+      "properties": {
+        "name_ko": "성북초교",
+        "name_en": "Seongbuk Elementary",
+        "lon": 127.0165,
+        "lat": 37.5895,
+        "mean_db": 64.92,
+        "leq_median": 64.62,
+        "leq_max": 71.31,
+        "geocode_note": "school approx",
+        "geocode_approx": true
+      }
+    }
+  ]
+}

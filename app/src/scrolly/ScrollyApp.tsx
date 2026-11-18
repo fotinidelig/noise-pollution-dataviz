@@ -7,9 +7,14 @@ import './scrolly.css'
 
 const STORY_URL = '/data/scrolly_story_v1.json'
 
+/**
+ * × on each story card dismisses the narrative overlay and jumps to Explore
+ * (free pan/zoom). Progress-rail clicks reopen that beat and show the card again.
+ */
 export function ScrollyApp() {
   const [metrics, setMetrics] = useState<StoryMetrics | null>(null)
   const [activeId, setActiveId] = useState<StoryStepId>('hero')
+  const [dismissed, setDismissed] = useState(false)
   const stepRefs = useRef<Record<string, HTMLElement | null>>({})
 
   useEffect(() => {
@@ -28,10 +33,13 @@ export function ScrollyApp() {
   }, [])
 
   const steps = useMemo(() => (metrics ? buildSteps(metrics) : []), [metrics])
-  const active = steps.find((s) => s.id === activeId) ?? steps[0]
+  const exploreStep = steps.find((s) => s.id === 'explore')
+  const active = dismissed
+    ? exploreStep ?? steps[0]
+    : (steps.find((s) => s.id === activeId) ?? steps[0])
 
   useEffect(() => {
-    if (!steps.length) return
+    if (!steps.length || dismissed) return
     const nodes = steps
       .map((s) => stepRefs.current[s.id])
       .filter((n): n is HTMLElement => Boolean(n))
@@ -51,7 +59,7 @@ export function ScrollyApp() {
     )
     for (const n of nodes) obs.observe(n)
     return () => obs.disconnect()
-  }, [steps])
+  }, [steps, dismissed])
 
   const mapControl: StoryMapControl | null = active?.map
     ? {
@@ -60,13 +68,22 @@ export function ScrollyApp() {
         source: active.map.source,
         metric: active.map.metric,
         highlightId: active.map.highlightId ?? null,
-        explore: Boolean(active.explore),
-        stepId: active.id,
+        explore: Boolean(active.explore) || dismissed,
+        stepId: dismissed ? 'explore' : active.id,
       }
     : null
 
   const jump = (id: string) => {
+    if (id !== 'explore') setDismissed(false)
     const el = stepRefs.current[id]
+    el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    setActiveId(id as StoryStepId)
+  }
+
+  const dismissStory = () => {
+    setDismissed(true)
+    setActiveId('explore')
+    const el = stepRefs.current.explore
     el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
@@ -79,47 +96,51 @@ export function ScrollyApp() {
   }
 
   return (
-    <main className="scrolly-root">
-      <ProgressRail steps={steps} activeId={activeId} onJump={jump} />
+    <main className={`scrolly-root${dismissed ? ' is-dismissed' : ''}`}>
+      <ProgressRail steps={steps} activeId={active.id} onJump={jump} />
 
       <div className="scrolly-map-sticky">
         <NoiseMap story={mapControl} />
       </div>
 
-      <div className="scrolly-steps">
+      <div className="scrolly-steps" aria-hidden={dismissed}>
         {steps.map((step) => (
           <section
             key={step.id}
-            className={`scrolly-step${step.id === 'hero' ? ' scrolly-step--hero' : ''}${step.id === activeId ? ' is-active' : ''}`}
+            className={`scrolly-step${step.id === 'hero' ? ' scrolly-step--hero' : ''}${step.id === active.id && !dismissed ? ' is-active' : ''}`}
             data-step-id={step.id}
             ref={(el) => {
               stepRefs.current[step.id] = el
             }}
           >
-            <div className="scrolly-step__card">
-              {step.year != null ? (
-                <p className="scrolly-step__year">Year {step.year}</p>
-              ) : null}
-              <h2 className="scrolly-step__title">{step.title}</h2>
-              {step.questions.length ? (
-                <ul className="scrolly-step__qs">
-                  {step.questions.map((q) => (
-                    <li key={q}>{q}</li>
-                  ))}
-                </ul>
-              ) : null}
-              {step.body.map((p) => (
-                <p
-                  key={p.slice(0, 48)}
-                  className="scrolly-step__body"
-                  dangerouslySetInnerHTML={{
-                    __html: p
-                      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-                      .replace(/\n/g, '<br/>'),
-                  }}
-                />
-              ))}
-            </div>
+            {!dismissed ? (
+              <div className="scrolly-step__card">
+                <button
+                  type="button"
+                  className="scrolly-step__close"
+                  aria-label="Close story and explore the map"
+                  title="Close story · explore map"
+                  onClick={dismissStory}
+                >
+                  ×
+                </button>
+                {step.year != null ? (
+                  <p className="scrolly-step__year">Year {step.year}</p>
+                ) : null}
+                <h2 className="scrolly-step__title">{step.title}</h2>
+                {step.body.map((p) => (
+                  <p
+                    key={p.slice(0, 48)}
+                    className="scrolly-step__body"
+                    dangerouslySetInnerHTML={{
+                      __html: p
+                        .replace(/\*\*(.+?)\*\*/g, '<span class="scrolly-hi">$1</span>')
+                        .replace(/\n/g, '<br/>'),
+                    }}
+                  />
+                ))}
+              </div>
+            ) : null}
           </section>
         ))}
       </div>
