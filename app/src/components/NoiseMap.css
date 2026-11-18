@@ -132,6 +132,12 @@
   box-shadow: 0 0 16px rgba(0, 184, 204, 0.35);
 }
 
+.seg.metric button {
+  font-size: 0.95rem;
+  padding: 0.4rem 0.65rem;
+  white-space: nowrap;
+}
+
 .seg.metric button.active {
   background: #00B8CC;
   outline: 1px solid #00B8CC;

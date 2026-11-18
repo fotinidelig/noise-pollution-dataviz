@@ -11,9 +11,14 @@ export const SOURCES: { id: NoiseSource; label: string }[] = [
 ]
 
 export const METRICS: { id: NoiseMetric; label: string }[] = [
-  { id: 'Lden', label: 'Lden' },
-  { id: 'Lnight', label: 'Lnight' },
+  { id: 'Lden', label: 'all-day noise' },
+  { id: 'Lnight', label: 'night-noise' },
 ]
+
+/** User-facing metric name; keep `NoiseMetric` ids for data keys. */
+export function metricLabel(metric: NoiseMetric): string {
+  return METRICS.find((m) => m.id === metric)?.label ?? metric
+}
 
 /** Display bands used in legend (END core thresholds + high). */
 export const LDEN_BANDS = [

@@ -19,14 +19,6 @@ type Props = {
 const DAY = '#7eb8a8'
 const NIGHT = '#5b7fbf'
 
-/** Light common-sound guides (Fotini can drop/edit). Mid of published ranges. */
-const SOUND_REFS: { id: string; label: string; db: number }[] = [
-  { id: 'whisper', label: 'whisper', db: 27.5 },
-  { id: 'library', label: 'quiet room', db: 30 },
-  { id: 'birds', label: 'distant birds', db: 44 },
-  { id: 'quiet-home', label: 'quiet home', db: 50 },
-]
-
 export function CalmSpacesChart({
   data,
   focusId,
@@ -34,21 +26,22 @@ export function CalmSpacesChart({
   collapsed = false,
 }: Props) {
   const wrapRef = useRef<HTMLDivElement | null>(null)
-  const [size, setSize] = useState({ w: 880, h: 200 })
+  const plotRef = useRef<HTMLDivElement | null>(null)
+  const [size, setSize] = useState({ w: 880, h: 220 })
   const [localHover, setLocalHover] = useState<string | null>(null)
   const [hidden, setHidden] = useState(false)
 
   useEffect(() => {
-    const el = wrapRef.current
+    const el = plotRef.current
     if (!el || hidden || collapsed) return
     const apply = (width: number, height: number) => {
-      setSize({ w: Math.max(320, width), h: Math.max(140, height) })
+      setSize({ w: Math.max(320, width), h: Math.max(160, height) })
     }
     const rect = el.getBoundingClientRect()
     apply(rect.width, rect.height)
     const ro = new ResizeObserver((entries) => {
       const r = entries[0]?.contentRect
-      if (!r || r.height < 80) return
+      if (!r || r.height < 60) return
       apply(r.width, r.height)
     })
     ro.observe(el)
@@ -64,16 +57,16 @@ export function CalmSpacesChart({
 
   const layout = useMemo(() => {
     if (ordered.length < 2) return null
-    const margin = { top: 16, right: 18, bottom: 36, left: 42 }
-    const innerW = size.w - margin.left - margin.right
-    const innerH = size.h - margin.top - margin.bottom
+    const margin = { top: 22, right: 14, bottom: 34, left: 42 }
+    const innerW = Math.max(40, size.w - margin.left - margin.right)
+    const innerH = Math.max(40, size.h - margin.top - margin.bottom)
     const ids = ordered.map((p) => p.id)
     const x = scalePoint<string>().domain(ids).range([0, innerW]).padding(0.35)
     const dbs = points.map((p) => p.db)
     const yMin = Math.min(...dbs, 5)
     const yMax = Math.max(...dbs, 60)
     const y = scaleLinear()
-      .domain([yMin - 2, yMax + 3])
+      .domain([yMin - 4, yMax + 5])
       .range([innerH, 0])
       .nice()
 
@@ -188,95 +181,73 @@ export function CalmSpacesChart({
           hide
         </button>
       </div>
-      <svg
-        className="calm-chart__svg"
-        width={size.w}
-        height={size.h}
-        onMouseMove={onMove}
-        onMouseLeave={onLeave}
-        role="img"
-      >
-        <g transform={`translate(${layout.margin.left},${layout.margin.top})`}>
-          {layout.y.ticks(5).map((t) => (
-            <g key={t} transform={`translate(0,${layout.y(t)})`}>
-              <line
-                className="calm-chart__grid"
-                x1={0}
-                x2={layout.innerW}
-                y1={0}
-                y2={0}
-              />
-              <text className="calm-chart__y-tick" x={-8} y={4} textAnchor="end">
-                {t}
-              </text>
-            </g>
-          ))}
-          {SOUND_REFS.filter(
-            (r) => r.db >= layout.y.domain()[0] && r.db <= layout.y.domain()[1],
-          ).map((r) => {
-            const y = layout.y(r.db)
-            return (
-              <g key={r.id} className="calm-chart__ref" transform={`translate(0,${y})`}>
+      <div className="calm-chart__plot" ref={plotRef}>
+        <svg
+          className="calm-chart__svg"
+          width={size.w}
+          height={size.h}
+          onMouseMove={onMove}
+          onMouseLeave={onLeave}
+          role="img"
+        >
+          <g transform={`translate(${layout.margin.left},${layout.margin.top})`}>
+            {layout.y.ticks(5).map((t) => (
+              <g key={t} transform={`translate(0,${layout.y(t)})`}>
                 <line
-                  className="calm-chart__ref-line"
+                  className="calm-chart__grid"
                   x1={0}
                   x2={layout.innerW}
                   y1={0}
                   y2={0}
                 />
-                <text
-                  className="calm-chart__ref-label"
-                  x={layout.innerW - 2}
-                  y={-4}
-                  textAnchor="end"
-                >
-                  {r.label}
+                <text className="calm-chart__y-tick" x={-8} y={4} textAnchor="end">
+                  {t}
                 </text>
               </g>
-            )
-          })}
-          {layout.bands.map((b) => (
-            <text
-              key={b.continent}
-              className="calm-chart__band"
-              x={(b.x0 + b.x1) / 2}
-              y={layout.innerH + 28}
-              textAnchor="middle"
-            >
-              {b.continent}
-            </text>
-          ))}
-          {points.map((pt) => {
-            const cx = layout.x(pt.placeId) ?? 0
-            const cy = layout.y(pt.db)
-            const r = quietnessRadius(pt.db, dbExtent.min, dbExtent.max, 4.5, 11)
-            const focused = activeId === pt.placeId
-            return (
-              <circle
-                key={`${pt.placeId}-${pt.period}`}
-                className={`calm-chart__dot calm-chart__dot--${pt.period}${focused ? ' is-focus' : ''}`}
-                cx={cx}
-                cy={cy}
-                r={r}
-                fill={pt.period === 'day' ? DAY : NIGHT}
-                stroke="rgba(255,255,255,0.35)"
-                opacity={activeId && !focused ? 0.28 : 0.9}
-              />
-            )
-          })}
-          {/* Place name only while hovered / focused from map */}
-          {activePlace ? (
-            <text
-              className="calm-chart__label is-focus"
-              x={layout.x(activePlace.id) ?? 0}
-              y={-6}
-              textAnchor="middle"
-            >
-              {activePlace.shortLabel}
-            </text>
-          ) : null}
-        </g>
-      </svg>
+            ))}
+            {layout.bands.map((b) => (
+              <text
+                key={b.continent}
+                className="calm-chart__band"
+                x={(b.x0 + b.x1) / 2}
+                y={layout.innerH + 22}
+                textAnchor="middle"
+              >
+                {b.continent}
+              </text>
+            ))}
+            {points.map((pt) => {
+              const cx = layout.x(pt.placeId) ?? 0
+              const cy = layout.y(pt.db)
+              const r = quietnessRadius(pt.db, dbExtent.min, dbExtent.max, 4, 9.5)
+              const focused = activeId === pt.placeId
+              return (
+                <circle
+                  key={`${pt.placeId}-${pt.period}`}
+                  className={`calm-chart__dot calm-chart__dot--${pt.period}${focused ? ' is-focus' : ''}`}
+                  cx={cx}
+                  cy={cy}
+                  r={r}
+                  fill={pt.period === 'day' ? DAY : NIGHT}
+                  stroke="rgba(255,255,255,0.35)"
+                  opacity={activeId && !focused ? 0.28 : 0.9}
+                />
+              )
+            })}
+            {/* Place name only while hovered / focused from map */}
+            {activePlace ? (
+              <text
+                className="calm-chart__label is-focus"
+                x={layout.x(activePlace.id) ?? 0}
+                y={10}
+                textAnchor="middle"
+              >
+                {activePlace.shortLabel}
+              </text>
+            ) : null}
+          </g>
+        </svg>
+      </div>
       {activePlace ? (
         <div className="calm-chart__tip">
           <div className="tip-name">{activePlace.label}</div>

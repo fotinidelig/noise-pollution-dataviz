@@ -6,6 +6,7 @@ import { hydrateChartCities } from '../lib/chartData'
 import {
   EUROPE_BOUNDS,
   METRICS,
+  metricLabel,
   SOURCES,
   type NoiseMetric,
   type NoiseSource,
@@ -126,7 +127,9 @@ function buildTooltipHtml(
   const citiesLabel = `${cityCount} ${cityCount === 1 ? 'city' : 'cities'}`
   const subParts: string[] = []
   if (mean != null) {
-    subParts.push(`<span class="tip-mean">${mean}dB average noise</span>`)
+    subParts.push(
+      `<span class="tip-mean">${mean}dB average ${metricLabel(metric)}</span>`,
+    )
   }
   subParts.push(citiesLabel)
   const rows = bands
@@ -1922,7 +1925,11 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
                 </button>
               ))}
             </div>
-            <div className="seg metric" role="radiogroup" aria-label="Metric">
+            <div
+              className="seg metric"
+              role="radiogroup"
+              aria-label="Noise period"
+            >
               {METRICS.map((m) => (
                 <button
                   key={m.id}
