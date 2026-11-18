@@ -24,7 +24,7 @@
   text-shadow: 0 0 18px rgba(126, 184, 168, 0.28);
 }
 
-.noise-shell--calm .noise-eyebrow {
+.noise-shell--calm .noise-sub {
   color: #8fa39a;
 }
 
@@ -67,13 +67,21 @@
 }
 
 .noise-brand h1 {
-  margin: 0.1rem 0 0;
+  margin: 0;
   font-family: inherit;
   font-weight: 400;
   font-size: clamp(1.85rem, 3.4vw, 2.6rem);
   letter-spacing: 0.02em;
   line-height: 1.05;
   text-shadow: 0 0 18px rgba(0, 184, 204, 0.28);
+}
+
+.noise-sub {
+  margin: 0.35rem 0 0;
+  font-size: clamp(1rem, 1.6vw, 1.2rem);
+  letter-spacing: 0.03em;
+  line-height: 1.25;
+  color: #9db0cc;
 }
 
 .noise-eyebrow {

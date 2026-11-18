@@ -1903,12 +1903,12 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     <section className={`noise-shell${calmMode ? ' noise-shell--calm' : ''}`}>
       <header className="noise-top">
         <div className="noise-brand">
-          <p className="noise-eyebrow">
-            {calmMode ? 'Quiet anchors' : 'EEA END 2022'}
-          </p>
           <h1>
-            {calmMode ? 'Calm spaces' : 'Europe environmental noise'}
+            {calmMode ? 'Calm spaces' : 'Do you hear the birds?'}
           </h1>
+          <p className="noise-sub">
+            {calmMode ? 'Quiet anchors' : 'The world might be too noisy'}
+          </p>
         </div>
         {explore ? (
           <div className="noise-controls" role="group" aria-label="Noise layer controls">

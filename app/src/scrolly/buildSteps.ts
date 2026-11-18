@@ -35,6 +35,8 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       id: 'hero',
       railLabel: 'Intro',
       title: 'do you hear the birds?',
+      subtitle:
+        'We’ll look at noise levels around Europe and the world to find out.',
       questions: [],
       body: [],
       map: {

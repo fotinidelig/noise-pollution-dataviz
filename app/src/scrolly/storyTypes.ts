@@ -120,6 +120,8 @@ export type StoryStep = {
   railLabel: string
   year?: number | string
   title: string
+  /** Optional line under the title (hero intro). */
+  subtitle?: string
   questions: string[]
   body: string[]
   map?: {

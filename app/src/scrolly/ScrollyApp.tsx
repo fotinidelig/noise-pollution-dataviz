@@ -166,6 +166,9 @@ export function ScrollyApp() {
                       <p className="scrolly-step__year">Year {step.year}</p>
                     ) : null}
                     <h2 className="scrolly-step__title">{step.title}</h2>
+                    {step.subtitle ? (
+                      <p className="scrolly-step__subtitle">{step.subtitle}</p>
+                    ) : null}
                     {step.body.map((p) => (
                       <p
                         key={p.slice(0, 48)}
