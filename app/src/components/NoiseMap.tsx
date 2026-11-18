@@ -107,7 +107,9 @@ function buildTooltipHtml(
   const mean = meanDb(metric, bands)
   const citiesLabel = `${cityCount} ${cityCount === 1 ? 'city' : 'cities'}`
   const subParts: string[] = []
-  if (mean != null) subParts.push(`<span class="tip-mean">~${mean} dB</span>`)
+  if (mean != null) {
+    subParts.push(`<span class="tip-mean">${mean}dB average noise</span>`)
+  }
   subParts.push(citiesLabel)
   const rows = bands
     .filter((b) => b.people > 0)
@@ -121,7 +123,7 @@ function buildTooltipHtml(
     <div class="tip">
       <div class="tip-title">${title}</div>
       <div class="tip-sub">${subParts.join(' · ')}</div>
-      <div class="tip-total">${formatPeople(total)} people in mapped bands</div>
+      <div class="tip-total">${formatPeople(total)} people recorded</div>
       <div class="tip-bands">${rows || '<div class="tip-empty">No exposure reported</div>'}</div>
     </div>
   `
@@ -477,7 +479,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
         return
       }
       setTipAnchor({
-        left: r.right - wrapBox.left + 8,
+        left: r.right - wrapBox.left + 2,
         top: r.top - wrapBox.top,
         height: Math.max(120, r.height),
       })
