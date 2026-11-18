@@ -143,7 +143,6 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       questions: [],
       body: [
         `Among eight Seoul road sites in ${seoul.year}, ${hi(seoul.loudest_site)} has the ${hi('highest mean')} — about ${hiDb(seoul.max_db_median)}. The ${hi('highest single reading')} is about ${hiDb(seoul.max_db_peak)}${seoul.peak_site ? ` at ${hi(seoul.peak_site)}` : ''}.`,
-        `Both sit near a ${hiLoud('vacuum (~70 dB)')} and short of a full doubling above it; the peak leans toward a ${hiLoud('blender')}. Bubble size shows each site’s mean; positions are approximate.`,
       ],
       map: {
         center: [seoul.lon, seoul.lat],

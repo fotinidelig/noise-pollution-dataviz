@@ -52,7 +52,7 @@ On the **2020** Hong Kong **citywide traffic-noise map** (modelled area levels, 
 
 ### Seoul (2024)
 
-**Bukahyeon-dong** highest mean ~**73 dB**; peak ~**77 dB** at **Sookmyung Girls' HS (front)**. Near vacuum; short of a full doubling above it; peak leans toward blender.
+Among eight Seoul road sites, **Bukahyeon-dong** has the **highest mean** (~**73 dB**). Highest single reading ~**77 dB** at **Sookmyung Girls' HS (front)**.
 
 ### Calm — Places where you might hear birds
 
