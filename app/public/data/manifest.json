@@ -1,61 +1,7 @@
 {
-  "outputs": {
-    "road__Lden": {
-      "pmtiles": "data/processed/map/end_road_lden.pmtiles",
-      "public": "app/public/data/end_road_lden.pmtiles",
-      "bytes": 8269229,
-      "countries": 6
-    },
-    "road__Lnight": {
-      "pmtiles": "data/processed/map/end_road_lnight.pmtiles",
-      "public": "app/public/data/end_road_lnight.pmtiles",
-      "bytes": 5924440,
-      "countries": 6
-    },
-    "rail__Lden": {
-      "pmtiles": "data/processed/map/end_rail_lden.pmtiles",
-      "public": "app/public/data/end_rail_lden.pmtiles",
-      "bytes": 919727,
-      "countries": 5
-    },
-    "rail__Lnight": {
-      "pmtiles": "data/processed/map/end_rail_lnight.pmtiles",
-      "public": "app/public/data/end_rail_lnight.pmtiles",
-      "bytes": 850435,
-      "countries": 5
-    },
-    "aircraft__Lden": {
-      "pmtiles": "data/processed/map/end_aircraft_lden.pmtiles",
-      "public": "app/public/data/end_aircraft_lden.pmtiles",
-      "bytes": 18420,
-      "countries": 6
-    },
-    "aircraft__Lnight": {
-      "pmtiles": "data/processed/map/end_aircraft_lnight.pmtiles",
-      "public": "app/public/data/end_aircraft_lnight.pmtiles",
-      "bytes": 21575,
-      "countries": 6
-    },
-    "industry__Lden": {
-      "pmtiles": "data/processed/map/end_industry_lden.pmtiles",
-      "public": "app/public/data/end_industry_lden.pmtiles",
-      "bytes": 419801,
-      "countries": 5
-    },
-    "industry__Lnight": {
-      "pmtiles": "data/processed/map/end_industry_lnight.pmtiles",
-      "public": "app/public/data/end_industry_lnight.pmtiles",
-      "bytes": 414512,
-      "countries": 6
-    }
-  },
-  "countries": [
-    "CY",
-    "EE",
-    "LT",
-    "LV",
-    "MT",
-    "PT",
-    "RO"
-  ]
+  "note": "Contour PMTiles are build artifacts under data/processed/map/ — not shipped in public (ring viz uses agglomeration_chart.json).",
+  "chart": "app/public/data/agglomeration_chart.json",
+  "stream": "app/public/data/agglomeration_ha_hsd_stream.json",
+  "pmtiles_processed": "data/processed/map/end_*.pmtiles",
+  "countries_built": ["CY", "EE", "LT", "LV", "MT", "PT", "RO"]
 }

@@ -430,6 +430,24 @@ def build(people_per_ring: int, max_rings: int) -> None:
     processed = ROOT / "data/processed/map/agglomeration_soundwaves.geojson"
     processed.write_text(OUT_GEOJSON.read_text())
 
+    def slim_series(raw: dict) -> dict:
+        """Drop label/color/rings — app hydrates from noiseStyle at load."""
+        out = {}
+        for key, tip in (raw or {}).items():
+            bands = []
+            for b in tip.get("bands") or []:
+                people = int(round(float(b.get("people") or 0)))
+                if people <= 0:
+                    continue
+                bands.append({"band": b["band"], "people": people})
+            mean = tip.get("mean_db")
+            out[key] = {
+                "mean_db": None if mean is None else round(float(mean), 1),
+                "total": int(round(float(tip.get("total") or 0))),
+                "bands": bands,
+            }
+        return out
+
     chart_cities = []
     for c in centers:
         p = c["properties"]
@@ -439,13 +457,17 @@ def build(people_per_ring: int, max_rings: int) -> None:
                 "id": f"{p['country']}|{p['agglomeration']}",
                 "agglomeration": p["agglomeration"],
                 "country": p["country"],
-                "inhabitants": p.get("inhabitants") or 0,
+                "inhabitants": int(round(float(p.get("inhabitants") or 0))),
                 "lon": lon,
                 "lat": lat,
-                "series": json.loads(p.get("tooltip") or "{}"),
+                "series": slim_series(json.loads(p.get("tooltip") or "{}")),
             }
         )
     OUT_CHART.write_text(json.dumps({"cities": chart_cities}, separators=(",", ":")))
+    # Keep processed chart mirror for rebuilds / audit
+    (ROOT / "data/processed/map/agglomeration_chart.json").write_text(
+        OUT_CHART.read_text()
+    )
 
     meta_out = {
         "people_per_ring": PEOPLE_PER_RING,

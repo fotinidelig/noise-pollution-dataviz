@@ -6,13 +6,13 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:pages": "tsc -b && VITE_BASE=/noise-pollution-dataviz/ vite build",
     "lint": "oxlint",
     "preview": "vite preview"
   },
   "dependencies": {
     "d3": "^7.9.2",
     "maplibre-gl": "^6.18.0",
-    "pmtiles": "^4.5.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },

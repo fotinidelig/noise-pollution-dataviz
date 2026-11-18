@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Feature, FeatureCollection, Point } from 'geojson'
 import * as maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
+import { hydrateChartCities } from '../lib/chartData'
 import {
   EUROPE_BOUNDS,
   METRICS,
@@ -49,11 +50,16 @@ const HIT_LAYER = 'aggl-hit'
 const LABEL_LAYER = 'aggl-labels'
 const COUNTRY_HIT_LAYER = 'aggl-country-hit'
 const COUNTRY_LABEL_LAYER = 'aggl-country-labels'
-const CHART_URL = '/data/agglomeration_chart.json'
-const STREAM_URL = '/data/agglomeration_ha_hsd_stream.json'
-const HK_OVERLAY_META_URL = '/data/hong_kong_l10_overlay.json'
-const HK_SAMPLE_URL = '/data/hong_kong_l10_sample.json'
-const SEOUL_SITES_URL = '/data/seoul_road_sites.geojson'
+const dataUrl = (path: string) => {
+  const base = import.meta.env.BASE_URL || '/'
+  const p = path.startsWith('/') ? path.slice(1) : path
+  return `${base}${p}`
+}
+const CHART_URL = dataUrl('data/agglomeration_chart.json')
+const STREAM_URL = dataUrl('data/agglomeration_ha_hsd_stream.json')
+const HK_OVERLAY_META_URL = 'data/hong_kong_l10_overlay.json'
+const HK_SAMPLE_URL = dataUrl('data/hong_kong_l10_sample.json')
+const SEOUL_SITES_URL = 'data/seoul_road_sites.geojson'
 const HK_IMAGE_SRC = 'hk-l10-image'
 const HK_IMAGE_LAYER = 'hk-l10-layer'
 const SEOUL_SRC = 'seoul-road-sites'
@@ -375,6 +381,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     if (!story) return
     if (story.source) setSource(story.source)
     if (story.metric) setMetric(story.metric)
+    if (!mapReady) return
     const map = mapRef.current
     if (!map) return
     if (lastStoryStep.current === story.stepId) {
@@ -397,6 +404,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
+    mapReady,
     story?.stepId,
     story?.center?.[0],
     story?.center?.[1],
@@ -497,11 +505,18 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
 
   // Hong Kong raster + Seoul bubbles — unlock once, then keep visible
   useEffect(() => {
+    if (!mapReady) return
     const map = mapRef.current
     if (!map) return
 
     const showHk = Boolean(story?.overlays?.hongkong)
     const showSeoul = Boolean(story?.overlays?.seoul)
+    let cancelled = false
+    const asset = (path: string) => {
+      const base = import.meta.env.BASE_URL || '/'
+      const p = path.startsWith('/') ? path.slice(1) : path
+      return `${base}${p}`
+    }
 
     const setVis = (layerId: string, on: boolean) => {
       if (!map.getLayer(layerId)) return
@@ -515,32 +530,37 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
       }
       try {
         if (!map.getSource(HK_IMAGE_SRC)) {
-          const meta = (await fetch(HK_OVERLAY_META_URL).then((r) => r.json())) as {
+          const meta = (await fetch(asset(HK_OVERLAY_META_URL)).then((r) => {
+            if (!r.ok) throw new Error(`HK meta ${r.status}`)
+            return r.json()
+          })) as {
             url: string
             coordinates: [[number, number], [number, number], [number, number], [number, number]]
           }
+          if (cancelled) return
+          const url = asset(meta.url.startsWith('/') ? meta.url : `/${meta.url}`)
           map.addSource(HK_IMAGE_SRC, {
             type: 'image',
-            url: meta.url,
+            url,
             coordinates: meta.coordinates,
           })
         }
+        if (cancelled) return
         if (!map.getLayer(HK_IMAGE_LAYER)) {
-          map.addLayer(
-            {
-              id: HK_IMAGE_LAYER,
-              type: 'raster',
-              source: HK_IMAGE_SRC,
-              paint: { 'raster-opacity': 0.78, 'raster-fade-duration': 0 },
-              layout: { visibility: 'visible' },
-            },
-            RINGS_LAYER,
-          )
+          // On top of rings so the L10 surface is not buried
+          map.addLayer({
+            id: HK_IMAGE_LAYER,
+            type: 'raster',
+            source: HK_IMAGE_SRC,
+            paint: { 'raster-opacity': 0.82, 'raster-fade-duration': 0 },
+            layout: { visibility: 'visible' },
+          })
         } else {
           setVis(HK_IMAGE_LAYER, true)
+          map.setPaintProperty(HK_IMAGE_LAYER, 'raster-opacity', 0.82)
         }
-      } catch {
-        /* overlay optional */
+      } catch (err) {
+        console.warn('[NoiseMap] Hong Kong overlay failed', err)
       }
     }
 
@@ -552,9 +572,14 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
       }
       try {
         if (!map.getSource(SEOUL_SRC)) {
-          const data = await fetch(SEOUL_SITES_URL).then((r) => r.json())
+          const data = await fetch(asset(SEOUL_SITES_URL)).then((r) => {
+            if (!r.ok) throw new Error(`Seoul sites ${r.status}`)
+            return r.json()
+          })
+          if (cancelled) return
           map.addSource(SEOUL_SRC, { type: 'geojson', data })
         }
+        if (cancelled) return
         if (!map.getLayer(SEOUL_CIRCLE_LAYER)) {
           map.addLayer({
             id: SEOUL_CIRCLE_LAYER,
@@ -567,20 +592,21 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
                 ['linear'],
                 ['get', 'mean_db'],
                 64,
-                10,
+                12,
                 70,
-                18,
+                22,
                 74,
-                28,
+                32,
               ],
               'circle-color': '#ff6df5',
-              'circle-opacity': 0.45,
+              'circle-opacity': 0.72,
               'circle-stroke-color': '#00e5ff',
-              'circle-stroke-width': 1.4,
+              'circle-stroke-width': 1.6,
             },
           })
         } else {
           setVis(SEOUL_CIRCLE_LAYER, true)
+          map.setPaintProperty(SEOUL_CIRCLE_LAYER, 'circle-opacity', 0.72)
         }
         if (!map.getLayer(SEOUL_LABEL_LAYER)) {
           map.addLayer({
@@ -605,19 +631,26 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
         } else {
           setVis(SEOUL_LABEL_LAYER, true)
         }
-      } catch {
-        /* overlay optional */
+      } catch (err) {
+        console.warn('[NoiseMap] Seoul overlay failed', err)
       }
     }
 
     const run = () => {
+      if (cancelled) return
       void ensureHk()
       void ensureSeoul()
     }
 
-    if (map.isStyleLoaded()) run()
-    else map.once('load', run)
-  }, [story?.overlays?.hongkong, story?.overlays?.seoul])
+    // mapReady means our layers exist; do not gate on isStyleLoaded() —
+    // it can flip false during easeTo and 'load' will not fire again.
+    run()
+    map.on('style.load', run)
+    return () => {
+      cancelled = true
+      map.off('style.load', run)
+    }
+  }, [mapReady, story?.overlays?.hongkong, story?.overlays?.seoul])
 
   type HkSample = {
     width: number
@@ -636,7 +669,10 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     if (!story?.overlays?.hongkong || hkSampleRef.current) return
     let cancelled = false
     fetch(HK_SAMPLE_URL)
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(`HK sample ${r.status}`)
+        return r.json()
+      })
       .then((raw: {
         width: number
         height: number
@@ -684,7 +720,8 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
           agglomeration: c.agglomeration,
           country: c.country,
           inhabitants: c.inhabitants,
-          tooltip: JSON.stringify(c.series),
+          // Active tip only — avoid embedding every source×metric on each point
+          tooltip: JSON.stringify(tip),
         } satisfies CityPointProps,
       })
     }
@@ -696,7 +733,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     fetch(CHART_URL)
       .then((r) => r.json())
       .then((data: { cities: ChartCity[] }) => {
-        if (!cancelled) setChartCities(data.cities ?? [])
+        if (!cancelled) setChartCities(hydrateChartCities(data.cities ?? []))
       })
       .catch(() => {
         if (!cancelled) setChartCities([])

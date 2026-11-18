@@ -5,7 +5,7 @@ import { ProgressRail } from './ProgressRail'
 import type { StoryMetrics, StoryStepId } from './storyTypes'
 import './scrolly.css'
 
-const STORY_URL = '/data/scrolly_story_v1.json'
+const STORY_URL = `${import.meta.env.BASE_URL || '/'}data/scrolly_story_v1.json`
 
 /**
  * × on each story card dismisses the narrative overlay and jumps to Explore
@@ -42,12 +42,22 @@ export function ScrollyApp() {
     ? exploreStep ?? steps[0]
     : (steps.find((s) => s.id === activeId) ?? steps[0])
 
+  // Unlock on the same render as the step (avoid one-frame race with map overlays)
+  const overlays = useMemo(
+    () => ({
+      hongkong: unlocked.hongkong || activeId === 'hongkong',
+      seoul: unlocked.seoul || activeId === 'seoul',
+    }),
+    [unlocked.hongkong, unlocked.seoul, activeId],
+  )
+
   useEffect(() => {
-    if (activeId === 'hongkong') {
-      setUnlocked((u) => (u.hongkong ? u : { ...u, hongkong: true }))
-    }
-    if (activeId === 'seoul') {
-      setUnlocked((u) => (u.seoul ? u : { ...u, seoul: true }))
+    if (activeId === 'hongkong' || activeId === 'seoul') {
+      setUnlocked((u) => {
+        if (activeId === 'hongkong' && !u.hongkong) return { ...u, hongkong: true }
+        if (activeId === 'seoul' && !u.seoul) return { ...u, seoul: true }
+        return u
+      })
     }
   }, [activeId])
 
@@ -83,12 +93,16 @@ export function ScrollyApp() {
         highlightId: active.map.highlightId ?? null,
         explore: Boolean(active.explore) || dismissed,
         stepId: dismissed ? 'explore' : active.id,
-        overlays: unlocked,
+        overlays,
       }
     : null
 
   const jump = (id: string) => {
     if (id !== 'explore') setDismissed(false)
+    // Unlock immediately on rail jump so overlays mount before scroll settles
+    if (id === 'hongkong' || id === 'seoul') {
+      setUnlocked((u) => ({ ...u, [id]: true }))
+    }
     const el = stepRefs.current[id]
     el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     setActiveId(id as StoryStepId)

@@ -32,56 +32,6 @@ export const LNIGHT_BANDS = [
   { category: 'LnightGreaterThan70', label: '≥70 dB', color: '#ff1744' },
 ] as const
 
-/** Full match-expression covering voluntary lower bands too. */
-export function fillColorExpression(metric: NoiseMetric): unknown[] {
-  const pairs =
-    metric === 'Lden'
-      ? [
-          'LdenLowerThan40',
-          '#1a237e',
-          'Lden4044',
-          '#283593',
-          'Lden4549',
-          '#303f9f',
-          'Lden5054',
-          '#3949ab',
-          'Lden5559',
-          '#3d5afe',
-          'Lden6064',
-          '#00e5ff',
-          'Lden6569',
-          '#76ff03',
-          'Lden7074',
-          '#ffea00',
-          'LdenGreaterThan75',
-          '#ff1744',
-        ]
-      : [
-          'LnightLowerThan40',
-          '#1a237e',
-          'Lnight4044',
-          '#283593',
-          'Lnight4549',
-          '#303f9f',
-          'Lnight5054',
-          '#3d5afe',
-          'Lnight5559',
-          '#00e5ff',
-          'Lnight6064',
-          '#76ff03',
-          'Lnight6569',
-          '#ffea00',
-          'LnightGreaterThan70',
-          '#ff1744',
-        ]
-
-  return ['match', ['get', 'category'], ...pairs, '#ff00ff']
-}
-
-export function pmtilesUrl(source: NoiseSource, metric: NoiseMetric): string {
-  return `/data/end_${source}_${metric.toLowerCase()}.pmtiles`
-}
-
 export const EUROPE_BOUNDS: [[number, number], [number, number]] = [
   [-12, 34],
   [32, 72],

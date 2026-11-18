@@ -107,15 +107,23 @@ export function countriesToGeoJSON(countries: CountryAgg[]): FeatureCollection {
   }
 }
 
-/** Parse tip JSON from a city leaf / point. */
+/** Parse tip JSON from a city leaf / point (single tip or full series map). */
 export function tipFromProps(
   tooltipRaw: unknown,
   source: NoiseSource,
   metric: NoiseMetric,
 ): ChartSeries | null {
   try {
-    const all = JSON.parse(String(tooltipRaw || '{}')) as Record<string, ChartSeries>
-    const tip = all[`${source}__${metric}`]
+    const parsed = JSON.parse(String(tooltipRaw || '{}')) as
+      | ChartSeries
+      | Record<string, ChartSeries>
+    if (!parsed || typeof parsed !== 'object') return null
+    // Preferred: only the active series tip is stored on the feature
+    if ('bands' in parsed && Array.isArray((parsed as ChartSeries).bands)) {
+      const tip = parsed as ChartSeries
+      return tip.total > 0 ? tip : null
+    }
+    const tip = (parsed as Record<string, ChartSeries>)[`${source}__${metric}`]
     return tip && tip.total > 0 ? tip : null
   } catch {
     return null
