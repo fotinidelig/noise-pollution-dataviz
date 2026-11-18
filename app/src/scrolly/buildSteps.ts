@@ -157,12 +157,12 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
     {
       id: 'calm',
       railLabel: 'Calm',
-      title: 'Toward quieter places',
+      title: 'Places where you might hear birds',
       questions: [],
       body: [
         `A Grand Canyon fall night near ${hi('15 dB')} sits far below a vacuum cleaner; a Berlin park hour near ${hi('49 dB')} is calm for a city, not silent.`,
         `Denali Birch Creek (~${hi('18 dB')}) and Haleakalā Nuʻu (~${hi('23 dB')}) sit near a ${hi('whisper (~20–30 dB)')}; a quiet-forest sample (~${hi('29 dB')}) and Poland’s Silent Route (~${hi('33 dB')}) land around a ${hi('quiet room (~30–40 dB)')}.`,
-        `Hoh River Trail (~${hi('34–38 dB')}) still undercuts casual ${hi('conversation (~60 dB)')}; Stockholm city parks (~${hi('55 dB')}) creep closer — still nowhere near a ${hiLoud('blender (~80–90 dB)')}.`,
+        `Distant bird calls on agency charts sit around ${hi('44–60 dB')}; a temperate-forest dawn ambient is often near ${hi('~45–50 dB(A)')}, while territorial song at 1 m can spike ${hiLoud('~75–100 dB')}. Hoh River Trail (~${hi('34–38 dB')}) still undercuts casual ${hi('conversation (~60 dB)')}; Stockholm city parks (~${hi('55 dB')}) creep closer — still nowhere near a ${hiLoud('blender (~80–90 dB)')}.`,
       ],
       map: {
         center: [-40, 45],
@@ -175,10 +175,10 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
     {
       id: 'explore',
       railLabel: 'Explore',
-      title: 'Explore the map',
+      title: 'Look closer',
       questions: [],
       body: [
-        'Pan, zoom, and switch noise source freely. Story flying is paused here — use the rail if you want a beat again. Toggle Calm spaces to revisit quiet anchors.',
+        `Zoom into ${hi('countries')} or ${hi('cities')} to see who is most exposed — and explore impacts on ${hi('human annoyance')} and potential ${hi('sleep disturbance')}.`,
       ],
       map: {
         center: [10, 48],

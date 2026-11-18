@@ -55,7 +55,18 @@ Companion to [`common-sounds-db-levels.md`](./common-sounds-db-levels.md) for Fo
 
 ## 3. Best 5–8 for storytelling (“how it sounds” vs vacuum / blender)
 
-Pair with [`common-sounds-db-levels.csv`](./common-sounds-db-levels.csv): whisper **25–30**, conversation **60–65**, vacuum **~70**, blender **~80–90**, busy street snapshot **75–90**.
+Pair with [`common-sounds-db-levels.csv`](./common-sounds-db-levels.csv): whisper **25–30**, distant bird calls **44–60**, dawn-chorus ambient **~45–55**, conversation **60–65**, vacuum **~70**, blender **~80–90**, busy street snapshot **75–90**.
+## Birdsong vs calm sites (Nov 2026)
+
+For perceptual anchors next to measured calm places, use [`common-sounds-db-levels.md`](./common-sounds-db-levels.md) **Birdsong / dawn chorus**:
+
+- Distant bird calls / song (charts): **44–60 dB** — [Purdue](https://www.physics.purdue.edu/primelab/safety/PPE/Hearing%20protection/dblevels.htm), NOAA chart lineage.
+- Temperate dawn-chorus ambient: **~45–55 dB(A)** — [Tegel airport natural experiment](https://pmc.ncbi.nlm.nih.gov/articles/PMC9470256/) (~46.2 dB(A) forest ambient); [Bear River dawn chorus](https://pubs.aip.org/asa/poma/article-pdf/doi/10.1121/2.0001873/19875147/010001_1_2.0001873.pdf).
+- Territorial song at **1 m**: **~74–100 dB** SPL — [Loning et al. 2022](https://pmc.ncbi.nlm.nih.gov/articles/PMC8902932/) citing Brackenbury; soft song sparrow **55–77** — [Anderson et al. 2008](http://www.nowickilab.org/papers/ASPN08e.pdf).
+
+Wilderness L50/LA50 values in this doc (**~15–25 dB**) sit below distant-bird charts (headroom to *hear* birds). City-park hours (**~46–49 dB**) already sit in dawn-chorus ambient territory.
+
+
 
 1. **Haleakalā crater ~10 dBA** — near **breathing**; ~60 dB below vacuum → “city noise is sixty times louder on a log scale” story (energy: 10⁶×). Prefer as *extreme floor*; note Nuʻu measured L50 is ~22–24.
 2. **Denali Birch Creek L50 ~18 dBA** — multi-week NPS monitor; still far below whisper upper end; good “continental wilderness” beat.

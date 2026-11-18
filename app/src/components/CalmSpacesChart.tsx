@@ -159,7 +159,7 @@ export function CalmSpacesChart({
       <div className="calm-chart__head">
         <div className="calm-chart__head-main">
           <span className="calm-chart__title">
-            Calm spaces — quieter places to visit
+            Places where you might hear birds
           </span>
           <span className="calm-chart__legend" aria-hidden={false}>
             <span className="calm-chart__swatch calm-chart__swatch--day" />

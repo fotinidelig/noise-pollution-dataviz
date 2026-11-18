@@ -1907,7 +1907,9 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
             {calmMode ? 'Calm spaces' : 'Do you hear the birds?'}
           </h1>
           <p className="noise-sub">
-            {calmMode ? 'Quiet anchors' : 'The world might be too noisy'}
+            {calmMode
+              ? 'Quiet anchors'
+              : 'The world might be too noisy to do that.'}
           </p>
         </div>
         {explore ? (
