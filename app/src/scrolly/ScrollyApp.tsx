@@ -160,7 +160,7 @@ export function ScrollyApp() {
                       />
                     ))}
                   </div>
-                  {isActiveCard && unlocked.hongkong ? (
+                  {isActiveCard && step.id === 'hongkong' ? (
                     <div
                       className="scrolly-hk-colorbar"
                       aria-label="Hong Kong peak traffic noise color scale"
