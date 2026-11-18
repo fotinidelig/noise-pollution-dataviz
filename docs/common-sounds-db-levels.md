@@ -17,6 +17,9 @@ Reference table for comparing **everyday sound pressure levels** with **European
 
 **WHO outdoor guidelines (for map thresholds, not “sounds”):** road **&lt;53 dB Lden** / **&lt;45 dB Lnight**; aircraft **&lt;45 dB Lden** / **&lt;40 dB Lnight** ([WHO ENG 2018](https://www.who.int/europe/publications/i/item/9789289053563)).
 
+
+**Perception (story):** ~**+10 dB ≈ twice as loud** (NIDCD rule of thumb). Scrolly uses this for doubling-step contrasts; not a claim about browser audio level.
+
 **Quiet baseline in Europe:** wilderness / sparsely populated areas often **Lden 30–35 dB** with instantaneous levels mostly **below ~30 dB(A)** ([EASA background noise report](https://www.easa.europa.eu/sites/default/files/dfu/Background_noise_report.pdf)).
 
 ---
