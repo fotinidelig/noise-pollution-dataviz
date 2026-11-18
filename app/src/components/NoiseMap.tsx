@@ -1263,7 +1263,8 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
       closeOnClick: false,
       offset: 14,
       className: 'noise-tip',
-      maxWidth: '280px',
+      // IBM Plex Sans is wider than VT323 — allow long Seoul one-liners.
+      maxWidth: '420px',
     })
     popupRef.current = popup
     mapRef.current = map

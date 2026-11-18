@@ -191,6 +191,8 @@
   box-shadow: 0 0 24px rgba(0, 184, 204, 0.12);
   color: #e8f0ff;
   font-family: var(--font-body, "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif);
+  max-width: none;
+  width: max-content;
 }
 
 .noise-tip .maplibregl-popup-tip {
@@ -205,8 +207,11 @@
 /* Compact Seoul site tip — one centered line */
 .tip--seoul {
   min-width: 0;
-  padding: 0.55rem 0.85rem;
+  width: max-content;
+  max-width: none;
+  padding: 0.55rem 1rem;
   text-align: center;
+  box-sizing: border-box;
 }
 
 .tip-seoul-line {
@@ -214,9 +219,9 @@
   align-items: center;
   justify-content: center;
   gap: 0.45rem;
-  font-size: 1.05rem;
-  line-height: 1.2;
-  letter-spacing: 0.02em;
+  font-size: 0.95rem;
+  line-height: 1.25;
+  letter-spacing: 0.01em;
   white-space: nowrap;
 }
 
