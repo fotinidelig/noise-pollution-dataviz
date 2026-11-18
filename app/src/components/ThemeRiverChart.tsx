@@ -69,7 +69,7 @@ export function ThemeRiverChart({
 }: Props) {
   const wrapRef = useRef<HTMLDivElement | null>(null)
   const lastNotifiedId = useRef<string | null>(null)
-  const [size, setSize] = useState({ w: 800, h: 168 })
+  const [size, setSize] = useState({ w: 800, h: 200 })
   const [localHover, setLocalHover] = useState<string | null>(null)
   const [collapsed, setCollapsed] = useState(false)
 
