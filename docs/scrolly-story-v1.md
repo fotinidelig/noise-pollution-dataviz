@@ -33,8 +33,9 @@ As a rule of thumb, each **+10 dB** sounds about **twice** as loud. Exposure at 
 
 ### Germany · Berlin (2021)
 
-About **110k** above **75 dB**; **~11k (10.3%)** in Berlin.  
-**75 dB** between **vacuum (~70)** and **blender (~80–90)** — roughly **4×** the **55 dB** lower END band (two doublings).
+Title: **110k people must listen to a vacuum cleaner all day — 10.3% in Berlin**  
+About **110k** people above **75 dB**; **~11k (10.3%)** in Berlin.  
+**75 dB** sits between a **vacuum cleaner (~70 dB)** and a **blender (~80–90 dB)**.
 
 ### Paris (2025)
 

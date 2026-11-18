@@ -69,11 +69,11 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       id: 'germany',
       railLabel: 'Germany',
       year: de.year_label,
-      title: `${dePeople} people on high dBs — ${de.berlin_share_of_germany_pct}% in Berlin`,
+      title: `${dePeople} people must listen to a vacuum cleaner all day — ${de.berlin_share_of_germany_pct}% in Berlin`,
       questions: [],
       body: [
         `In German cities, about ${hi(dePeople)} people live with long-term day–evening–night averages above ${hiLoud('75 dB')}. Of them, about ${hi(berlinPeople)} — ${hi(`${de.berlin_share_of_germany_pct}%`)} — are in Berlin.`,
-        `${hiLoud('75 dB')} sits between a ${hiLoud('vacuum cleaner (~70 dB)')} and a ${hiLoud('blender (~80–90 dB)')} — roughly ${hi('4× as loud')} as the ${hi('55 dB')} lower END band (two doublings). Louder places lean toward the blender.`,
+        `${hiLoud('75 dB')} sits between a ${hiLoud('vacuum cleaner (~70 dB)')} and a ${hiLoud('blender (~80–90 dB)')}.`,
       ],
       map: {
         center: [de.lon, de.lat],
