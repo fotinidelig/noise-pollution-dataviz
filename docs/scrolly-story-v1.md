@@ -4,7 +4,8 @@
 **Metrics JSON:** `app/public/data/scrolly_story_v1.json` (= `data/processed/scrolly/story_v1_metrics.json`).  
 **Run:** `cd app && npm run dev -- --host 127.0.0.1 --port 5173` → hard-refresh.
 
-No temporal trend charts — **snapshot years only**, always labelled.
+No temporal trend charts — **snapshot years only**, always labelled.  
+**UI copy rule:** no metric jargon in reader-facing text (no Lden / Ln / LAeq / L₁₀ / Leq). Use plain language (“night noise at this road site”, “peak traffic noise”, “day–evening–night long-term”). Internal map props may still use END metric codes.
 
 ---
 
@@ -12,33 +13,48 @@ No temporal trend charts — **snapshot years only**, always labelled.
 
 | | |
 | --- | --- |
-| **Title** | do you hear the birds? |
-| **Map** | Europe overview, road · Lden |
+| **Title** | How loud is the city? |
+| **Map** | Europe overview, road · day–evening–night |
 
 ---
 
-## Step 1 — Europe END (label year **2021**)
+## Step 1 — Europe (label year **2021**)
+
+**Both beats stay on this step (Fotini):** (a) people above WHO guidance, and (b) highly annoyed. The **>75 dB** high-band story is a **separate later beat** (Germany), not mixed into Europe.
 
 | Question | Answer (v1 numbers) |
 | --- | --- |
-| How many people in Europe are HA by the sounds? | **~12.5 million** highly annoyed (HA); also **~3.3 million** HSD — agglomeration road/rail/aircraft, WHO ERFs × END bands |
-| How many people experience sound louder than the WHO suggestions? | **~74.1 million** people in END **Lden** bands (≥55 dB reporting). WHO road guidance ~**53 dB Lden** → END bands used as practical proxy |
+| How many people experience sound louder than WHO suggestions? | **~74.1 million** people in official agglomeration bands that already sit above WHO road guidance (maps start counting from levels past those guidelines; practical exceedance proxy) |
+| How many people in Europe are highly annoyed by the sounds? | **~12.5 million** highly annoyed; also **~3.3 million** highly sleep-disturbed — road/rail/aircraft, WHO exposure–response × official bands |
 
 **Sources:** `exposure_agglomeration_who_ha_hsd.csv` (END 2022 round → story year label **2021**).
 
 ---
 
-## Step 2 — Germany · Cologne
+## Step 2 — Germany · Berlin (high-band share)
 
 | | |
 | --- | --- |
-| **Agglomeration chosen** | **Cologne** — most people in road **Lden >75** among German agglomerations (**12,200** people) |
+| **Agglomeration** | **Berlin** (Fotini: not Cologne) |
+| **Frame** | Share of high-dB exposure: “**X** people on high dBs, **Y%** in Berlin” |
 | **Year** | **2021** |
-| **Questions** | How many people are exposed to louder than 75 dB? / What does 75 dB compare to? |
-| **Common sound** | Busy street / city traffic (roadside snapshot) · **75–90 dB** |
-| **Map** | Fly to Cologne; road · Lden; highlight `Germany\|Cologne` |
+| **High band** | Top band **>75 dB** day–evening–night, **road + rail + aircraft** in German agglomerations |
+| **Numbers** | Germany **110,200** people · Berlin **11,400** → **10.3%** of Germany’s high-band total (~**2.4%** of Europe’s **480,800**) |
+| **Road-only (secondary)** | Germany **97,000** · Berlin **3,400** → **3.5%** of DE road high-band — not the headline frame |
+| **Common sound** | **Busy street / city traffic** · **75–90 dB** — **placeholder** until Fotini picks from options below |
+| **Map** | Fly to Berlin; highlight `Germany\|Berlin` |
 
-Runner-up >75 road: Munich 11.5k, Düsseldorf 9.6k.
+### ~75 dB common-sound options (pending pick)
+
+From `docs/common-sounds-db-levels.csv` / store table — near the high band; **do not lock** until Fotini chooses:
+
+| Sound | dB range |
+| --- | --- |
+| Vacuum cleaner | 70 |
+| Busy street / city traffic (roadside snapshot) | 75–90 *(current placeholder)* |
+| Aircraft cabin in cruise | 72–83 |
+| Coffee shop / noisy restaurant | 80 |
+| Inside car in city traffic | 85 |
 
 ---
 
@@ -47,11 +63,13 @@ Runner-up >75 road: Munich 11.5k, Düsseldorf 9.6k.
 | | |
 | --- | --- |
 | **Year** | **2025** |
-| **Metric** | Measured **Ln** (Bruitparif road sites) |
+| **Plain language** | Night noise at this road site |
 | **Loudest site** | **Périphérique Vincennes** |
-| **Max dB** | **77.5 dB Ln** |
-| **Common sound** | Busy street / city traffic · **75–90 dB** |
+| **Max dB** | **77.5 dB** |
+| **Common sound** | Aircraft cabin in cruise · **72–83 dB** |
 | **Question angle** | Which site had the highest night level in 2025? What everyday sound sits near that? |
+
+*(Wording OK for now; keep metric names out of UI.)*
 
 ---
 
@@ -59,12 +77,14 @@ Runner-up >75 road: Munich 11.5k, Düsseldorf 9.6k.
 
 | | |
 | --- | --- |
-| **Year** | **2026** (most recent year present in SIVCA nightly extract) |
-| **Metric** | Night **LAeq** (Periodo N), focus stations |
+| **Year** | **2026** (most recent year in SIVCA nightly extract) |
+| **Plain language** | Night noise at this monitoring station |
 | **Loudest focus station** | **ID 6** |
 | **Max dB** | Median **64.4 dB**; peak reading **80.4 dB** (same station) |
 | **Common sound (median)** | Normal conversation · **60–65 dB** |
-| **Question angle** | Which focus station is loudest at night in 2026? What does that LAeq feel like? |
+| **Question angle** | Which focus station is loudest at night in 2026? What does that feel like? |
+
+*(Wording OK for now; keep metric names out of UI.)*
 
 ---
 
@@ -73,11 +93,11 @@ Runner-up >75 road: Munich 11.5k, Düsseldorf 9.6k.
 | | |
 | --- | --- |
 | **Year** | **2020** |
-| **Metric** | Traffic **L₁₀ (1 h @ 4 m)** raster |
-| **Max L₁₀** | **~96.8 dB** |
-| **Common sound** | Personal music (headphones; high volume) · **96–110 dB** |
-| **Very loud extent** | **~23.0%** of valid cells **>70 dB** → **~96.9 km²** |
-| **Method** | Valid cells = finite L₁₀ ∈ [30, 100]; count L₁₀>70; each cell **10×10 m** → area. **Not** road-km (no centreline). |
+| **Plain language** | Peak traffic noise on the 2020 map |
+| **Max on grid** | **~96.8 dB** |
+| **Common sound** | Jet flyover outdoors (≈1000 ft) · **88–103 dB** |
+| **Very loud extent** | **~23.0%** of valid cells **>70 dB** → **~96.9 km²** — **confirmed** (Fotini: >70 for area) |
+| **Method (internal)** | Valid cells = finite peak-traffic values ∈ [30, 100]; count >70; each cell **10×10 m** → area. **Not** road-km. |
 
 ---
 
@@ -86,7 +106,7 @@ Runner-up >75 road: Munich 11.5k, Düsseldorf 9.6k.
 | | |
 | --- | --- |
 | **Year** | **2024** |
-| **Metric** | Daily road **Leq** (Seoul-only) |
+| **Plain language** | Daily road noise at this site |
 | **Loudest site** | **북아현동** |
 | **Max dB** | Median **73.4 dB**; file peak **76.6 dB** (숙명여고 앞) |
 | **Common sound (median)** | Vacuum cleaner · **70 dB** (nearest mid) / busy street band also nearby |
@@ -103,4 +123,6 @@ Full interactive map: source/metric toggles, hover/pin, ThemeRiver.
 
 - Left **progress rail** (clickable stops).  
 - Map **sticky full-bleed**; step cards scroll over left.  
-- Controls locked to step source/metric until Explore.
+- Controls locked to step source/metric until Explore.  
+- Years labelled on each beat.  
+- Reader copy: plain language only for measured noise; map layer codes stay internal.

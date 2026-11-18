@@ -14,24 +14,60 @@
       "road": 2598508
     },
     "people_exposed_lden_end_bands": 74093700.0,
-    "people_exposed_lnight_end_bands": 51473600.0
+    "people_exposed_lnight_end_bands": 51473600.0,
+    "who_guideline_note": "END agglomeration bands start at 55 dB day-evening-night / 50 dB night; WHO road guidance is ~53 / 45. Exposed counts in END bands are the WHO-exceedance proxy."
   },
   "germany": {
-    "agglomeration": "Cologne",
-    "id": "Germany|Cologne",
-    "lon": 6.95,
-    "lat": 50.93333,
+    "agglomeration": "Berlin",
+    "id": "Germany|Berlin",
+    "lon": 13.41053,
+    "lat": 52.52437,
     "band": ">75",
-    "metric": "Lden",
-    "source": "road",
-    "people_gt75": 12200.0,
     "year_label": 2021,
+    "high_band_people_germany": 110200.0,
+    "high_band_people_berlin": 11400.0,
+    "berlin_share_of_germany_pct": 10.3,
+    "high_band_people_europe": 480800.0,
+    "berlin_share_of_europe_pct": 2.4,
+    "road_only": {
+      "germany": 97000.0,
+      "berlin": 3400.0,
+      "berlin_share_of_germany_pct": 3.5
+    },
+    "frame": "Of people in the top high-dB band (>75) across road/rail/aircraft in German agglomerations, Berlin’s share.",
     "common_sound": {
-      "sound_name": "Aircraft cabin in cruise",
-      "db_min": 72.0,
-      "db_max": 83.0,
-      "mid": 77.5
-    }
+      "sound_name": "Busy street / city traffic (roadside snapshot)",
+      "db_min": 75.0,
+      "db_max": 90.0,
+      "mid": 82.5
+    },
+    "common_sound_options_pending": [
+      {
+        "sound_name": "Vacuum cleaner",
+        "db_min": 70,
+        "db_max": 70
+      },
+      {
+        "sound_name": "Busy street / city traffic (roadside snapshot)",
+        "db_min": 75,
+        "db_max": 90
+      },
+      {
+        "sound_name": "Aircraft cabin in cruise",
+        "db_min": 72,
+        "db_max": 83
+      },
+      {
+        "sound_name": "Coffee shop / noisy restaurant",
+        "db_min": 80,
+        "db_max": 80
+      },
+      {
+        "sound_name": "Inside car in city traffic",
+        "db_min": 85,
+        "db_max": 85
+      }
+    ]
   },
   "paris": {
     "year": 2025,
@@ -45,7 +81,8 @@
       "db_min": 72.0,
       "db_max": 83.0,
       "mid": 77.5
-    }
+    },
+    "plain": "night noise at this road site"
   },
   "madrid": {
     "year": 2026,
@@ -66,7 +103,8 @@
       "db_min": 60.0,
       "db_max": 65.0,
       "mid": 62.5
-    }
+    },
+    "plain": "night noise at this monitoring station"
   },
   "hong_kong": {
     "year": 2020,
@@ -84,7 +122,8 @@
       "db_min": 88.0,
       "db_max": 103.0,
       "mid": 95.5
-    }
+    },
+    "plain": "peak traffic noise on the 2020 map"
   },
   "seoul": {
     "year": 2024,
@@ -100,6 +139,7 @@
       "db_min": 70.0,
       "db_max": 70.0,
       "mid": 70.0
-    }
+    },
+    "plain": "daily road noise at this site"
   }
 }

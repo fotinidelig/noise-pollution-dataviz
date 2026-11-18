@@ -7,14 +7,26 @@ export type StoryMetrics = {
     people_highly_sleep_disturbed: number
     people_exposed_lden_end_bands: number
     by_source_ha: Record<string, number>
+    who_guideline_note?: string
   }
   germany: {
     agglomeration: string
     id: string
     lon: number
     lat: number
-    people_gt75: number
+    band: string
     year_label: number
+    high_band_people_germany: number
+    high_band_people_berlin: number
+    berlin_share_of_germany_pct: number
+    high_band_people_europe: number
+    berlin_share_of_europe_pct: number
+    road_only?: {
+      germany: number
+      berlin: number
+      berlin_share_of_germany_pct: number | null
+    }
+    frame?: string
     common_sound: { sound_name: string; db_min: number; db_max: number }
   }
   paris: {
@@ -23,6 +35,7 @@ export type StoryMetrics = {
     max_db: number
     lon: number
     lat: number
+    plain?: string
     common_sound: { sound_name: string; db_min: number; db_max: number }
   }
   madrid: {
@@ -32,6 +45,7 @@ export type StoryMetrics = {
     max_db_peak: number
     lon: number
     lat: number
+    plain?: string
     common_sound: { sound_name: string; db_min: number; db_max: number }
   }
   hong_kong: {
@@ -42,6 +56,7 @@ export type StoryMetrics = {
     lon: number
     lat: number
     method: string
+    plain?: string
     common_sound: { sound_name: string; db_min: number; db_max: number }
   }
   seoul: {
@@ -51,6 +66,7 @@ export type StoryMetrics = {
     max_db_peak: number
     lon: number
     lat: number
+    plain?: string
     common_sound: { sound_name: string; db_min: number; db_max: number }
   }
 }
