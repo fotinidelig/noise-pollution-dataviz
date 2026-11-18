@@ -8,6 +8,9 @@ export const MAX_RINGS_PER_BAND = 12
 export const RING_STEP_KM = 0.55
 export const RING_BASE_KM = 1.2
 export const RING_VERTICES = 48
+/** Extra expanding pulse rings beyond the last static ring (visible at overview). */
+export const PULSE_OUTER_COUNT = 4
+export const PULSE_STEP_KM = 1.35
 
 export const LDEN_KEYS = ['55-59', '60-64', '65-69', '70-74', '>75'] as const
 export const LNIGHT_KEYS = ['50-54', '55-59', '60-64', '65-69', '>70'] as const
@@ -52,6 +55,7 @@ export function ringCoords(
 /**
  * Build equally spaced rings across bands (no extra gap when a band has fewer rings).
  * Colour still encodes dB band; radius only depends on cumulative ring index.
+ * Appends outer `role:'pulse'` rings so the sound-wave can travel past the static set.
  */
 export function buildEqualSpacedRings(args: {
   lon: number
@@ -64,10 +68,12 @@ export function buildEqualSpacedRings(args: {
 }): Feature[] {
   const features: Feature[] = []
   let ringIndex = 0
+  let lastColor = '#00e5ff'
   for (const b of args.bands) {
     const n = ringsForPeople(b.people)
     for (let i = 0; i < n; i++) {
       const radiusKm = RING_BASE_KM + ringIndex * RING_STEP_KM
+      lastColor = b.color
       features.push({
         type: 'Feature',
         geometry: {
@@ -76,6 +82,7 @@ export function buildEqualSpacedRings(args: {
         },
         properties: {
           kind: 'ring',
+          role: 'static',
           id: args.id,
           label: args.label,
           source: args.source,
@@ -91,6 +98,37 @@ export function buildEqualSpacedRings(args: {
       ringIndex += 1
     }
   }
+
+  const lastStaticRadius =
+    ringIndex > 0
+      ? RING_BASE_KM + (ringIndex - 1) * RING_STEP_KM
+      : RING_BASE_KM
+
+  for (let i = 0; i < PULSE_OUTER_COUNT; i++) {
+    const radiusKm = lastStaticRadius + (i + 1) * PULSE_STEP_KM
+    features.push({
+      type: 'Feature',
+      geometry: {
+        type: 'LineString',
+        coordinates: ringCoords(args.lon, args.lat, radiusKm),
+      },
+      properties: {
+        kind: 'ring',
+        role: 'pulse',
+        id: args.id,
+        label: args.label,
+        source: args.source,
+        metric: args.metric,
+        band: 'pulse',
+        band_label: 'pulse',
+        color: lastColor,
+        people: 0,
+        ring_index: i,
+        radius_km: Number(radiusKm.toFixed(3)),
+      },
+    })
+  }
+
   return features
 }
 

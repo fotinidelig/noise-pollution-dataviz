@@ -33,10 +33,11 @@ import './NoiseMap.css'
 const CITIES_SOURCE = 'aggl-cities'
 const COUNTRIES_SOURCE = 'aggl-countries'
 const RINGS_SOURCE = 'aggl-rings-dyn'
+/** Static exposure rings — hover dimming only; never painted by the pulse rAF. */
 const RINGS_LAYER = 'aggl-rings'
-/** Soft outer glow twin — same geometry, blurrier pulse. */
-const RINGS_GLOW_LAYER = 'aggl-rings-glow'
-const RING_PULSE_BUCKETS = 6
+/** Outer traveling sound-wave — separate layer so hover hit-testing stays snappy. */
+const RINGS_PULSE_LAYER = 'aggl-rings-pulse'
+const RING_PULSE_BUCKETS = 4
 const HIT_LAYER = 'aggl-hit'
 const LABEL_LAYER = 'aggl-labels'
 const COUNTRY_HIT_LAYER = 'aggl-country-hit'
@@ -172,6 +173,11 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
   const [hoverSeries, setHoverSeries] = useState<HoverSeries | null>(null)
   const [pinnedId, setPinnedId] = useState<string | null>(null)
   const [pinnedSeries, setPinnedSeries] = useState<HoverSeries | null>(null)
+  const [tipAnchor, setTipAnchor] = useState<{
+    left: number
+    top: number
+    height: number
+  } | null>(null)
   const pinnedIdRef = useRef<string | null>(null)
   const hoveredIdRef = useRef<string | null>(null)
   const focusIdRef = useRef<string | null>(null)
@@ -188,30 +194,25 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
   focusIdRef.current = focusId
 
   /**
-   * Sound-wave pulse on END exposure rings.
-   * Uses interpolate stops on ring_index (no MapLibre `%`/`match`) so paint
-   * updates stay valid; crest travels outward ~20fps.
+   * Paint-only pulse on the OUTER pulse layer (not static rings).
+   * Throttled ~12fps; never touches hit layers or static ring paint used by hover.
    */
   const paintRingSoundWave = (activeId: string | null = ringFocusIdRef.current) => {
     const map = mapRef.current
-    if (!map || !map.getLayer(RINGS_LAYER)) return
+    if (!map || !map.getLayer(RINGS_PULSE_LAYER)) return
     ringFocusIdRef.current = activeId
     const dimming = Boolean(activeId)
     const id = activeId ?? ''
     const phase = pulsePhaseRef.current
     const N = RING_PULSE_BUCKETS
-    const maxRing = 28
 
-    const opacityStops: Array<number> = []
-    const blurStops: Array<number> = []
-    const widthStops: Array<number> = []
-    for (let i = 0; i <= maxRing; i++) {
-      const t = (phase - (i % N) / N + 1) % 1
+    const opacityStops: number[] = []
+    const blurStops: number[] = []
+    for (let i = 0; i < N; i++) {
+      const t = (phase - i / N + 1) % 1
       const soft = Math.sin(t * Math.PI) ** 2
-      // Strong enough to read as a pulse on the dark neon map
-      opacityStops.push(i, 0.22 + 0.78 * soft)
-      blurStops.push(i, 0.05 + 2.2 * soft)
-      widthStops.push(i, 0.75 + 0.55 * soft)
+      opacityStops.push(i, 0.08 + 0.72 * soft)
+      blurStops.push(i, 0.4 + 2.6 * soft)
     }
 
     const ringIdx = [
@@ -219,101 +220,37 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
       ['to-number', ['get', 'ring_index']],
       0,
     ] as maplibregl.ExpressionSpecification
-    const pulseOpacity = [
-      'interpolate',
-      ['linear'],
-      ringIdx,
-      ...opacityStops,
-    ] as maplibregl.ExpressionSpecification
-    const pulseBlur = [
-      'interpolate',
-      ['linear'],
-      ringIdx,
-      ...blurStops,
-    ] as maplibregl.ExpressionSpecification
-    const pulseWidthMul = [
-      'interpolate',
-      ['linear'],
-      ringIdx,
-      ...widthStops,
-    ] as maplibregl.ExpressionSpecification
 
     const focusMul: maplibregl.ExpressionSpecification | number = dimming
       ? ([
           'case',
           ['==', ['to-string', ['get', 'id']], id],
           1,
-          0.14,
+          0.12,
         ] as maplibregl.ExpressionSpecification)
       : 1
 
-    const baseWidth: maplibregl.ExpressionSpecification = dimming
-      ? ([
-          'case',
-          ['==', ['to-string', ['get', 'id']], id],
-          ['interpolate', ['linear'], ['zoom'], 3, 1.2, 6, 2.0, 10, 2.8],
-          ['interpolate', ['linear'], ['zoom'], 3, 0.45, 6, 0.7, 10, 1.0],
-        ] as maplibregl.ExpressionSpecification)
-      : ([
+    try {
+      map.setPaintProperty(RINGS_PULSE_LAYER, 'line-opacity', [
+        '*',
+        focusMul,
+        [
           'interpolate',
           ['linear'],
-          ['zoom'],
-          3,
-          0.75,
-          6,
-          1.25,
-          10,
-          2.0,
-        ] as maplibregl.ExpressionSpecification)
-
-    const setPaint = (layer: string, prop: string, value: unknown) => {
-      try {
-        map.setPaintProperty(layer, prop, value as maplibregl.ExpressionSpecification)
-        return true
-      } catch (err) {
-        if (!pulseErrorLoggedRef.current) {
-          pulseErrorLoggedRef.current = true
-          console.warn(`[rings pulse] ${layer}.${prop} failed`, err)
-        }
-        return false
-      }
-    }
-
-    // Global breath (literal) — guaranteed visible even if data-driven stagger fails
-    const breath = 0.28 + 0.72 * Math.sin(phase * Math.PI) ** 2
-    const breathBlur = 0.15 + 2.4 * Math.sin(phase * Math.PI) ** 2
-
-    // Prefer traveling-wave stagger by ring_index; fall back to global breath
-    const opacityOk = setPaint(RINGS_LAYER, 'line-opacity', [
-      '*',
-      focusMul,
-      pulseOpacity,
-    ])
-    if (!opacityOk) {
-      setPaint(RINGS_LAYER, 'line-opacity', ['*', focusMul, breath])
-    }
-    const widthOk = setPaint(RINGS_LAYER, 'line-width', ['*', pulseWidthMul, baseWidth])
-    if (!widthOk) {
-      setPaint(RINGS_LAYER, 'line-width', ['*', breath * 0.5 + 0.75, baseWidth])
-    }
-    if (!setPaint(RINGS_LAYER, 'line-blur', pulseBlur)) {
-      setPaint(RINGS_LAYER, 'line-blur', breathBlur)
-    }
-
-    if (map.getLayer(RINGS_GLOW_LAYER)) {
-      if (
-        !setPaint(RINGS_GLOW_LAYER, 'line-opacity', [
-          '*',
-          focusMul,
-          0.6,
-          pulseOpacity,
-        ])
-      ) {
-        setPaint(RINGS_GLOW_LAYER, 'line-opacity', ['*', focusMul, 0.55 * breath])
-      }
-      setPaint(RINGS_GLOW_LAYER, 'line-width', ['*', 1.8, widthOk ? pulseWidthMul : 1, baseWidth])
-      if (!setPaint(RINGS_GLOW_LAYER, 'line-blur', ['+', 1.8, pulseBlur])) {
-        setPaint(RINGS_GLOW_LAYER, 'line-blur', breathBlur + 1.8)
+          ringIdx,
+          ...opacityStops,
+        ],
+      ] as maplibregl.ExpressionSpecification)
+      map.setPaintProperty(RINGS_PULSE_LAYER, 'line-blur', [
+        'interpolate',
+        ['linear'],
+        ringIdx,
+        ...blurStops,
+      ] as maplibregl.ExpressionSpecification)
+    } catch (err) {
+      if (!pulseErrorLoggedRef.current) {
+        pulseErrorLoggedRef.current = true
+        console.warn('[rings pulse] paint failed', err)
       }
     }
   }
@@ -325,6 +262,44 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     if (!map || !map.getLayer(RINGS_LAYER)) return
     const dimming = Boolean(activeId)
     const id = activeId ?? ''
+    ringFocusIdRef.current = activeId
+
+    // Static rings only — pulse layer is updated by the rAF loop
+    map.setPaintProperty(
+      RINGS_LAYER,
+      'line-opacity',
+      dimming
+        ? ([
+            'case',
+            ['==', ['to-string', ['get', 'id']], id],
+            0.95,
+            0.16,
+          ] as maplibregl.ExpressionSpecification)
+        : 0.88,
+    )
+    map.setPaintProperty(
+      RINGS_LAYER,
+      'line-width',
+      dimming
+        ? ([
+            'case',
+            ['==', ['to-string', ['get', 'id']], id],
+            ['interpolate', ['linear'], ['zoom'], 3, 1.15, 6, 1.9, 10, 2.6],
+            ['interpolate', ['linear'], ['zoom'], 3, 0.4, 6, 0.65, 10, 0.95],
+          ] as maplibregl.ExpressionSpecification)
+        : ([
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            3,
+            0.7,
+            6,
+            1.15,
+            10,
+            1.8,
+          ] as maplibregl.ExpressionSpecification),
+    )
+    // Sync pulse focus mul without waiting for next rAF tick
     paintRingSoundWave(activeId)
 
     if (map.getLayer(LABEL_LAYER)) {
@@ -441,19 +416,18 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     if (nav) nav.style.display = storyLocked ? 'none' : ''
   }, [storyLocked, story?.stepId, mapReady])
 
-  // Sound-wave pulse loop — keyed off mapReady so it survives story remounts
+  // Outer-ring pulse only (~12fps) — never rebuilds geometry, never paints static rings
   useEffect(() => {
     if (!mapReady) return
     let last = 0
     const tick = (now: number) => {
-      if (now - last >= 48) {
+      if (now - last >= 80) {
         last = now
-        pulsePhaseRef.current = (pulsePhaseRef.current + 0.04) % 1
+        pulsePhaseRef.current = (pulsePhaseRef.current + 0.055) % 1
         paintRingSoundWaveRef.current(ringFocusIdRef.current)
       }
       pulseRafRef.current = window.requestAnimationFrame(tick)
     }
-    // Kick once immediately so the first paint isn't the static layer default
     paintRingSoundWaveRef.current(ringFocusIdRef.current)
     pulseRafRef.current = window.requestAnimationFrame(tick)
     return () => {
@@ -463,6 +437,50 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
       }
     }
   }, [mapReady])
+
+  // Dock wave chart to the right of the MapLibre hover/pin tooltip
+  useEffect(() => {
+    const wrap = containerRef.current?.parentElement
+    if (!wrap) return
+    let raf = 0
+    const sync = () => {
+      const tip = wrap.querySelector('.noise-tip') as HTMLElement | null
+      const wrapBox = wrap.getBoundingClientRect()
+      if (!tip || tip.offsetParent === null) {
+        setTipAnchor(null)
+        return
+      }
+      const r = tip.getBoundingClientRect()
+      if (r.width < 8 || r.height < 8) {
+        setTipAnchor(null)
+        return
+      }
+      setTipAnchor({
+        left: r.right - wrapBox.left + 8,
+        top: r.top - wrapBox.top,
+        height: Math.max(120, r.height),
+      })
+    }
+    const onMove = () => {
+      if (raf) return
+      raf = window.requestAnimationFrame(() => {
+        raf = 0
+        sync()
+      })
+    }
+    sync()
+    const map = mapRef.current
+    map?.on('move', onMove)
+    map?.on('zoom', onMove)
+    const mo = new MutationObserver(onMove)
+    mo.observe(wrap, { childList: true, subtree: true, attributes: true })
+    return () => {
+      if (raf) window.cancelAnimationFrame(raf)
+      map?.off('move', onMove)
+      map?.off('zoom', onMove)
+      mo.disconnect()
+    }
+  }, [mapReady, hoveredId, pinnedId, focusId])
 
   // Hong Kong raster + Seoul bubbles — unlock once, then keep visible
   useEffect(() => {
@@ -891,8 +909,6 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     })
     popupRef.current = popup
     mapRef.current = map
-    // Debug hook for pulse verification (harmless in prod)
-    ;(window as unknown as { __noiseMap?: maplibregl.Map }).__noiseMap = map
 
     map.on('load', () => {
       map.addSource(CITIES_SOURCE, {
@@ -914,34 +930,13 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
       })
 
       map.addLayer({
-        id: RINGS_GLOW_LAYER,
-        type: 'line',
-        source: RINGS_SOURCE,
-        paint: {
-          'line-color': ['get', 'color'],
-          'line-opacity': 0.25,
-          'line-width': [
-            'interpolate',
-            ['linear'],
-            ['zoom'],
-            3,
-            1.1,
-            6,
-            1.8,
-            10,
-            2.6,
-          ],
-          'line-blur': 2.2,
-        },
-      })
-
-      map.addLayer({
         id: RINGS_LAYER,
         type: 'line',
         source: RINGS_SOURCE,
+        filter: ['==', ['get', 'role'], 'static'],
         paint: {
           'line-color': ['get', 'color'],
-          'line-opacity': 0.75,
+          'line-opacity': 0.88,
           'line-width': [
             'interpolate',
             ['linear'],
@@ -949,11 +944,34 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
             3,
             0.7,
             6,
-            1.2,
+            1.15,
             10,
-            1.9,
+            1.8,
           ],
-          'line-blur': 0.4,
+          'line-blur': 0,
+        },
+      })
+
+      map.addLayer({
+        id: RINGS_PULSE_LAYER,
+        type: 'line',
+        source: RINGS_SOURCE,
+        filter: ['==', ['get', 'role'], 'pulse'],
+        paint: {
+          'line-color': ['get', 'color'],
+          'line-opacity': 0.45,
+          'line-width': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            3,
+            1.1,
+            6,
+            1.7,
+            10,
+            2.4,
+          ],
+          'line-blur': 1.8,
         },
       })
 
@@ -1473,7 +1491,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
 
       <div className="noise-canvas-wrap">
         <div className="noise-canvas" ref={containerRef} />
-        {chartCities.length > 0 ? (
+        {chartCities.length > 0 && tipAnchor ? (
           <CityWaveChart
             cities={chartCities}
             source={source}
@@ -1483,6 +1501,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
             pinnedId={pinnedId}
             pinnedSeries={pinnedSeries}
             pinned={Boolean(pinnedId)}
+            sidecar={tipAnchor}
           />
         ) : null}
         {streamData && explore ? (

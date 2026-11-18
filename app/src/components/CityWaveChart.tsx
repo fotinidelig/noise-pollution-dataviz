@@ -51,6 +51,8 @@ type Props = {
   pinnedId?: string | null
   pinnedSeries?: HoverSeries | null
   pinned?: boolean
+  /** Docked to the right of the map tooltip (mock sidecar). */
+  sidecar?: { left: number; top: number; height: number } | null
 }
 
 type Pt = { x: number; y: number; color: string; t: number }
@@ -128,9 +130,10 @@ export function CityWaveChart({
   pinnedId = null,
   pinnedSeries = null,
   pinned = false,
+  sidecar = null,
 }: Props) {
   const plotRef = useRef<HTMLDivElement | null>(null)
-  const [size, setSize] = useState({ w: 220, h: 640 })
+  const [size, setSize] = useState({ w: 200, h: 200 })
   const [bandTip, setBandTip] = useState<{
     label: string
     people: number
@@ -146,8 +149,8 @@ export function CityWaveChart({
       const cr = entries[0]?.contentRect
       if (!cr) return
       setSize({
-        w: Math.max(160, Math.floor(cr.width)),
-        h: Math.max(200, Math.floor(cr.height)),
+        w: Math.max(120, Math.floor(cr.width)),
+        h: Math.max(100, Math.floor(cr.height)),
       })
     })
     ro.observe(el)
@@ -204,7 +207,7 @@ export function CityWaveChart({
     setBandTip(null)
   }, [active?.id, source, metric])
 
-  const pad = { top: 16, right: 36, bottom: 28, left: 52 }
+  const pad = { top: 8, right: 28, bottom: 22, left: 40 }
   const innerW = Math.max(40, size.w - pad.left - pad.right)
   const innerH = Math.max(80, size.h - pad.top - pad.bottom)
 
@@ -247,16 +250,21 @@ export function CityWaveChart({
 
   const xTicks = x.ticks(3).filter((t) => t < (active?.localMax ?? 0) * 0.92)
 
-  if (!active) return null
+  if (!active || !sidecar) return null
 
   return (
     <div
-      className={`wave-panel has-series${pinned ? ' is-pinned' : ''}`}
+      className={`wave-panel wave-panel--sidecar has-series${pinned ? ' is-pinned' : ''}`}
       aria-label="People by dB band"
+      style={{
+        left: sidecar.left,
+        top: sidecar.top,
+        height: sidecar.height,
+      }}
     >
       <div className="wave-panel__head">
         <span className="wave-panel__meta">
-          {active.name}
+          people × dB
           {pinned ? <span className="wave-pin-badge">pinned</span> : null}
         </span>
       </div>

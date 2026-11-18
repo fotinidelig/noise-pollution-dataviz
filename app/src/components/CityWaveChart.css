@@ -1,21 +1,21 @@
 .wave-panel {
   position: absolute;
-  z-index: 4;
-  top: clamp(5.2rem, 11vw, 6.8rem);
-  left: 0.65rem;
-  bottom: 0.75rem;
-  width: min(260px, 34vw);
+  z-index: 5;
+  display: none;
+  pointer-events: none;
+}
+
+/* Sidecar: same height as map tooltip, attached to its right edge */
+.wave-panel--sidecar {
   display: flex;
   flex-direction: column;
-  pointer-events: none;
-  background: linear-gradient(
-    90deg,
-    rgba(3, 5, 10, 0.88) 0%,
-    rgba(3, 5, 10, 0.62) 72%,
-    rgba(3, 5, 10, 0.1) 100%
-  );
-  border: 1px solid rgba(120, 160, 220, 0.16);
-  backdrop-filter: blur(6px);
+  width: min(200px, 28vw);
+  bottom: auto;
+  right: auto;
+  background: rgba(6, 10, 18, 0.94);
+  border: 1px solid rgba(0, 229, 255, 0.35);
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.12);
+  backdrop-filter: blur(8px);
   overflow: hidden;
 }
 
@@ -24,8 +24,8 @@
 }
 
 .wave-panel.is-pinned {
-  border-color: rgba(0, 229, 255, 0.45);
-  box-shadow: 0 0 18px rgba(0, 229, 255, 0.12);
+  border-color: rgba(0, 229, 255, 0.55);
+  box-shadow: 0 0 18px rgba(0, 229, 255, 0.16);
 }
 
 .wave-panel__head {
@@ -33,9 +33,9 @@
   justify-content: flex-end;
   align-items: baseline;
   gap: 0.5rem;
-  padding: 0.45rem 0.55rem 0.15rem;
+  padding: 0.35rem 0.5rem 0.1rem;
   color: #9db0cc;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   letter-spacing: 0.06em;
   flex: 0 0 auto;
   pointer-events: none;
@@ -46,7 +46,7 @@
   align-items: center;
   gap: 0.35rem;
   color: #c8d6ee;
-  font-size: 1rem;
+  font-size: 0.95rem;
   text-transform: none;
   letter-spacing: 0.02em;
   max-width: 100%;
@@ -181,15 +181,15 @@
 
 .wave-hover-label {
   position: absolute;
-  left: 0.55rem;
-  right: 0.55rem;
-  bottom: 0.45rem;
+  left: 0.4rem;
+  right: 0.4rem;
+  bottom: 0.3rem;
   display: flex;
   justify-content: space-between;
-  gap: 0.5rem;
-  padding: 0.2rem 0.35rem;
+  gap: 0.4rem;
+  padding: 0.15rem 0.3rem;
   color: #e8f0ff;
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   background: rgba(5, 8, 16, 0.75);
   border: 1px solid rgba(0, 229, 255, 0.25);
   pointer-events: none;
@@ -202,8 +202,7 @@
 }
 
 @media (max-width: 720px) {
-  .wave-panel {
-    width: min(180px, 44vw);
-    top: clamp(7.5rem, 22vw, 9rem);
+  .wave-panel--sidecar {
+    width: min(150px, 40vw);
   }
 }
