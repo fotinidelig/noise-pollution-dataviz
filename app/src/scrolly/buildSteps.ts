@@ -90,8 +90,8 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       title: `Paris night: ${paris.max_db.toFixed(0)} dB at ${paris.loudest_site}`,
       questions: [],
       body: [
-        `In ${paris.year}, night noise at the loudest Paris road site in this set — ${hi(paris.loudest_site)} — reaches about ${hiDb(paris.max_db, 1)}.`,
-        `That is about ${hi('+7–8 dB')} above a ${hiLoud('vacuum cleaner (~70 dB)')} — approaching ${hi('twice as loud')} (almost one doubling).`,
+        `In ${paris.year}, night noise at the loudest Paris road site in this set — ${hi(paris.loudest_site)} — reaches about ${hiDb(paris.max_db, 1)}, between a ${hiLoud('vacuum cleaner (~70 dB)')} and a ${hiLoud('blender (~80–90 dB)')}.`,
+        `On the ${paris.end_year ?? 2021} END road maps for the ${hi(paris.agglomeration ?? 'Paris')} agglomeration, about ${hi(formatPeople(paris.road_ha ?? 0))} people are ${hi('highly annoyed')} and about ${hi(formatPeople(paris.road_hsd ?? 0))} are ${hi('highly sleep disturbed')}.`,
       ],
       map: {
         center: [paris.lon, paris.lat],

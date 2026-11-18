@@ -64,6 +64,11 @@ export type StoryMetrics = {
     lat: number
     plain?: string
     common_sound?: CommonSound
+    /** END road WHO HA/HSD for agglomeration Paris (ThemeRiver source). */
+    end_year?: number
+    agglomeration?: string
+    road_ha?: number
+    road_hsd?: number
   }
   madrid: {
     year: number

@@ -34,7 +34,7 @@
       "berlin": 3400.0,
       "berlin_share_of_germany_pct": 3.5
     },
-    "frame": "Of people in the top high-dB band (>75) across road/rail/aircraft in German agglomerations, Berlin’s share.",
+    "frame": "Of people in the top high-dB band (>75) across road/rail/aircraft in German agglomerations, Berlin\u2019s share.",
     "common_sound": {
       "sound_name": "Between vacuum cleaner and blender",
       "db_min": 70.0,
@@ -45,7 +45,7 @@
   "paris": {
     "year": 2025,
     "metric": "Ln",
-    "loudest_site": "Périphérique Vincennes",
+    "loudest_site": "P\u00e9riph\u00e9rique Vincennes",
     "max_db": 77.5,
     "lon": 2.395,
     "lat": 48.835,
@@ -55,7 +55,12 @@
       "db_max": 90.0,
       "mid": 77.5
     },
-    "plain": "night noise at this road site"
+    "plain": "night noise at this road site",
+    "end_year": 2021,
+    "agglomeration": "Paris",
+    "id": "France|Paris",
+    "road_ha": 993205.031,
+    "road_hsd": 270535.567
   },
   "madrid": {
     "year": 2026,
@@ -93,7 +98,7 @@
     "area_km2_gt70": 96.94,
     "n_cells_gt70": 969391,
     "cell_size_m": 10,
-    "method": "Count valid raster cells with L10>70; each cell 10×10 m → area_km2. Not road-km (no centerline).",
+    "method": "Count valid raster cells with L10>70; each cell 10\u00d710 m \u2192 area_km2. Not road-km (no centerline).",
     "lon": 114.1694,
     "lat": 22.3193,
     "common_sound": {
@@ -127,8 +132,8 @@
       "mid": 73.4
     },
     "plain": "daily road noise at this site",
-    "loudest_site_ko": "북아현동",
-    "peak_site_ko": "숙명여고 앞",
+    "loudest_site_ko": "\ubd81\uc544\ud604\ub3d9",
+    "peak_site_ko": "\uc219\uba85\uc5ec\uace0 \uc55e",
     "sites_geojson": "/data/seoul_road_sites.geojson",
     "geocode_caveat": "Coordinates are approximate neighborhood/landmark geocodes, not official monitor footprints."
   },
@@ -145,6 +150,6 @@
       "db_max": 90.0,
       "mid": 85.0
     },
-    "note": "Fotini-locked: ~75 dB ≈ between vacuum (~70) and blender (~80–90); louder sites toward blender."
+    "note": "Fotini-locked: ~75 dB \u2248 between vacuum (~70) and blender (~80\u201390); louder sites toward blender."
   }
 }

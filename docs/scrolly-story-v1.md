@@ -37,10 +37,10 @@ Title: **110k people must listen to a vacuum cleaner all day — 10.3% in Berlin
 About **110k** people above **75 dB**; **~11k (10.3%)** in Berlin.  
 **75 dB** sits between a **vacuum cleaner (~70 dB)** and a **blender (~80–90 dB)**.
 
-### Paris (2025)
+### Paris (2025 site · 2021 END road HA/HSD)
 
-**Périphérique Vincennes** night ~**77.5 dB**.  
-Vs **vacuum (~70)**: **+~7–8 dB** → approaching **twice as loud** (almost one doubling).
+**Périphérique Vincennes** night ~**77.5 dB**, between a **vacuum cleaner (~70 dB)** and a **blender (~80–90 dB)**.  
+On the **2021** END **road** maps for the **Paris** agglomeration (`France|Paris`): about **993k** people **highly annoyed**, about **271k** **highly sleep disturbed** (ThemeRiver / WHO HA–HSD totals).
 
 ### Madrid (2026)
 
