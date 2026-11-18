@@ -191,8 +191,8 @@ export function ThemeRiverChart({ data, source, focusId, onHoverCity }: Props) {
           People highly annoyed (
           <span className="theme-river__term theme-river__term--ha">HA</span>) /
           highly sleep disturbed (
-          <span className="theme-river__term theme-river__term--hsd">HSD</span>) ·{' '}
-          {source}
+          <span className="theme-river__term theme-river__term--hsd">HSD</span>) by{' '}
+          {source} noise
         </span>
       </div>
       <svg
