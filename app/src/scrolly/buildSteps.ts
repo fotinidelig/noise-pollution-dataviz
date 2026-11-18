@@ -108,8 +108,7 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       title: `Madrid night: outdoor station ${madrid.loudest_station_id} peaks near ${madrid.max_db_peak.toFixed(0)} dB`,
       questions: [],
       body: [
-        `In ${madrid.year}, night noise at ${hi(`fixed outdoor noise monitoring station ${madrid.loudest_station_id}`)} sits around ${hiDb(madrid.max_db_median)} on a typical night, with peaks near ${hiDb(madrid.max_db_peak)}.`,
-        `Peak vs typical is about ${hi('+16 dB')} — roughly ${hi('3× as loud')}. Against a ${hiLoud('vacuum (~70 dB)')}, that peak is about ${hi('+10 dB')} — roughly ${hi('twice as loud')}.`,
+        `In ${madrid.year}, night noise at ${hi(`fixed outdoor noise monitoring station ${madrid.loudest_station_id}`)} sits around ${hiDb(madrid.max_db_median)} on a typical night, with peaks near ${hiDb(madrid.max_db_peak)}. Yes, that's ${hi('2 times')} the noise of a ${hiLoud('vacuum cleaner')}.`,
       ],
       map: {
         center: [madrid.lon, madrid.lat],

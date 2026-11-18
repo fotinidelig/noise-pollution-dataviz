@@ -44,8 +44,7 @@ On the **2021** END **road** maps for the **Paris** agglomeration (`France|Paris
 
 ### Madrid (2026)
 
-Station **6** typical night ~**64 dB**, peaks ~**80 dB**.  
-Peak vs typical **+~16 dB ≈ ~3×**; peak vs vacuum **+~10 dB ≈ ~2×**.
+In **2026**, night noise at **fixed outdoor noise monitoring station 6** sits around **64 dB** on a typical night, with peaks near **80 dB**. Yes, that's **2 times** the noise of a **vacuum cleaner**.
 
 ### Hong Kong (2020)
 
