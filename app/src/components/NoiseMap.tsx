@@ -1779,7 +1779,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
           popup
             .setLngLat(e.lngLat)
             .setHTML(
-              `<div class="tip-total">${db.toFixed(0)}dB</div>`,
+              `<div class="tip tip--hk"><span class="tip-hk-line">${db.toFixed(0)} dB</span></div>`,
             )
             .addTo(map)
           return
