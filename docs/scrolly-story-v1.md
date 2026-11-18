@@ -40,7 +40,7 @@ Horizontal quiet→loud ladder (equally spaced markers; click-to-play `app/publi
 | Blender | **~80–90 dB** | `blender.mp3` (Freesound 72304) |
 | Motorcycle | ~90 dB (loud end) | `motorcycle-passing.mp3` |
 
-While a sample plays: full-screen white-noise grain (intensity ∝ 2^((dB−45)/10) with soft ceiling) dims the map; only the playing column’s pulse rings animate.
+While a sample plays: full-screen visible particle grain (count ∝ 2^((dB−45)/10), 2× per +10 dB) dims the map; only the playing column’s pulse rings animate.
 
 Browser playback is **not** calibrated SPL — clips show character; labels carry the dB anchors. Clips are peak-normalized to a shared max amplitude.
 

@@ -6,6 +6,7 @@ import { SoundGrainOverlay } from './SoundGrainOverlay'
 import {
   SoundScale,
   grainIntensity,
+  loudnessRatio,
   type SoundAnchor,
 } from './SoundScale'
 import type { StoryMetrics, StoryStepId } from './storyTypes'
@@ -131,6 +132,7 @@ export function ScrollyApp() {
 
   const grainOn = Boolean(playingSound) && active?.id === 'sounds' && !dismissed
   const grainStrength = playingSound ? grainIntensity(playingSound.db) : 0
+  const grainDensity = playingSound ? loudnessRatio(playingSound.db) : 1
 
   useEffect(() => {
     if (active?.id !== 'sounds' || dismissed) setPlayingSound(null)
@@ -152,7 +154,11 @@ export function ScrollyApp() {
         <NoiseMap story={mapControl} />
       </div>
 
-      <SoundGrainOverlay active={grainOn} intensity={grainStrength} />
+      <SoundGrainOverlay
+        active={grainOn}
+        intensity={grainStrength}
+        density={grainDensity}
+      />
 
       <div className="scrolly-steps" aria-hidden={dismissed}>
         {steps.map((step) => {

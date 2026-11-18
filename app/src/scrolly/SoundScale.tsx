@@ -55,10 +55,14 @@ export const STORY_SOUND_ANCHORS: SoundAnchor[] = [
   },
 ]
 
-/** Loudness-ratio intensity for grain: 2^((dB−ref)/10), soft-ceiling to ~0–1. */
+/** Loudness ratio for grain density: 2× per +10 dB (ref ≈ quiet stream/birds). */
+export function loudnessRatio(db: number, refDb = 45): number {
+  return 2 ** ((db - refDb) / 10)
+}
+
+/** Soft-ceiling 0–1 for dim/veil strength (density uses {@link loudnessRatio}). */
 export function grainIntensity(db: number, refDb = 45): number {
-  const ratio = 2 ** ((db - refDb) / 10)
-  // Soft ceiling so motorcycle (~90) approaches ~1 without clipping hard
+  const ratio = loudnessRatio(db, refDb)
   return 1 - Math.exp(-ratio / 5.5)
 }
 

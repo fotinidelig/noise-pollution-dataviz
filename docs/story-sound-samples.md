@@ -6,7 +6,7 @@ Local CC0 / public-domain / CC-licensed clips for Fotini’s dB-focused scrolly 
 
 **Peak levels:** story MP3s are peak-normalized to ≈ **−1 dBFS** max amplitude (same peak; not LUFS loudness-matched).
 
-**While playing:** full-screen white-noise grain overlays the map (dimmed underneath). Grain opacity scales with loudness ratio **2^((dB − 45)/10)** with a soft ceiling. Only the playing column’s pulse rings animate.
+**While playing:** full-screen **visible particle** grain overlays the map (dimmed underneath). Particle count scales with loudness ratio **2^((dB − 45)/10)** (2× density per +10 dB); dim uses a soft ceiling of the same ratio. Only the playing column’s pulse rings animate.
 
 ---
 

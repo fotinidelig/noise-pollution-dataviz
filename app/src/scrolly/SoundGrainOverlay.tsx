@@ -2,13 +2,15 @@ import { useEffect, useRef, type CSSProperties } from 'react'
 import './SoundGrainOverlay.css'
 
 type Props = {
-  /** 0–1 soft-ceiling intensity from loudness ratio. */
+  /** Raw loudness ratio 2^((dB−ref)/10) — drives particle count (2× per +10 dB). */
+  density: number
+  /** 0–1 soft-ceiling for map dim / veil. */
   intensity: number
   active: boolean
 }
 
-/** Full-screen white-noise grain; only painted while a sample plays. */
-export function SoundGrainOverlay({ intensity, active }: Props) {
+/** Full-screen visible particle grain; only while a sample plays. */
+export function SoundGrainOverlay({ density, intensity, active }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const rafRef = useRef<number | null>(null)
 
@@ -27,8 +29,8 @@ export function SoundGrainOverlay({ intensity, active }: Props) {
 
     let last = 0
     const paint = (t: number) => {
-      // ~12 fps — enough for grain shimmer without burning CPU
-      if (t - last < 80) {
+      // ~15 fps shimmer
+      if (t - last < 66) {
         rafRef.current = requestAnimationFrame(paint)
         return
       }
@@ -44,18 +46,32 @@ export function SoundGrainOverlay({ intensity, active }: Props) {
         canvas.style.width = `${w}px`
         canvas.style.height = `${h}px`
       }
-      const image = ctx.createImageData(cw, ch)
-      const data = image.data
-      // Sparse grain: every other pixel for speed; alpha from intensity
-      const a = Math.round(55 + 160 * intensity)
-      for (let i = 0; i < data.length; i += 8) {
-        const v = (Math.random() * 255) | 0
-        data[i] = v
-        data[i + 1] = v
-        data[i + 2] = v
-        data[i + 3] = a
+
+      ctx.clearRect(0, 0, cw, ch)
+
+      // Base particle count at dB_ref; doubles each +10 dB via density ratio
+      const baseCount = 900
+      const count = Math.min(
+        28_000,
+        Math.max(400, Math.round(baseCount * density)),
+      )
+
+      // Bright particles on dark map — high contrast white/cyan flecks
+      for (let i = 0; i < count; i++) {
+        const x = Math.random() * cw
+        const y = Math.random() * ch
+        const size = (1 + Math.random() * 2.2) * dpr
+        const bright = 0.72 + Math.random() * 0.28
+        // Slight cool tint so flecks read on dark basemap
+        const cool = Math.random() > 0.65
+        if (cool) {
+          ctx.fillStyle = `rgba(210, 230, 240, ${bright})`
+        } else {
+          ctx.fillStyle = `rgba(255, 255, 255, ${bright})`
+        }
+        ctx.fillRect(x, y, size, size)
       }
-      ctx.putImageData(image, 0, 0)
+
       rafRef.current = requestAnimationFrame(paint)
     }
 
@@ -66,7 +82,7 @@ export function SoundGrainOverlay({ intensity, active }: Props) {
         rafRef.current = null
       }
     }
-  }, [active, intensity])
+  }, [active, density])
 
   if (!active) return null
 
@@ -75,8 +91,7 @@ export function SoundGrainOverlay({ intensity, active }: Props) {
       className="sound-grain"
       style={
         {
-          '--grain-opacity': String(0.22 + 0.55 * intensity),
-          '--grain-dim': String(0.28 + 0.42 * intensity),
+          '--grain-dim': String(0.4 + 0.4 * intensity),
         } as CSSProperties
       }
       aria-hidden="true"
