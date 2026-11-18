@@ -169,6 +169,24 @@ export function ScrollyApp() {
                     {step.subtitle ? (
                       <p className="scrolly-step__subtitle">{step.subtitle}</p>
                     ) : null}
+                    {step.stats && step.stats.length > 0 ? (
+                      <div
+                        className="scrolly-step__stats"
+                        role="list"
+                        aria-label="Key noise impact figures"
+                      >
+                        {step.stats.map((stat) => (
+                          <div
+                            key={stat.value}
+                            className="scrolly-step__stat"
+                            role="listitem"
+                          >
+                            <div className="scrolly-step__stat-value">{stat.value}</div>
+                            <div className="scrolly-step__stat-label">{stat.label}</div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
                     {step.body.map((p) => (
                       <p
                         key={p.slice(0, 48)}

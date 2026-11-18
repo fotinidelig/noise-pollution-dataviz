@@ -54,7 +54,7 @@
 }
 
 .scrolly-step--hero .scrolly-step__stack {
-  max-width: min(560px, 94vw);
+  max-width: min(720px, 94vw);
   align-items: center;
 }
 
@@ -238,9 +238,36 @@
 }
 
 .scrolly-step--hero .scrolly-step__subtitle {
-  max-width: 28ch;
+  max-width: 42ch;
   margin-left: auto;
   margin-right: auto;
+  margin-bottom: 0.15rem;
+}
+
+.scrolly-step__stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem 1rem;
+  margin: 1.05rem 0 0.15rem;
+  width: 100%;
+  text-align: center;
+}
+
+.scrolly-step__stat-value {
+  font-family: var(--font-display, "VT323", "Courier New", monospace);
+  font-size: clamp(1.55rem, 3.4vw, 2.45rem);
+  line-height: 1.05;
+  letter-spacing: 0.02em;
+  color: #e8f0ff;
+  text-shadow: 0 0 14px rgba(0, 184, 204, 0.28);
+}
+
+.scrolly-step__stat-label {
+  margin-top: 0.35rem;
+  color: #9db0cc;
+  font-size: clamp(0.78rem, 1.35vw, 0.92rem);
+  line-height: 1.25;
+  letter-spacing: 0.01em;
 }
 
 .scrolly-step__body {
@@ -356,6 +383,14 @@
 
   .scrolly-step--hero {
     padding-left: 3.4rem;
+  }
+
+  .scrolly-step__stats {
+    gap: 0.55rem 0.45rem;
+  }
+
+  .scrolly-step__stat-label {
+    font-size: 0.72rem;
   }
 
   .scrolly-step--calm {

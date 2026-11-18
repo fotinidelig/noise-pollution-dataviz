@@ -120,6 +120,13 @@ export type StoryStepId =
   | 'calm'
   | 'explore'
 
+export type StoryStat = {
+  /** Big figure shown in the intro row (e.g. "1 in 5", "~3.3M"). */
+  value: string
+  /** Short label under the figure. */
+  label: string
+}
+
 export type StoryStep = {
   id: StoryStepId
   railLabel: string
@@ -129,6 +136,8 @@ export type StoryStep = {
   subtitle?: string
   questions: string[]
   body: string[]
+  /** Intro wireframe: one row of big numbers with short labels. */
+  stats?: StoryStat[]
   map?: {
     center: [number, number]
     zoom: number

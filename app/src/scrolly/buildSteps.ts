@@ -27,6 +27,7 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
 
   const whoAbove = formatPeople(eu.people_exposed_lden_end_bands)
   const ha = formatPeople(eu.people_highly_annoyed)
+  const hsdMillions = (eu.people_highly_sleep_disturbed / 1_000_000).toFixed(1)
   const dePeople = formatPeople(de.high_band_people_germany)
   const berlinPeople = formatPeople(de.high_band_people_berlin)
 
@@ -35,9 +36,23 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       id: 'hero',
       railLabel: 'Intro',
       title: 'Do you hear the birds?',
-      questions: [],
-      body: [
+      subtitle:
         'Or are our cities too loud? We’ll look at noise levels around Europe and the world to find out.',
+      questions: [],
+      body: [],
+      stats: [
+        {
+          value: '1 in 5',
+          label: 'EU citizens affected by noise',
+        },
+        {
+          value: '~500,000',
+          label: 'children with reading difficulties (transport noise)',
+        },
+        {
+          value: `~${hsdMillions}M`,
+          label: 'highly sleep disturbed — like a vacuum at night',
+        },
       ],
       map: {
         center: [10, 50],
@@ -122,10 +137,11 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       id: 'hongkong',
       railLabel: 'Hong Kong',
       year: hk.year,
-      title: `Hong Kong: ${hk.pct_valid_gt70.toFixed(0)}% of mapped area above 70 dB`,
+      title: 'Hong Kong: ≥1 million people above 70 dB road traffic',
       questions: [],
       body: [
-        `On the ${hk.year} Hong Kong ${hi('citywide traffic-noise map')} (modelled area levels, not one microphone), about ${hi(`${hk.pct_valid_gt70.toFixed(0)}%`)} of the mapped territory sits above ${hiLoud('70 dB')} — roughly ${hi(`${hk.area_km2_gt70.toFixed(0)} km²`)} — past a ${hiLoud('vacuum cleaner')}.`,
+        `UNEP Frontiers 2022: at least ${hi('1 million')} Hong Kong residents live with road traffic above ${hiLoud('70 dB')} — past a ${hiLoud('vacuum cleaner')}.`,
+        `On the ${hk.year} Hong Kong ${hi('citywide traffic-noise map')} (modelled area levels, not one microphone), about ${hi(`${hk.pct_valid_gt70.toFixed(0)}%`)} of the mapped territory sits above ${hiLoud('70 dB')} — roughly ${hi(`${hk.area_km2_gt70.toFixed(0)} km²`)}.`,
       ],
       map: {
         center: [hk.lon, hk.lat],
