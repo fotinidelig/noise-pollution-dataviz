@@ -37,9 +37,10 @@ Horizontal quiet→loud ladder (equally spaced markers; click-to-play `app/publi
 | Water stream | ~40–50 dB | `water-stream.mp3` |
 | Birds | ~44–60 dB | `birds-singing.mp3` |
 | Vacuum | **~70 dB** (HSD threshold highlight) | `vacuum-cleaner.mp3` (Freesound 76618) |
-| Motorcycle | ~90 dB | `motorcycle-passing.mp3` |
-| Helicopter | ~105 dB | `helicopter.mp3` |
-| Rock concert | ~90–130 dB | `rock-concert.mp3` |
+| Blender | **~80–90 dB** | `blender.mp3` (Freesound 72304) |
+| Motorcycle | ~90 dB (loud end) | `motorcycle-passing.mp3` |
+
+While a sample plays: full-screen white-noise grain (intensity ∝ 2^((dB−45)/10) with soft ceiling) dims the map; only the playing column’s pulse rings animate.
 
 Browser playback is **not** calibrated SPL — clips show character; labels carry the dB anchors. Clips are peak-normalized to a shared max amplitude.
 

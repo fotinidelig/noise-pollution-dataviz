@@ -15,7 +15,7 @@ export type SoundAnchor = {
 
 const BASE = import.meta.env.BASE_URL || '/'
 
-/** Quietest → loudest story ladder (anchors from story-sound-samples.md). */
+/** Quietest → loudest; scale ends near ~90 dB (motorcycle). */
 export const STORY_SOUND_ANCHORS: SoundAnchor[] = [
   {
     id: 'water',
@@ -40,39 +40,64 @@ export const STORY_SOUND_ANCHORS: SoundAnchor[] = [
     highlight: true,
   },
   {
+    id: 'blender',
+    label: 'Blender',
+    db: 85,
+    dbNote: '~80–90',
+    src: `${BASE}audio/blender.mp3`,
+  },
+  {
     id: 'motorcycle',
     label: 'Motorcycle',
     db: 90,
     dbNote: '~90',
     src: `${BASE}audio/motorcycle-passing.mp3`,
   },
-  {
-    id: 'helicopter',
-    label: 'Helicopter',
-    db: 105,
-    dbNote: '~105',
-    src: `${BASE}audio/helicopter.mp3`,
-  },
-  {
-    id: 'concert',
-    label: 'Rock concert',
-    db: 110,
-    dbNote: '~90–130',
-    src: `${BASE}audio/rock-concert.mp3`,
-  },
 ]
+
+/** Loudness-ratio intensity for grain: 2^((dB−ref)/10), soft-ceiling to ~0–1. */
+export function grainIntensity(db: number, refDb = 45): number {
+  const ratio = 2 ** ((db - refDb) / 10)
+  // Soft ceiling so motorcycle (~90) approaches ~1 without clipping hard
+  return 1 - Math.exp(-ratio / 5.5)
+}
 
 type Props = {
   anchors?: SoundAnchor[]
+  /** When false (scrolled away), stop playback and clear grain. */
+  active?: boolean
+  /** Fired when playback starts/stops so the parent can show full-screen grain. */
+  onPlayingChange?: (anchor: SoundAnchor | null) => void
 }
 
-export function SoundScale({ anchors = STORY_SOUND_ANCHORS }: Props) {
+export function SoundScale({
+  anchors = STORY_SOUND_ANCHORS,
+  active = true,
+  onPlayingChange,
+}: Props) {
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const [playingId, setPlayingId] = useState<string | null>(null)
   const sorted = useMemo(
     () => [...anchors].sort((a, b) => a.db - b.db),
     [anchors],
   )
+  const onPlayingChangeRef = useRef(onPlayingChange)
+  onPlayingChangeRef.current = onPlayingChange
+
+  const stop = () => {
+    const a = audioRef.current
+    if (a) {
+      a.pause()
+      a.currentTime = 0
+    }
+    setPlayingId(null)
+    onPlayingChangeRef.current?.(null)
+  }
+
+  useEffect(() => {
+    if (!active) stop()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- stop when leaving the sounds beat
+  }, [active])
 
   useEffect(() => {
     return () => {
@@ -82,30 +107,36 @@ export function SoundScale({ anchors = STORY_SOUND_ANCHORS }: Props) {
         a.src = ''
       }
       audioRef.current = null
+      onPlayingChangeRef.current?.(null)
     }
   }, [])
+
+  const setPlaying = (anchor: SoundAnchor | null) => {
+    setPlayingId(anchor?.id ?? null)
+    onPlayingChangeRef.current?.(anchor)
+  }
 
   const play = async (anchor: SoundAnchor) => {
     let audio = audioRef.current
     if (!audio) {
       audio = new Audio()
       audioRef.current = audio
-      audio.addEventListener('ended', () => setPlayingId(null))
+      audio.addEventListener('ended', () => setPlaying(null))
     }
     if (playingId === anchor.id && !audio.paused) {
       audio.pause()
       audio.currentTime = 0
-      setPlayingId(null)
+      setPlaying(null)
       return
     }
     audio.pause()
     audio.src = anchor.src
     audio.currentTime = 0
-    setPlayingId(anchor.id)
+    setPlaying(anchor)
     try {
       await audio.play()
     } catch {
-      setPlayingId(null)
+      setPlaying(null)
     }
   }
 

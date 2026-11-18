@@ -30,7 +30,8 @@
 
 .scrolly-steps {
   position: relative;
-  z-index: 2;
+  /* Above full-screen sound grain (z-index 3) so the card stays readable. */
+  z-index: 4;
   margin-top: -100svh;
   pointer-events: none;
 }

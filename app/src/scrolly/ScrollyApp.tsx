@@ -2,7 +2,12 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { NoiseMap, type StoryMapControl } from '../components/NoiseMap'
 import { buildSteps } from './buildSteps'
 import { ProgressRail } from './ProgressRail'
-import { SoundScale } from './SoundScale'
+import { SoundGrainOverlay } from './SoundGrainOverlay'
+import {
+  SoundScale,
+  grainIntensity,
+  type SoundAnchor,
+} from './SoundScale'
 import type { StoryMetrics, StoryStepId } from './storyTypes'
 import './scrolly.css'
 
@@ -20,6 +25,7 @@ export function ScrollyApp() {
   const [activeId, setActiveId] = useState<StoryStepId>('hero')
   const [dismissed, setDismissed] = useState(false)
   const [unlocked, setUnlocked] = useState({ hongkong: false, seoul: false })
+  const [playingSound, setPlayingSound] = useState<SoundAnchor | null>(null)
   const stepRefs = useRef<Record<string, HTMLElement | null>>({})
 
   useEffect(() => {
@@ -123,6 +129,13 @@ export function ScrollyApp() {
     active?.id !== 'explore' &&
     active?.id !== undefined
 
+  const grainOn = Boolean(playingSound) && active?.id === 'sounds' && !dismissed
+  const grainStrength = playingSound ? grainIntensity(playingSound.db) : 0
+
+  useEffect(() => {
+    if (active?.id !== 'sounds' || dismissed) setPlayingSound(null)
+  }, [active?.id, dismissed])
+
   if (!metrics || !steps.length) {
     return (
       <main className="scrolly-root">
@@ -138,6 +151,8 @@ export function ScrollyApp() {
       <div className="scrolly-map-sticky">
         <NoiseMap story={mapControl} />
       </div>
+
+      <SoundGrainOverlay active={grainOn} intensity={grainStrength} />
 
       <div className="scrolly-steps" aria-hidden={dismissed}>
         {steps.map((step) => {
@@ -203,7 +218,12 @@ export function ScrollyApp() {
                         }}
                       />
                     ))}
-                    {step.id === 'sounds' ? <SoundScale /> : null}
+                    {step.id === 'sounds' ? (
+                      <SoundScale
+                        active={isActiveCard}
+                        onPlayingChange={setPlayingSound}
+                      />
+                    ) : null}
                   </div>
                   {isActiveCard && step.id === 'hongkong' ? (
                     <div
