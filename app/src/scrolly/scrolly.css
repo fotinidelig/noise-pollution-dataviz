@@ -43,10 +43,24 @@
   pointer-events: none;
 }
 
+.scrolly-step__stack {
+  pointer-events: auto;
+  max-width: min(420px, 92vw);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.scrolly-step--hero .scrolly-step__stack {
+  max-width: min(560px, 94vw);
+  align-items: center;
+}
+
 .scrolly-step__card {
   position: relative;
   pointer-events: auto;
-  max-width: min(420px, 92vw);
+  width: 100%;
   padding: 1.1rem 1.2rem 1.25rem;
   background: linear-gradient(
     135deg,
@@ -56,6 +70,80 @@
   border: 1px solid rgba(120, 160, 220, 0.22);
   backdrop-filter: blur(10px);
   box-shadow: 0 0 28px rgba(0, 0, 0, 0.35);
+}
+
+.scrolly-hk-colorbar {
+  width: 100%;
+  padding: 0.45rem 0.55rem 0.5rem;
+  background: rgba(3, 5, 10, 0.78);
+  border: 1px solid rgba(120, 160, 220, 0.2);
+  backdrop-filter: blur(8px);
+}
+
+.scrolly-hk-colorbar__ramp {
+  height: 0.55rem;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    #000004 0%,
+    #51127c 25%,
+    #b73779 50%,
+    #fc8961 75%,
+    #fcfdbf 100%
+  );
+}
+
+.scrolly-hk-colorbar__ticks {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.3rem;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  color: #9db0cc;
+}
+
+.scrolly-scroll-cue {
+  position: fixed;
+  z-index: 6;
+  left: 50%;
+  bottom: 1.1rem;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  pointer-events: none;
+  color: #9db0cc;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.85rem;
+  animation: scrolly-cue-pulse 1.8s ease-in-out infinite;
+}
+
+.scrolly-scroll-cue__chevron {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-right: 2px solid #5ef0ff;
+  border-bottom: 2px solid #5ef0ff;
+  transform: rotate(45deg);
+  margin-top: 0.1rem;
+}
+
+@keyframes scrolly-cue-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(4px);
+  }
+}
+
+.scrolly-root.is-explore .scrolly-scroll-cue {
+  display: none;
 }
 
 .scrolly-step__close {
@@ -91,7 +179,6 @@
 }
 
 .scrolly-step--hero .scrolly-step__card {
-  max-width: min(560px, 94vw);
   text-align: center;
   background: rgba(3, 5, 10, 0.55);
   border-color: rgba(0, 229, 255, 0.25);

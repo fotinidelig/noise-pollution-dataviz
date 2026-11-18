@@ -10,11 +10,15 @@ const STORY_URL = '/data/scrolly_story_v1.json'
 /**
  * × on each story card dismisses the narrative overlay and jumps to Explore
  * (free pan/zoom). Progress-rail clicks reopen that beat and show the card again.
+ *
+ * Hong Kong / Seoul overlays unlock when first visited and stay visible for the
+ * rest of the story (including Explore) so scrolling back still shows the data.
  */
 export function ScrollyApp() {
   const [metrics, setMetrics] = useState<StoryMetrics | null>(null)
   const [activeId, setActiveId] = useState<StoryStepId>('hero')
   const [dismissed, setDismissed] = useState(false)
+  const [unlocked, setUnlocked] = useState({ hongkong: false, seoul: false })
   const stepRefs = useRef<Record<string, HTMLElement | null>>({})
 
   useEffect(() => {
@@ -37,6 +41,15 @@ export function ScrollyApp() {
   const active = dismissed
     ? exploreStep ?? steps[0]
     : (steps.find((s) => s.id === activeId) ?? steps[0])
+
+  useEffect(() => {
+    if (activeId === 'hongkong') {
+      setUnlocked((u) => (u.hongkong ? u : { ...u, hongkong: true }))
+    }
+    if (activeId === 'seoul') {
+      setUnlocked((u) => (u.seoul ? u : { ...u, seoul: true }))
+    }
+  }, [activeId])
 
   useEffect(() => {
     if (!steps.length || dismissed) return
@@ -70,6 +83,7 @@ export function ScrollyApp() {
         highlightId: active.map.highlightId ?? null,
         explore: Boolean(active.explore) || dismissed,
         stepId: dismissed ? 'explore' : active.id,
+        overlays: unlocked,
       }
     : null
 
@@ -87,6 +101,9 @@ export function ScrollyApp() {
     el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
+  const showScrollCue =
+    !dismissed && active?.id !== 'explore' && active?.id !== undefined
+
   if (!metrics || !steps.length) {
     return (
       <main className="scrolly-root">
@@ -96,7 +113,7 @@ export function ScrollyApp() {
   }
 
   return (
-    <main className={`scrolly-root${dismissed ? ' is-dismissed' : ''}`}>
+    <main className={`scrolly-root${dismissed ? ' is-dismissed' : ''}${showScrollCue ? '' : ' is-explore'}`}>
       <ProgressRail steps={steps} activeId={active.id} onJump={jump} />
 
       <div className="scrolly-map-sticky">
@@ -104,46 +121,71 @@ export function ScrollyApp() {
       </div>
 
       <div className="scrolly-steps" aria-hidden={dismissed}>
-        {steps.map((step) => (
-          <section
-            key={step.id}
-            className={`scrolly-step${step.id === 'hero' ? ' scrolly-step--hero' : ''}${step.id === active.id && !dismissed ? ' is-active' : ''}`}
-            data-step-id={step.id}
-            ref={(el) => {
-              stepRefs.current[step.id] = el
-            }}
-          >
-            {!dismissed ? (
-              <div className="scrolly-step__card">
-                <button
-                  type="button"
-                  className="scrolly-step__close"
-                  aria-label="Close story and explore the map"
-                  title="Close story · explore map"
-                  onClick={dismissStory}
-                >
-                  ×
-                </button>
-                {step.year != null ? (
-                  <p className="scrolly-step__year">Year {step.year}</p>
-                ) : null}
-                <h2 className="scrolly-step__title">{step.title}</h2>
-                {step.body.map((p) => (
-                  <p
-                    key={p.slice(0, 48)}
-                    className="scrolly-step__body"
-                    dangerouslySetInnerHTML={{
-                      __html: p
-                        .replace(/\*\*(.+?)\*\*/g, '<span class="scrolly-hi">$1</span>')
-                        .replace(/\n/g, '<br/>'),
-                    }}
-                  />
-                ))}
-              </div>
-            ) : null}
-          </section>
-        ))}
+        {steps.map((step) => {
+          const isActiveCard = step.id === active.id && !dismissed
+          return (
+            <section
+              key={step.id}
+              className={`scrolly-step${step.id === 'hero' ? ' scrolly-step--hero' : ''}${isActiveCard ? ' is-active' : ''}`}
+              data-step-id={step.id}
+              ref={(el) => {
+                stepRefs.current[step.id] = el
+              }}
+            >
+              {!dismissed ? (
+                <div className="scrolly-step__stack">
+                  <div className="scrolly-step__card">
+                    <button
+                      type="button"
+                      className="scrolly-step__close"
+                      aria-label="Close story and explore the map"
+                      title="Close story · explore map"
+                      onClick={dismissStory}
+                    >
+                      ×
+                    </button>
+                    {step.year != null ? (
+                      <p className="scrolly-step__year">Year {step.year}</p>
+                    ) : null}
+                    <h2 className="scrolly-step__title">{step.title}</h2>
+                    {step.body.map((p) => (
+                      <p
+                        key={p.slice(0, 48)}
+                        className="scrolly-step__body"
+                        dangerouslySetInnerHTML={{
+                          __html: p
+                            .replace(/\*\*(.+?)\*\*/g, '<span class="scrolly-hi">$1</span>')
+                            .replace(/\n/g, '<br/>'),
+                        }}
+                      />
+                    ))}
+                  </div>
+                  {isActiveCard && unlocked.hongkong ? (
+                    <div
+                      className="scrolly-hk-colorbar"
+                      aria-label="Hong Kong peak traffic noise color scale"
+                    >
+                      <div className="scrolly-hk-colorbar__ramp" />
+                      <div className="scrolly-hk-colorbar__ticks">
+                        <span>50 dB</span>
+                        <span>peak traffic noise</span>
+                        <span>85 dB</span>
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
+            </section>
+          )
+        })}
       </div>
+
+      {showScrollCue ? (
+        <div className="scrolly-scroll-cue" aria-hidden="true">
+          <span className="scrolly-scroll-cue__label">Scroll</span>
+          <span className="scrolly-scroll-cue__chevron" />
+        </div>
+      ) : null}
     </main>
   )
 }

@@ -41,6 +41,7 @@ const COUNTRY_LABEL_LAYER = 'aggl-country-labels'
 const CHART_URL = '/data/agglomeration_chart.json'
 const STREAM_URL = '/data/agglomeration_ha_hsd_stream.json'
 const HK_OVERLAY_META_URL = '/data/hong_kong_l10_overlay.json'
+const HK_SAMPLE_URL = '/data/hong_kong_l10_sample.json'
 const SEOUL_SITES_URL = '/data/seoul_road_sites.geojson'
 const HK_IMAGE_SRC = 'hk-l10-image'
 const HK_IMAGE_LAYER = 'hk-l10-layer'
@@ -130,6 +131,8 @@ export type StoryMapControl = {
   metric?: NoiseMetric
   highlightId?: string | null
   explore?: boolean
+  /** Once unlocked in the story, keep city overlays visible. */
+  overlays?: { hongkong?: boolean; seoul?: boolean }
 }
 
 type NoiseMapProps = {
@@ -154,6 +157,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
   const [source, setSource] = useState<NoiseSource>('road')
   const [metric, setMetric] = useState<NoiseMetric>('Lden')
   const [status, setStatus] = useState('Loading map…')
+  const [mapReady, setMapReady] = useState(false)
   const [chartCities, setChartCities] = useState<ChartCity[]>([])
   const [streamData, setStreamData] = useState<StreamData | null>(null)
   const [hoveredId, setHoveredId] = useState<string | null>(null)
@@ -310,13 +314,35 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     story?.explore,
   ])
 
-  // Hong Kong raster + Seoul site bubbles for scrolly city beats
+  // Lock map chrome to story scroll until Explore
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+    const handlers = [
+      map.scrollZoom,
+      map.dragPan,
+      map.touchZoomRotate,
+      map.doubleClickZoom,
+      map.boxZoom,
+      map.keyboard,
+      map.dragRotate,
+    ] as const
+    if (storyLocked) {
+      for (const h of handlers) h.disable()
+    } else {
+      for (const h of handlers) h.enable()
+    }
+    const nav = document.querySelector('.maplibregl-ctrl-bottom-right') as HTMLElement | null
+    if (nav) nav.style.display = storyLocked ? 'none' : ''
+  }, [storyLocked, story?.stepId, mapReady])
+
+  // Hong Kong raster + Seoul bubbles — unlock once, then keep visible
   useEffect(() => {
     const map = mapRef.current
     if (!map) return
 
-    const showHk = story?.stepId === 'hongkong'
-    const showSeoul = story?.stepId === 'seoul'
+    const showHk = Boolean(story?.overlays?.hongkong)
+    const showSeoul = Boolean(story?.overlays?.seoul)
 
     const setVis = (layerId: string, on: boolean) => {
       if (!map.getLayer(layerId)) return
@@ -324,17 +350,16 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     }
 
     const ensureHk = async () => {
-      if (map.getLayer(HK_IMAGE_LAYER)) {
-        setVis(HK_IMAGE_LAYER, showHk)
+      if (!showHk) {
+        setVis(HK_IMAGE_LAYER, false)
         return
       }
-      if (!showHk) return
       try {
-        const meta = (await fetch(HK_OVERLAY_META_URL).then((r) => r.json())) as {
-          url: string
-          coordinates: [[number, number], [number, number], [number, number], [number, number]]
-        }
         if (!map.getSource(HK_IMAGE_SRC)) {
+          const meta = (await fetch(HK_OVERLAY_META_URL).then((r) => r.json())) as {
+            url: string
+            coordinates: [[number, number], [number, number], [number, number], [number, number]]
+          }
           map.addSource(HK_IMAGE_SRC, {
             type: 'image',
             url: meta.url,
@@ -348,10 +373,12 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
               type: 'raster',
               source: HK_IMAGE_SRC,
               paint: { 'raster-opacity': 0.78, 'raster-fade-duration': 0 },
-              layout: { visibility: showHk ? 'visible' : 'none' },
+              layout: { visibility: 'visible' },
             },
             RINGS_LAYER,
           )
+        } else {
+          setVis(HK_IMAGE_LAYER, true)
         }
       } catch {
         /* overlay optional */
@@ -359,15 +386,14 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     }
 
     const ensureSeoul = async () => {
-      if (map.getLayer(SEOUL_CIRCLE_LAYER)) {
-        setVis(SEOUL_CIRCLE_LAYER, showSeoul)
-        setVis(SEOUL_LABEL_LAYER, showSeoul)
+      if (!showSeoul) {
+        setVis(SEOUL_CIRCLE_LAYER, false)
+        setVis(SEOUL_LABEL_LAYER, false)
         return
       }
-      if (!showSeoul) return
       try {
-        const data = await fetch(SEOUL_SITES_URL).then((r) => r.json())
         if (!map.getSource(SEOUL_SRC)) {
+          const data = await fetch(SEOUL_SITES_URL).then((r) => r.json())
           map.addSource(SEOUL_SRC, { type: 'geojson', data })
         }
         if (!map.getLayer(SEOUL_CIRCLE_LAYER)) {
@@ -375,7 +401,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
             id: SEOUL_CIRCLE_LAYER,
             type: 'circle',
             source: SEOUL_SRC,
-            layout: { visibility: showSeoul ? 'visible' : 'none' },
+            layout: { visibility: 'visible' },
             paint: {
               'circle-radius': [
                 'interpolate',
@@ -394,6 +420,8 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
               'circle-stroke-width': 1.4,
             },
           })
+        } else {
+          setVis(SEOUL_CIRCLE_LAYER, true)
         }
         if (!map.getLayer(SEOUL_LABEL_LAYER)) {
           map.addLayer({
@@ -401,7 +429,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
             type: 'symbol',
             source: SEOUL_SRC,
             layout: {
-              visibility: showSeoul ? 'visible' : 'none',
+              visibility: 'visible',
               'text-field': ['get', 'name_en'],
               'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
               'text-size': 12,
@@ -415,6 +443,8 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
               'text-halo-width': 1.2,
             },
           })
+        } else {
+          setVis(SEOUL_LABEL_LAYER, true)
         }
       } catch {
         /* overlay optional */
@@ -424,14 +454,54 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     const run = () => {
       void ensureHk()
       void ensureSeoul()
-      if (map.getLayer(HK_IMAGE_LAYER)) setVis(HK_IMAGE_LAYER, Boolean(showHk))
-      if (map.getLayer(SEOUL_CIRCLE_LAYER)) setVis(SEOUL_CIRCLE_LAYER, Boolean(showSeoul))
-      if (map.getLayer(SEOUL_LABEL_LAYER)) setVis(SEOUL_LABEL_LAYER, Boolean(showSeoul))
     }
 
     if (map.isStyleLoaded()) run()
     else map.once('load', run)
-  }, [story?.stepId])
+  }, [story?.overlays?.hongkong, story?.overlays?.seoul])
+
+  type HkSample = {
+    width: number
+    height: number
+    bbox: { west: number; east: number; north: number; south: number }
+    data: Uint8Array
+  }
+  const hkSampleRef = useRef<HkSample | null>(null)
+  const overlaysRef = useRef({ hongkong: false, seoul: false })
+  overlaysRef.current = {
+    hongkong: Boolean(story?.overlays?.hongkong),
+    seoul: Boolean(story?.overlays?.seoul),
+  }
+
+  useEffect(() => {
+    if (!story?.overlays?.hongkong || hkSampleRef.current) return
+    let cancelled = false
+    fetch(HK_SAMPLE_URL)
+      .then((r) => r.json())
+      .then((raw: {
+        width: number
+        height: number
+        bbox: { west: number; east: number; north: number; south: number }
+        data_b64: string
+      }) => {
+        if (cancelled) return
+        const bin = atob(raw.data_b64)
+        const data = new Uint8Array(bin.length)
+        for (let i = 0; i < bin.length; i++) data[i] = bin.charCodeAt(i)
+        hkSampleRef.current = {
+          width: raw.width,
+          height: raw.height,
+          bbox: raw.bbox,
+          data,
+        }
+      })
+      .catch(() => {
+        /* optional */
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [story?.overlays?.hongkong])
 
   const countryAggs = useMemo(
     () => buildCountryAggregates(chartCities, source, metric),
@@ -858,6 +928,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
       })
 
       setStatus(`${sourceRef.current} · ${metricRef.current} · countries`)
+      setMapReady(true)
       scheduleRebuild()
     })
 
@@ -1004,7 +1075,63 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
       }, 50)
     }
 
+    const sampleHkDb = (lng: number, lat: number): number | null => {
+      const hkSample = hkSampleRef.current
+      if (!hkSample) return null
+      const { west, east, north, south } = hkSample.bbox
+      if (lng < west || lng > east || lat < south || lat > north) return null
+      const x = ((lng - west) / (east - west)) * (hkSample.width - 1)
+      const y = ((north - lat) / (north - south)) * (hkSample.height - 1)
+      const c = Math.round(x)
+      const r = Math.round(y)
+      if (c < 0 || r < 0 || c >= hkSample.width || r >= hkSample.height) return null
+      const q = hkSample.data[r * hkSample.width + c]
+      if (q === 255) return null
+      return 30 + (q / 254) * 70
+    }
+
     const onMove = async (e: maplibregl.MapMouseEvent) => {
+      // City overlays take tooltip priority when unlocked
+      if (
+        overlaysRef.current.seoul &&
+        map.getLayer(SEOUL_CIRCLE_LAYER) &&
+        map.getLayoutProperty(SEOUL_CIRCLE_LAYER, 'visibility') !== 'none'
+      ) {
+        const seoulHits = map.queryRenderedFeatures(e.point, {
+          layers: [SEOUL_CIRCLE_LAYER],
+        })
+        if (seoulHits.length) {
+          cancelPendingClear()
+          const p = seoulHits[0].properties ?? {}
+          map.getCanvas().style.cursor = 'pointer'
+          popup
+            .setLngLat(e.lngLat)
+            .setHTML(
+              `<div class="tip-name">${String(p.name_en ?? '')}</div><div class="tip-total">${Number(p.mean_db).toFixed(1)} dB mean</div>`,
+            )
+            .addTo(map)
+          return
+        }
+      }
+      if (
+        overlaysRef.current.hongkong &&
+        map.getLayer(HK_IMAGE_LAYER) &&
+        map.getLayoutProperty(HK_IMAGE_LAYER, 'visibility') !== 'none'
+      ) {
+        const db = sampleHkDb(e.lngLat.lng, e.lngLat.lat)
+        if (db != null) {
+          cancelPendingClear()
+          map.getCanvas().style.cursor = 'crosshair'
+          popup
+            .setLngLat(e.lngLat)
+            .setHTML(
+              `<div class="tip-name">Peak traffic noise</div><div class="tip-total">${db.toFixed(0)} dB</div>`,
+            )
+            .addTo(map)
+          return
+        }
+      }
+
       const hitLayers = countryModeRef.current
         ? [COUNTRY_HIT_LAYER]
         : [HIT_LAYER]
