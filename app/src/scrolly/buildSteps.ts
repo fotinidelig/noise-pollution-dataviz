@@ -17,8 +17,13 @@ function hiDb(db: number, digits = 0) {
   return db >= 70 ? hiLoud(label) : hi(label)
 }
 
+/** Clear the centered ~420px story card (city sits just right of card edge). */
+const CARD_CLEAR_PX = 220
+/** Extra ~1/8 of a typical desktop viewport further right (Germany/HK/Seoul). */
+const EXTRA_EIGHTH_PX = 180
+
 /**
- * Place the city just right of the centered story card (~420px).
+ * Place the city right of the centered story card.
  * Westward center shift → geographic point sits east of viewport center.
  * MapLibre story easeTo has no padding; pixel→lon uses 512px tiles.
  */
@@ -26,7 +31,7 @@ function cardClearCenter(
   lon: number,
   lat: number,
   zoom: number,
-  pxRight = 220,
+  pxRight = CARD_CLEAR_PX,
 ): [number, number] {
   const lonPerPx = 360 / (512 * 2 ** zoom)
   return [lon - pxRight * lonPerPx, lat]
@@ -123,7 +128,7 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
         `${hiLoud('75 dB')} sits between a ${hiLoud('vacuum cleaner (~70 dB)')} and a ${hiLoud('blender (~80–90 dB)')}.`,
       ],
       map: {
-        center: cardClearCenter(de.lon, de.lat, 7.1),
+        center: cardClearCenter(de.lon, de.lat, 7.1, CARD_CLEAR_PX + EXTRA_EIGHTH_PX),
         zoom: 7.1,
         source: 'road',
         metric: 'Lden',
@@ -176,7 +181,7 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
         `On the ${hk.year} Hong Kong ${hi('citywide traffic-noise map')} (modelled area levels, not one microphone), about ${hi(`${hk.pct_valid_gt70.toFixed(0)}%`)} of the mapped territory sits above ${hiLoud('70 dB')} — roughly ${hi(`${hk.area_km2_gt70.toFixed(0)} km²`)}.`,
       ],
       map: {
-        center: cardClearCenter(hk.lon, hk.lat, 8.7),
+        center: cardClearCenter(hk.lon, hk.lat, 8.7, CARD_CLEAR_PX + EXTRA_EIGHTH_PX),
         zoom: 8.7,
         source: 'road',
         metric: 'Lden',
@@ -193,7 +198,7 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
         `Among eight Seoul road sites in ${seoul.year}, ${hi(seoul.loudest_site)} has the ${hi('highest mean')} — about ${hiDb(seoul.max_db_median)}. The ${hi('highest single reading')} is about ${hiDb(seoul.max_db_peak)}${seoul.peak_site ? ` at ${hi(seoul.peak_site)}` : ''}.`,
       ],
       map: {
-        center: cardClearCenter(seoul.lon, seoul.lat, 8.9),
+        center: cardClearCenter(seoul.lon, seoul.lat, 8.9, CARD_CLEAR_PX + EXTRA_EIGHTH_PX),
         zoom: 8.9,
         source: 'road',
         metric: 'Lden',
