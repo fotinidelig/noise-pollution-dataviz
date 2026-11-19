@@ -178,9 +178,6 @@ export function SoundScale({
           </button>
         ))}
       </div>
-      <p className="sound-scale__note">
-        Samples show character, not calibrated loudness on your device.
-      </p>
     </div>
   )
 }
