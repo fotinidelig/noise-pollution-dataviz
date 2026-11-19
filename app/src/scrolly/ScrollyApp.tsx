@@ -25,8 +25,9 @@ function bodyHtml(p: string) {
 }
 
 /**
- * × on each story card dismisses the narrative overlay and jumps to Explore
- * (free pan/zoom). Progress-rail clicks reopen that beat and show the card again.
+ * Hide on each story card fades the narrative box away and strengthens the
+ * matching progress-rail stop so users know where to reopen. Clicking that
+ * rail title shows the card again (same beat; no jump to Explore).
  *
  * Hong Kong / Seoul overlays unlock when first visited and stay visible for the
  * rest of the story (including Explore) so scrolling back still shows the data.
@@ -34,7 +35,7 @@ function bodyHtml(p: string) {
 export function ScrollyApp() {
   const [metrics, setMetrics] = useState<StoryMetrics | null>(null)
   const [activeId, setActiveId] = useState<StoryStepId>('hero')
-  const [dismissed, setDismissed] = useState(false)
+  const [cardHidden, setCardHidden] = useState(false)
   const [unlocked, setUnlocked] = useState({ hongkong: false, seoul: false })
   const [playingSound, setPlayingSound] = useState<SoundAnchor | null>(null)
   const stepRefs = useRef<Record<string, HTMLElement | null>>({})
@@ -55,10 +56,7 @@ export function ScrollyApp() {
   }, [])
 
   const steps = useMemo(() => (metrics ? buildSteps(metrics) : []), [metrics])
-  const exploreStep = steps.find((s) => s.id === 'explore')
-  const active = dismissed
-    ? exploreStep ?? steps[0]
-    : (steps.find((s) => s.id === activeId) ?? steps[0])
+  const active = steps.find((s) => s.id === activeId) ?? steps[0]
 
   // Unlock on the same render as the step (avoid one-frame race with map overlays)
   const overlays = useMemo(
@@ -68,7 +66,7 @@ export function ScrollyApp() {
     }),
     [unlocked.hongkong, unlocked.seoul, activeId],
   )
-  const calmStep = !dismissed && active?.id === 'calm'
+  const calmStep = !cardHidden && active?.id === 'calm'
 
   useEffect(() => {
     if (activeId === 'hongkong' || activeId === 'seoul') {
@@ -80,8 +78,13 @@ export function ScrollyApp() {
     }
   }, [activeId])
 
+  // New beat (scroll or jump) always shows its card again.
   useEffect(() => {
-    if (!steps.length || dismissed) return
+    setCardHidden(false)
+  }, [activeId])
+
+  useEffect(() => {
+    if (!steps.length) return
     const nodes = steps
       .map((s) => stepRefs.current[s.id])
       .filter((n): n is HTMLElement => Boolean(n))
@@ -108,7 +111,7 @@ export function ScrollyApp() {
     )
     for (const n of nodes) obs.observe(n)
     return () => obs.disconnect()
-  }, [steps, dismissed])
+  }, [steps])
 
   const mapControl: StoryMapControl | null = active?.map
     ? {
@@ -117,15 +120,23 @@ export function ScrollyApp() {
         source: active.map.source,
         metric: active.map.metric,
         highlightId: active.map.highlightId ?? null,
-        explore: Boolean(active.explore) || dismissed,
-        stepId: dismissed ? 'explore' : active.id,
-        calm: calmStep && !dismissed,
+        // Free pan/zoom while the card is tucked away; stay on this beat.
+        explore: Boolean(active.explore) || cardHidden,
+        stepId: active.id,
+        calm: calmStep,
         overlays,
       }
     : null
 
   const jump = (id: string) => {
-    if (id !== 'explore') setDismissed(false)
+    if (id === activeId) {
+      // Same stop: reopen if hidden; otherwise a no-op scroll is fine.
+      setCardHidden(false)
+      if (!cardHidden) {
+        stepRefs.current[id]?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+      return
+    }
     // Unlock immediately on rail jump so overlays mount before scroll settles
     if (id === 'hongkong' || id === 'seoul') {
       setUnlocked((u) => ({ ...u, [id]: true }))
@@ -135,26 +146,23 @@ export function ScrollyApp() {
     setActiveId(id as StoryStepId)
   }
 
-  const dismissStory = () => {
-    setDismissed(true)
-    setActiveId('explore')
-    const el = stepRefs.current.explore
-    el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  const hideCard = () => {
+    setCardHidden(true)
   }
 
   // Facts: always-on grain locked at 75 dB. Sounds: grain only while a sample plays.
   const FACTS_GRAIN_DB = 75
-  const factsGrain = active?.id === 'hero' && !dismissed
+  const factsGrain = active?.id === 'hero' && !cardHidden
   const soundsGrain =
-    Boolean(playingSound) && active?.id === 'sounds' && !dismissed
+    Boolean(playingSound) && active?.id === 'sounds' && !cardHidden
   const grainOn = factsGrain || soundsGrain
   const grainDb = factsGrain ? FACTS_GRAIN_DB : playingSound?.db
   const grainStrength = grainDb != null ? grainIntensity(grainDb) : 0
   const grainDensity = grainDb != null ? loudnessRatio(grainDb) : 1
 
   useEffect(() => {
-    if (active?.id !== 'sounds' || dismissed) setPlayingSound(null)
-  }, [active?.id, dismissed])
+    if (active?.id !== 'sounds' || cardHidden) setPlayingSound(null)
+  }, [active?.id, cardHidden])
 
   if (!metrics || !steps.length) {
     return (
@@ -165,8 +173,13 @@ export function ScrollyApp() {
   }
 
   return (
-    <main className={`scrolly-root${dismissed ? ' is-dismissed' : ''}`}>
-      <ProgressRail steps={steps} activeId={active.id} onJump={jump} />
+    <main className={`scrolly-root${cardHidden ? ' is-card-hidden' : ''}`}>
+      <ProgressRail
+        steps={steps}
+        activeId={active.id}
+        cardHidden={cardHidden}
+        onJump={jump}
+      />
 
       <div className="scrolly-map-sticky">
         <NoiseMap story={mapControl} />
@@ -178,146 +191,154 @@ export function ScrollyApp() {
         density={grainDensity}
       />
 
-      <div className="scrolly-steps" aria-hidden={dismissed}>
+      <div className="scrolly-steps" aria-hidden={cardHidden}>
         {steps.map((step, index) => {
-          const isActiveCard = step.id === active.id && !dismissed
+          const isActiveCard = step.id === active.id && !cardHidden
           const prevStep = index > 0 ? steps[index - 1] : null
           const nextStep = steps[index + 1]
+          const isActiveHidden = step.id === active.id && cardHidden
           return (
             <section
               key={step.id}
-              className={`scrolly-step${step.id === 'hero' ? ' scrolly-step--hero' : ''}${step.id === 'sounds' ? ' scrolly-step--sounds' : ''}${step.id === 'calm' ? ' scrolly-step--calm' : ''}${isActiveCard ? ' is-active' : ''}`}
+              className={`scrolly-step${step.id === 'hero' ? ' scrolly-step--hero' : ''}${step.id === 'sounds' ? ' scrolly-step--sounds' : ''}${step.id === 'calm' ? ' scrolly-step--calm' : ''}${isActiveCard ? ' is-active' : ''}${isActiveHidden ? ' is-card-hidden' : ''}`}
               data-step-id={step.id}
               ref={(el) => {
                 stepRefs.current[step.id] = el
               }}
             >
-              {!dismissed ? (
-                <div
-                  className={`scrolly-step__stack${
-                    step.id === 'hero' && step.stats?.length
-                      ? ' scrolly-step__stack--facts'
-                      : ''
-                  }`}
-                >
-                  {step.id === 'hero' && step.stats && step.stats.length > 0 ? (
-                    <div className="scrolly-step__facts-panel">
-                      <div
-                        className="scrolly-step__facts"
-                        role="list"
-                        aria-label="Key noise impact figures"
-                      >
-                        {step.stats.map((stat) => (
-                          <div
-                            key={stat.value}
-                            className="scrolly-step__fact-box"
-                            role="listitem"
-                          >
-                            <div className="scrolly-step__stat-value">{stat.value}</div>
-                            <div className="scrolly-step__stat-label">{stat.label}</div>
-                          </div>
-                        ))}
-                      </div>
-                      {nextStep ? (
-                        <button
-                          type="button"
-                          className="scrolly-step__next"
-                          aria-label={`Next story: ${nextStep.title}`}
-                          title={`Next: ${nextStep.railLabel}`}
-                          onClick={() => jump(nextStep.id)}
+              <div
+                className={`scrolly-step__stack${
+                  step.id === 'hero' && step.stats?.length
+                    ? ' scrolly-step__stack--facts'
+                    : ''
+                }${cardHidden && step.id === active.id ? ' is-faded' : ''}`}
+              >
+                {step.id === 'hero' && step.stats && step.stats.length > 0 ? (
+                  <div className="scrolly-step__facts-panel">
+                    <div
+                      className="scrolly-step__facts"
+                      role="list"
+                      aria-label="Key noise impact figures"
+                    >
+                      {step.stats.map((stat) => (
+                        <div
+                          key={stat.value}
+                          className="scrolly-step__fact-box"
+                          role="listitem"
                         >
-                          <span className="scrolly-step__next-chevron" aria-hidden="true" />
-                        </button>
-                      ) : null}
+                          {stat.prefix ? (
+                            <div className="scrolly-step__stat-prefix">
+                              {stat.prefix}
+                            </div>
+                          ) : null}
+                          <div className="scrolly-step__stat-value">
+                            {stat.value}
+                          </div>
+                          <div className="scrolly-step__stat-label">
+                            {stat.label}
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ) : (
-                    <div className="scrolly-step__card">
+                    {nextStep ? (
                       <button
                         type="button"
-                        className="scrolly-step__close"
-                        aria-label="Close story and explore the map"
-                        title="Close story · explore map"
-                        onClick={dismissStory}
+                        className="scrolly-step__next"
+                        aria-label={`Next story: ${nextStep.title}`}
+                        title={`Next: ${nextStep.railLabel}`}
+                        onClick={() => jump(nextStep.id)}
                       >
-                        ×
+                        <span className="scrolly-step__next-chevron" aria-hidden="true" />
                       </button>
-                      {prevStep ? (
-                        <button
-                          type="button"
-                          className="scrolly-step__prev"
-                          aria-label={`Previous story: ${prevStep.title}`}
-                          title={`Previous: ${prevStep.railLabel}`}
-                          onClick={() => jump(prevStep.id)}
-                        >
-                          <span className="scrolly-step__prev-chevron" aria-hidden="true" />
-                        </button>
-                      ) : null}
-                      {step.year != null ? (
-                        <p className="scrolly-step__year">Year {step.year}</p>
-                      ) : null}
-                      <h2 className="scrolly-step__title">{step.title}</h2>
-                      {step.subtitle ? (
-                        <p className="scrolly-step__subtitle">{step.subtitle}</p>
-                      ) : null}
-                      {step.id === 'sounds' ? (
-                        <>
-                          {step.body[0] ? (
-                            <p
-                              className="scrolly-step__body"
-                              dangerouslySetInnerHTML={{
-                                __html: bodyHtml(step.body[0]),
-                              }}
-                            />
-                          ) : null}
-                          <SoundScale
-                            active={isActiveCard}
-                            onPlayingChange={setPlayingSound}
+                    ) : null}
+                  </div>
+                ) : (
+                  <div className="scrolly-step__card">
+                    <button
+                      type="button"
+                      className="scrolly-step__hide"
+                      aria-label="Hide story card"
+                      title="Hide story card"
+                      onClick={hideCard}
+                    >
+                      Hide
+                    </button>
+                    {prevStep ? (
+                      <button
+                        type="button"
+                        className="scrolly-step__prev"
+                        aria-label={`Previous story: ${prevStep.title}`}
+                        title={`Previous: ${prevStep.railLabel}`}
+                        onClick={() => jump(prevStep.id)}
+                      >
+                        <span className="scrolly-step__prev-chevron" aria-hidden="true" />
+                      </button>
+                    ) : null}
+                    {step.year != null ? (
+                      <p className="scrolly-step__year">Year {step.year}</p>
+                    ) : null}
+                    <h2 className="scrolly-step__title">{step.title}</h2>
+                    {step.subtitle ? (
+                      <p className="scrolly-step__subtitle">{step.subtitle}</p>
+                    ) : null}
+                    {step.id === 'sounds' ? (
+                      <>
+                        {step.body[0] ? (
+                          <p
+                            className="scrolly-step__body"
+                            dangerouslySetInnerHTML={{
+                              __html: bodyHtml(step.body[0]),
+                            }}
                           />
-                          {step.body.slice(1).map((p) => (
-                            <p
-                              key={p.slice(0, 48)}
-                              className="scrolly-step__body"
-                              dangerouslySetInnerHTML={{ __html: bodyHtml(p) }}
-                            />
-                          ))}
-                        </>
-                      ) : (
-                        step.body.map((p) => (
+                        ) : null}
+                        <SoundScale
+                          active={isActiveCard}
+                          onPlayingChange={setPlayingSound}
+                        />
+                        {step.body.slice(1).map((p) => (
                           <p
                             key={p.slice(0, 48)}
                             className="scrolly-step__body"
                             dangerouslySetInnerHTML={{ __html: bodyHtml(p) }}
                           />
-                        ))
-                      )}
-                      {nextStep ? (
-                        <button
-                          type="button"
-                          className="scrolly-step__next"
-                          aria-label={`Next story: ${nextStep.title}`}
-                          title={`Next: ${nextStep.railLabel}`}
-                          onClick={() => jump(nextStep.id)}
-                        >
-                          <span className="scrolly-step__next-chevron" aria-hidden="true" />
-                        </button>
-                      ) : null}
+                        ))}
+                      </>
+                    ) : (
+                      step.body.map((p) => (
+                        <p
+                          key={p.slice(0, 48)}
+                          className="scrolly-step__body"
+                          dangerouslySetInnerHTML={{ __html: bodyHtml(p) }}
+                        />
+                      ))
+                    )}
+                    {nextStep ? (
+                      <button
+                        type="button"
+                        className="scrolly-step__next"
+                        aria-label={`Next story: ${nextStep.title}`}
+                        title={`Next: ${nextStep.railLabel}`}
+                        onClick={() => jump(nextStep.id)}
+                      >
+                        <span className="scrolly-step__next-chevron" aria-hidden="true" />
+                      </button>
+                    ) : null}
+                  </div>
+                )}
+                {isActiveCard && step.id === 'hongkong' ? (
+                  <div
+                    className="scrolly-hk-colorbar"
+                    aria-label="Hong Kong peak traffic noise color scale"
+                  >
+                    <div className="scrolly-hk-colorbar__ramp" />
+                    <div className="scrolly-hk-colorbar__ticks">
+                      <span>50 dB</span>
+                      <span>peak traffic noise</span>
+                      <span>85 dB</span>
                     </div>
-                  )}
-                  {isActiveCard && step.id === 'hongkong' ? (
-                    <div
-                      className="scrolly-hk-colorbar"
-                      aria-label="Hong Kong peak traffic noise color scale"
-                    >
-                      <div className="scrolly-hk-colorbar__ramp" />
-                      <div className="scrolly-hk-colorbar__ticks">
-                        <span>50 dB</span>
-                        <span>peak traffic noise</span>
-                        <span>85 dB</span>
-                      </div>
-                    </div>
-                  ) : null}
-                </div>
-              ) : null}
+                  </div>
+                ) : null}
+              </div>
             </section>
           )
         })}

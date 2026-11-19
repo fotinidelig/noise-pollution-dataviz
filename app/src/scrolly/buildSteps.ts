@@ -61,15 +61,19 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       body: [],
       stats: [
         {
+          prefix: 'about',
           value: '1 in 5',
           label: 'EU citizens are affected by noise pollution',
         },
         {
-          value: 'about 500,000',
-          label: 'children with reading difficulties due to traffic noise',
+          prefix: 'about',
+          value: '500,000',
+          label:
+            'children have reading difficulties due to frequent traffic noise',
         },
         {
-          value: `about ${hsdMillions}M`,
+          prefix: 'about',
+          value: `${hsdMillions}M`,
           label:
             'people are highly sleep disturbed, sleeping with noise as loud as a vacuum cleaner',
         },

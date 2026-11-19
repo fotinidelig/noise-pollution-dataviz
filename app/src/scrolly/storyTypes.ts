@@ -123,7 +123,9 @@ export type StoryStepId =
   | 'explore'
 
 export type StoryStat = {
-  /** Big figure shown in the intro row (e.g. "1 in 5", "about 3.3M"). */
+  /** Optional qualifier above the figure in body type (e.g. "about"). */
+  prefix?: string
+  /** Big figure shown in the intro row (e.g. "1 in 5", "500,000"). */
   value: string
   /** Short label under the figure. */
   label: string
