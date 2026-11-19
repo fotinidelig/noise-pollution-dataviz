@@ -165,8 +165,16 @@ html {
   margin-top: 0.35rem;
 }
 
+/* Shell owns stacking: corner wave (z0) under card (z1). */
+.scrolly-step__card-shell {
+  position: relative;
+  width: 100%;
+  overflow: visible;
+}
+
 .scrolly-step__card {
   position: relative;
+  z-index: 1;
   pointer-events: auto;
   width: 100%;
   /* Room for the absolute Hide control in the top-right */
@@ -175,8 +183,6 @@ html {
   border: 1px solid rgba(120, 160, 220, 0.22);
   backdrop-filter: blur(10px);
   box-shadow: 0 0 28px rgba(0, 0, 0, 0.35);
-  /* Let corner wave rings spill past the card edge. */
-  overflow: visible;
 }
 
 .scrolly-step__prev,
@@ -253,7 +259,9 @@ html {
 
 /*
  * Top-left corner sound-wave rings (map-matched #9bb7c2).
- * Tune: --sw-count via markup; --sw-dur, --sw-size, --sw-color, --sw-op,
+ * Sibling of .scrolly-step__card inside .scrolly-step__card-shell — z-index
+ * under the card so rings only show where they spill past the box edge.
+ * Tune: count via markup; --sw-dur, --sw-size, --sw-color, --sw-op,
  * --sw-scale-end, --sw-stagger below.
  */
 .scrolly-step__corner-wave {

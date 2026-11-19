@@ -280,7 +280,8 @@ export function ScrollyApp() {
                     ) : null}
                   </div>
                 ) : (
-                  <div className="scrolly-step__card">
+                  <div className="scrolly-step__card-shell">
+                    {/* Sibling behind the card — not a card child */}
                     <span
                       className="scrolly-step__corner-wave"
                       aria-hidden="true"
@@ -289,89 +290,91 @@ export function ScrollyApp() {
                       <span className="scrolly-step__corner-wave-ring" />
                       <span className="scrolly-step__corner-wave-ring" />
                     </span>
-                    <button
-                      type="button"
-                      className="scrolly-step__hide"
-                      aria-label="Hide story card"
-                      title="Hide story card"
-                      onClick={hideCard}
-                    >
-                      Hide
-                    </button>
-                    {prevStep ? (
+                    <div className="scrolly-step__card">
                       <button
                         type="button"
-                        className="scrolly-step__prev"
-                        aria-label={`Previous story: ${prevStep.title}`}
-                        title={`Previous: ${prevStep.railLabel}`}
-                        onClick={() => jump(prevStep.id)}
+                        className="scrolly-step__hide"
+                        aria-label="Hide story card"
+                        title="Hide story card"
+                        onClick={hideCard}
                       >
-                        <motion.span
-                          className="scrolly-step__chevron-bob"
-                          aria-hidden="true"
-                          animate={{ y: [0, -6, 0] }}
-                          transition={bobTween}
-                        >
-                          <span className="scrolly-step__prev-chevron" />
-                        </motion.span>
+                        Hide
                       </button>
-                    ) : null}
-                    {step.year != null ? (
-                      <p className="scrolly-step__year">Year {step.year}</p>
-                    ) : null}
-                    <h2 className="scrolly-step__title">{step.title}</h2>
-                    {step.subtitle ? (
-                      <p className="scrolly-step__subtitle">{step.subtitle}</p>
-                    ) : null}
-                    {step.id === 'sounds' ? (
-                      <>
-                        {step.body[0] ? (
-                          <p
-                            className="scrolly-step__body"
-                            dangerouslySetInnerHTML={{
-                              __html: bodyHtml(step.body[0]),
-                            }}
+                      {prevStep ? (
+                        <button
+                          type="button"
+                          className="scrolly-step__prev"
+                          aria-label={`Previous story: ${prevStep.title}`}
+                          title={`Previous: ${prevStep.railLabel}`}
+                          onClick={() => jump(prevStep.id)}
+                        >
+                          <motion.span
+                            className="scrolly-step__chevron-bob"
+                            aria-hidden="true"
+                            animate={{ y: [0, -6, 0] }}
+                            transition={bobTween}
+                          >
+                            <span className="scrolly-step__prev-chevron" />
+                          </motion.span>
+                        </button>
+                      ) : null}
+                      {step.year != null ? (
+                        <p className="scrolly-step__year">Year {step.year}</p>
+                      ) : null}
+                      <h2 className="scrolly-step__title">{step.title}</h2>
+                      {step.subtitle ? (
+                        <p className="scrolly-step__subtitle">{step.subtitle}</p>
+                      ) : null}
+                      {step.id === 'sounds' ? (
+                        <>
+                          {step.body[0] ? (
+                            <p
+                              className="scrolly-step__body"
+                              dangerouslySetInnerHTML={{
+                                __html: bodyHtml(step.body[0]),
+                              }}
+                            />
+                          ) : null}
+                          <SoundScale
+                            active={isActiveCard}
+                            onPlayingChange={setPlayingSound}
                           />
-                        ) : null}
-                        <SoundScale
-                          active={isActiveCard}
-                          onPlayingChange={setPlayingSound}
-                        />
-                        {step.body.slice(1).map((p) => (
+                          {step.body.slice(1).map((p) => (
+                            <p
+                              key={p.slice(0, 48)}
+                              className="scrolly-step__body"
+                              dangerouslySetInnerHTML={{ __html: bodyHtml(p) }}
+                            />
+                          ))}
+                        </>
+                      ) : (
+                        step.body.map((p) => (
                           <p
                             key={p.slice(0, 48)}
                             className="scrolly-step__body"
                             dangerouslySetInnerHTML={{ __html: bodyHtml(p) }}
                           />
-                        ))}
-                      </>
-                    ) : (
-                      step.body.map((p) => (
-                        <p
-                          key={p.slice(0, 48)}
-                          className="scrolly-step__body"
-                          dangerouslySetInnerHTML={{ __html: bodyHtml(p) }}
-                        />
-                      ))
-                    )}
-                    {nextStep ? (
-                      <button
-                        type="button"
-                        className="scrolly-step__next"
-                        aria-label={`Next story: ${nextStep.title}`}
-                        title={`Next: ${nextStep.railLabel}`}
-                        onClick={() => jump(nextStep.id)}
-                      >
-                        <motion.span
-                          className="scrolly-step__chevron-bob"
-                          aria-hidden="true"
-                          animate={{ y: [0, 6, 0] }}
-                          transition={bobTween}
+                        ))
+                      )}
+                      {nextStep ? (
+                        <button
+                          type="button"
+                          className="scrolly-step__next"
+                          aria-label={`Next story: ${nextStep.title}`}
+                          title={`Next: ${nextStep.railLabel}`}
+                          onClick={() => jump(nextStep.id)}
                         >
-                          <span className="scrolly-step__next-chevron" />
-                        </motion.span>
-                      </button>
-                    ) : null}
+                          <motion.span
+                            className="scrolly-step__chevron-bob"
+                            aria-hidden="true"
+                            animate={{ y: [0, 6, 0] }}
+                            transition={bobTween}
+                          >
+                            <span className="scrolly-step__next-chevron" />
+                          </motion.span>
+                        </button>
+                      ) : null}
+                    </div>
                   </div>
                 )}
                 {isActiveCard && step.id === 'hongkong' ? (
