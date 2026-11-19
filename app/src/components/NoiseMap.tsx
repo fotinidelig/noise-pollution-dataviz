@@ -1266,7 +1266,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
       closeOnClick: false,
       offset: 14,
       className: 'noise-tip',
-      // Erica One display metrics differ from body — allow long Seoul one-liners.
+      // BBH Hegarty display metrics differ from body — allow long Seoul one-liners.
       maxWidth: '420px',
     })
     popupRef.current = popup
