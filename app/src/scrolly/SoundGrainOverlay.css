@@ -4,6 +4,12 @@
   z-index: 3;
   pointer-events: none;
   overflow: hidden;
+  opacity: 0;
+  transition: opacity var(--grain-fade-ms, 480ms) ease-in-out;
+}
+
+.sound-grain.is-visible {
+  opacity: 1;
 }
 
 /* Dim the map under the grain (map sticky is z-index 1; steps stay above at 4). */
