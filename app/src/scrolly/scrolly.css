@@ -349,7 +349,7 @@ html {
 
 .scrolly-step__title {
   margin: 0 0 0.65rem;
-  font-family: var(--font-display, "Passion One", "Helvetica Neue", Arial, sans-serif);
+  font-family: var(--font-display, "Erica One", "Helvetica Neue", Arial, sans-serif);
   font-weight: 400;
   font-size: clamp(1.6rem, 3.2vw, 2.35rem);
   line-height: 1.05;
@@ -381,7 +381,7 @@ html {
 .scrolly-step__stat-value {
   width: 100%;
   margin: 0;
-  font-family: var(--font-display, "Passion One", "Helvetica Neue", Arial, sans-serif);
+  font-family: var(--font-display, "Erica One", "Helvetica Neue", Arial, sans-serif);
   font-size: clamp(1.45rem, 2.8vw, 2.2rem);
   line-height: 1.1;
   letter-spacing: 0.02em;
@@ -519,7 +519,7 @@ html {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-family: var(--font-display, "Passion One", "Helvetica Neue", Arial, sans-serif);
+  font-family: var(--font-display, "Erica One", "Helvetica Neue", Arial, sans-serif);
   letter-spacing: 0.04em;
   text-shadow: 0 1px 6px rgba(0, 0, 0, 0.65);
 }
