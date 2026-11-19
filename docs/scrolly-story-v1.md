@@ -44,7 +44,7 @@ While a sample plays: full-screen visible particle grain (count ∝ 2^((dB−45)
 
 Browser playback is **not** calibrated SPL — clips show character; labels carry the dB anchors. Clips are peak-normalized to a shared max amplitude.
 
-### Europe (2021) — People are quite annoyed by the noise
+### Europe (2021) — Noise pollution disturbs millions
 
 About **74.1 million** people in European cities live in official **noise levels** that already sit above **WHO road-traffic guidance (~53 dB)**. Roughly **12.5 million** people are **highly annoyed** by road, rail, or aircraft noise.  
 As a rule of thumb, each **+10 dB** sounds about **twice** as loud. Exposure at **≥75 dB** is about **4×** as loud as **55dB**. That is the world those highly annoyed people live in.

@@ -126,7 +126,7 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       id: 'europe',
       railLabel: 'Europe',
       year: eu.year_label,
-      title: 'People are quite annoyed by the noise',
+      title: 'Noise pollution disturbs millions',
       questions: [],
       body: [
         `About ${hi(whoAbove)} people in European cities live in official noise levels that already sit above ${hi('WHO road-traffic guidance')} (about ${hi('53 dB')}). Roughly ${hi(ha)} people are ${hi('highly annoyed')} by road, rail, or aircraft noise.`,
