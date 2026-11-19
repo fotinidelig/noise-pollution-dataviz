@@ -25,9 +25,10 @@ function bodyHtml(p: string) {
 }
 
 /**
- * Hide on each story card fades the narrative box away and strengthens the
- * matching progress-rail stop so users know where to reopen. Clicking that
- * rail title shows the card again (same beat; no jump to Explore).
+ * Hide on each story card only fades the narrative box away. Map camera, zoom,
+ * and Explore lock stay on the current beat. The active progress-rail stop keeps
+ * its strong highlight so users know where they are; clicking that rail title
+ * shows the card again (same beat; no jump to Explore).
  *
  * Hong Kong / Seoul overlays unlock when first visited and stay visible for the
  * rest of the story (including Explore) so scrolling back still shows the data.
@@ -66,7 +67,8 @@ export function ScrollyApp() {
     }),
     [unlocked.hongkong, unlocked.seoul, activeId],
   )
-  const calmStep = !cardHidden && active?.id === 'calm'
+  // Calm map mode follows the beat, not card visibility — Hide only fades the box.
+  const calmStep = active?.id === 'calm'
 
   useEffect(() => {
     if (activeId === 'hongkong' || activeId === 'seoul') {
@@ -120,8 +122,8 @@ export function ScrollyApp() {
         source: active.map.source,
         metric: active.map.metric,
         highlightId: active.map.highlightId ?? null,
-        // Free pan/zoom while the card is tucked away; stay on this beat.
-        explore: Boolean(active.explore) || cardHidden,
+        // Hide only fades the story box — do not unlock Explore or retarget the camera.
+        explore: Boolean(active.explore),
         stepId: active.id,
         calm: calmStep,
         overlays,

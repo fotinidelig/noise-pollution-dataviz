@@ -3,7 +3,7 @@ import type { StoryStep } from './storyTypes'
 type Props = {
   steps: StoryStep[]
   activeId: string
-  /** Card is hidden — strengthen the active stop so users see where to reopen. */
+  /** Card is hidden — active stop click reopens it (label cue stays always-on). */
   cardHidden?: boolean
   onJump: (id: string) => void
 }
@@ -25,7 +25,7 @@ export function ProgressRail({
             <li key={s.id}>
               <button
                 type="button"
-                className={`scrolly-rail__stop${active ? ' is-active' : ''}${past ? ' is-past' : ''}${reopenCue ? ' is-reopen' : ''}`}
+                className={`scrolly-rail__stop${active ? ' is-active' : ''}${past ? ' is-past' : ''}`}
                 aria-current={active ? 'step' : undefined}
                 aria-label={
                   reopenCue

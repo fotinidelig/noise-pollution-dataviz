@@ -477,24 +477,14 @@ html {
   opacity: 0.7;
 }
 
+/* Always-on active stop: stronger magenta cue + underlined label */
 .scrolly-rail__stop.is-active {
-  color: #e8f0ff;
-}
-
-.scrolly-rail__stop.is-active .scrolly-rail__dot {
-  background: #F500AB;
-  border-color: #F56DC0;
-  box-shadow: 0 0 10px rgba(245, 0, 171, 0.65);
-}
-
-/* Card hidden: stronger rail cue so the reopen target is obvious */
-.scrolly-rail__stop.is-reopen {
   color: #fff;
   font-weight: 600;
   text-shadow: 0 0 12px rgba(245, 0, 171, 0.55);
 }
 
-.scrolly-rail__stop.is-reopen .scrolly-rail__dot {
+.scrolly-rail__stop.is-active .scrolly-rail__dot {
   background: #F500AB;
   border-color: #fff;
   box-shadow:
@@ -503,7 +493,7 @@ html {
   transform: scale(1.25);
 }
 
-.scrolly-rail__stop.is-reopen .scrolly-rail__label {
+.scrolly-rail__stop.is-active .scrolly-rail__label {
   letter-spacing: 0.1em;
   text-decoration: underline;
   text-decoration-color: rgba(245, 0, 171, 0.75);
