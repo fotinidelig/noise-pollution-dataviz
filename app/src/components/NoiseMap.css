@@ -95,7 +95,7 @@
 
 .noise-brand h1 {
   margin: 0;
-  font-family: var(--font-display, "Erica One", "Helvetica Neue", Arial, sans-serif);
+  font-family: var(--font-display, "BBH Hegarty", "Helvetica Neue", Arial, sans-serif);
   font-weight: 400;
   font-size: clamp(1.85rem, 3.4vw, 2.6rem);
   letter-spacing: 0.02em;
@@ -283,7 +283,7 @@
 }
 
 .tip-title {
-  font-family: var(--font-display, "Erica One", "Helvetica Neue", Arial, sans-serif);
+  font-family: var(--font-display, "BBH Hegarty", "Helvetica Neue", Arial, sans-serif);
   font-size: 1.35rem;
   line-height: 1.1;
 }
