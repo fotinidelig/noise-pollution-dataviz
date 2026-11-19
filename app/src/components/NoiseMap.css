@@ -103,15 +103,41 @@
   gap: 0.55rem;
 }
 
-.noise-controls--story .active-readonly {
+/* Mode chrome: explore keeps cool gray; story uses soft magenta accent.
+   Clickable — toggles story ↔ exploration without a camera jump. */
+.noise-mode-tag {
+  appearance: none;
   display: inline-flex;
+  align-items: center;
+  margin: 0;
   padding: 0.4rem 0.75rem;
   color: #9db0cc;
   border: 1px solid rgba(120, 160, 220, 0.22);
   background: rgba(8, 12, 24, 0.72);
   letter-spacing: 0.06em;
   text-transform: uppercase;
+  font: inherit;
   font-size: 1rem;
+  cursor: pointer;
+  transition: color 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+
+.noise-mode-tag:hover,
+.noise-mode-tag:focus-visible {
+  color: #e8f0ff;
+  border-color: rgba(120, 160, 220, 0.45);
+  outline: none;
+}
+
+.noise-mode-tag--story {
+  color: #F56DC0;
+  border-color: #F56DC0;
+}
+
+.noise-mode-tag--story:hover,
+.noise-mode-tag--story:focus-visible {
+  color: #ff9ada;
+  border-color: #ff9ada;
 }
 
 .seg {

@@ -50,6 +50,23 @@ const RING_PULSE_BUCKETS = 64
 const RING_PULSE_PERIOD = 8
 /** Soft cyan-gray (less chroma than neon band colours). */
 const PULSE_LINE_COLOR = '#9bb7c2'
+/** Soft magenta — story-mode country borders only. */
+const STORY_COUNTRY_BORDER = '#F56DC0'
+/** Carto Dark Matter defaults — restored in exploration mode. */
+const EXPLORE_COUNTRY_OUTLINE_COLOR = '#2C353C'
+const EXPLORE_COUNTRY_OUTLINE_OPACITY = 0.5
+/** Zoom-interpolated Carto inner border (was style `stops`). */
+const EXPLORE_COUNTRY_INNER_COLOR: maplibregl.ExpressionSpecification = [
+  'interpolate',
+  ['linear'],
+  ['zoom'],
+  4,
+  'rgba(92, 94, 94, 1)',
+  5,
+  'rgba(96, 96, 96, 1)',
+  6,
+  'rgba(102, 102, 102, 1)',
+]
 /** Phase advance per ~80ms tick — lower = slower crest. */
 const PULSE_PHASE_STEP = 0.038
 const HIT_LAYER = 'aggl-hit'
@@ -350,16 +367,33 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
   const [chartCities, setChartCities] = useState<ChartCity[]>([])
   const [streamData, setStreamData] = useState<StreamData | null>(null)
   const [calmData, setCalmData] = useState<CalmSpacesData | null>(null)
-  /** Explore toggle — story calm step forces on. */
-  const [calmToggle, setCalmToggle] = useState(false)
   const [calmFocusId, setCalmFocusId] = useState<string | null>(null)
+  /**
+   * Label toggle: force explore/story without changing the scrolly beat
+   * (keeps the current map camera). `auto` follows the active step.
+   */
+  const [modeOverride, setModeOverride] = useState<'auto' | 'explore' | 'story'>(
+    'auto',
+  )
 
-  // Standalone map = explore; scrolly steps lock until the final explore beat
-  const explore = !story || Boolean(story.explore)
+  // New story beat wins — clear manual mode so scroll stays authoritative.
+  useEffect(() => {
+    setModeOverride('auto')
+  }, [story?.stepId])
+
+  // Standalone map = explore; scrolly beats lock until Explore (or label toggle).
+  const beatExplore = !story || Boolean(story.explore)
+  const explore =
+    modeOverride === 'explore'
+      ? true
+      : modeOverride === 'story'
+        ? false
+        : beatExplore
   const storyLocked = Boolean(story) && !explore
   const exploreRef = useRef(explore)
   exploreRef.current = explore
-  const calmMode = Boolean(story?.calm) || (explore && calmToggle)
+  /** Calm bubbles/chart only on the story calm beat (explore no longer has a toggle). */
+  const calmMode = Boolean(story?.calm) && !explore
   const calmModeRef = useRef(calmMode)
   calmModeRef.current = calmMode
   const [hoveredId, setHoveredId] = useState<string | null>(null)
@@ -737,7 +771,8 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
       .addTo(map)
   }
 
-  // Sync story camera / layer locks (scrolly)
+  // Sync story camera / layer locks (scrolly).
+  // Mode-label override keeps the current view — never easeTo while overridden.
   useEffect(() => {
     if (!story) return
     if (story.source) setSource(story.source)
@@ -745,6 +780,12 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     if (!mapReady) return
     const map = mapRef.current
     if (!map) return
+    if (modeOverride !== 'auto') {
+      if (story.highlightId && modeOverride === 'story') {
+        applyFocusPaint(story.highlightId)
+      }
+      return
+    }
     if (lastStoryStep.current === story.stepId) {
       applyFocusPaint(story.highlightId ?? focusIdRef.current)
       return
@@ -774,29 +815,67 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     story?.metric,
     story?.highlightId,
     story?.explore,
+    modeOverride,
   ])
 
-  // Lock map chrome to story scroll until Explore
+  // Story: pan allowed, zoom locked (cameras still fly programmatically).
+  // Explore: restore pan + zoom + nav chrome.
   useEffect(() => {
     const map = mapRef.current
     if (!map) return
-    const handlers = [
+    const zoomHandlers = [
       map.scrollZoom,
-      map.dragPan,
       map.touchZoomRotate,
       map.doubleClickZoom,
       map.boxZoom,
       map.keyboard,
       map.dragRotate,
     ] as const
+    map.dragPan.enable()
     if (storyLocked) {
-      for (const h of handlers) h.disable()
+      for (const h of zoomHandlers) h.disable()
     } else {
-      for (const h of handlers) h.enable()
+      for (const h of zoomHandlers) h.enable()
     }
     const nav = document.querySelector('.maplibregl-ctrl-bottom-right') as HTMLElement | null
     if (nav) nav.style.display = storyLocked ? 'none' : ''
   }, [storyLocked, story?.stepId, mapReady])
+
+  // Country borders: magenta in story only; Carto defaults in exploration.
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !mapReady) return
+    const paintBorders = (magenta: boolean) => {
+      try {
+        if (map.getLayer('boundary_country_outline')) {
+          map.setPaintProperty(
+            'boundary_country_outline',
+            'line-color',
+            magenta ? STORY_COUNTRY_BORDER : EXPLORE_COUNTRY_OUTLINE_COLOR,
+          )
+          map.setPaintProperty(
+            'boundary_country_outline',
+            'line-opacity',
+            magenta ? 0.85 : EXPLORE_COUNTRY_OUTLINE_OPACITY,
+          )
+        }
+      } catch {
+        /* style variant */
+      }
+      try {
+        if (map.getLayer('boundary_country_inner')) {
+          map.setPaintProperty(
+            'boundary_country_inner',
+            'line-color',
+            magenta ? STORY_COUNTRY_BORDER : EXPLORE_COUNTRY_INNER_COLOR,
+          )
+        }
+      } catch {
+        /* */
+      }
+    }
+    paintBorders(storyLocked)
+  }, [storyLocked, mapReady])
 
   // Outer-ring pulse only (~12fps) — never rebuilds geometry, never paints static rings
   useEffect(() => {
@@ -1835,9 +1914,10 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     })
 
     // Explore: country/city/cluster click drills zoom (same thresholds as scroll).
-    // Story mode: pin only — never easeTo (keeps scrolly flyTos authoritative).
+    // Story: ignore city clicks (hover tips still work; cameras stay scrolly-owned).
     map.on('click', (e) => {
-      const canDrill = exploreRef.current
+      if (!exploreRef.current) return
+
       const target = resolveNoiseTarget(map, e.point)
       if (!target) {
         pinnedIdRef.current = null
@@ -1845,16 +1925,6 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
         setPinnedId(null)
         setPinnedSeries(null)
         applyFocusPaint(hoveredIdRef.current)
-        return
-      }
-
-      if (!canDrill) {
-        pinnedIdRef.current = target.id
-        focusIdRef.current = target.id
-        setPinnedId(target.id)
-        setPinnedSeries(target.series)
-        setMapHover(target.id, target.series)
-        showNoisePopup(map, popup, target)
         return
       }
 
@@ -2086,7 +2156,8 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
       }
 
       cancelPendingClear()
-      map.getCanvas().style.cursor = 'pointer'
+      // Story: default cursor on cities (not clickable). Explore: pointer.
+      map.getCanvas().style.cursor = exploreRef.current ? 'pointer' : ''
       if (hoveredIdRef.current !== target.id) {
         setMapHover(target.id, target.series)
       }
@@ -2180,22 +2251,27 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
                 </button>
               ))}
             </div>
-            <div className="seg" role="group" aria-label="Calm spaces">
-              <button
-                type="button"
-                className={calmToggle ? 'active' : ''}
-                aria-pressed={calmToggle}
-                onClick={() => setCalmToggle((v) => !v)}
-              >
-                Calm spaces
-              </button>
-            </div>
+            <button
+              type="button"
+              className="noise-mode-tag"
+              aria-pressed={true}
+              aria-label="Switch to story mode"
+              onClick={() => setModeOverride('story')}
+            >
+              exploration mode
+            </button>
           </div>
         ) : (
           <div className="noise-controls noise-controls--story">
-            <span className="seg active-readonly">
-              {story?.calm ? 'Calm spaces' : 'Story mode'}
-            </span>
+            <button
+              type="button"
+              className="noise-mode-tag noise-mode-tag--story"
+              aria-pressed={false}
+              aria-label="Switch to exploration mode"
+              onClick={() => setModeOverride('explore')}
+            >
+              {story?.calm && modeOverride === 'auto' ? 'Calm spaces' : 'Story mode'}
+            </button>
           </div>
         )}
       </header>
