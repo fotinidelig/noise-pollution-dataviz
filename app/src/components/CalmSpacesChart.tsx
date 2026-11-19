@@ -40,6 +40,8 @@ type Props = {
   /** Controlled preview so the parent can drive SoundGrainOverlay. */
   preview?: CalmScatterPreview | null
   onPreviewChange?: (preview: CalmScatterPreview | null) => void
+  /** Silence nature clip only; keep preview + grain. */
+  muted?: boolean
 }
 
 const DAY = '#7eb8a8'
@@ -67,6 +69,7 @@ export function CalmSpacesChart({
   haltToken = 0,
   preview = null,
   onPreviewChange,
+  muted = false,
 }: Props) {
   const wrapRef = useRef<HTMLDivElement | null>(null)
   const plotRef = useRef<HTMLDivElement | null>(null)
@@ -159,15 +162,16 @@ export function CalmSpacesChart({
   }, [haltToken])
 
   // Drive nature clip from controlled preview (generation token inside player).
+  // Mute silences audio only — keep preview so SoundGrainOverlay stays on.
   useEffect(() => {
     const player = playerRef.current
     if (!player) return
-    if (!active || !preview) {
+    if (!active || !preview || muted) {
       player.stop()
       return
     }
     void player.play(natureClipForPeriod(preview.period), preview.db)
-  }, [active, preview])
+  }, [active, preview, muted])
 
   useEffect(() => {
     return () => {

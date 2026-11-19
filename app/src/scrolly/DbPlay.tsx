@@ -30,6 +30,8 @@ const DbPlayContext = createContext<DbPlayContextValue | null>(null)
 type ProviderProps = {
   active: boolean
   preview: DbPreview | null
+  /** Silence white-noise only; preview + grain stay. */
+  muted?: boolean
   onPreviewChange: (preview: DbPreview | null) => void
   children: ReactNode
 }
@@ -41,6 +43,7 @@ type ProviderProps = {
 export function DbPlayProvider({
   active,
   preview,
+  muted = false,
   onPreviewChange,
   children,
 }: ProviderProps) {
@@ -79,15 +82,16 @@ export function DbPlayProvider({
   }, [active])
 
   // Drive white noise from the active preview (generation token inside DbWhiteNoise).
+  // Mute silences audio only — keep preview so SoundGrainOverlay stays on.
   useEffect(() => {
     const noise = noiseRef.current
     if (!noise) return
-    if (!active || !preview) {
+    if (!active || !preview || muted) {
       noise.stop()
       return
     }
     void noise.play(preview.db)
-  }, [active, preview])
+  }, [active, preview, muted])
 
   useEffect(() => {
     return () => {

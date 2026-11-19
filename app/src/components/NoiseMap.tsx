@@ -346,12 +346,61 @@ export type StoryMapControl = {
   calmHaltToken?: number
   calmPreview?: CalmScatterPreview | null
   onCalmPreviewChange?: (preview: CalmScatterPreview | null) => void
+  /** Session mute — silence story/explore audio; grain viz stays. */
+  audioMuted?: boolean
+  onAudioMutedChange?: (muted: boolean) => void
 }
 
 export type { CalmScatterPreview }
 
 type NoiseMapProps = {
   story?: StoryMapControl | null
+}
+
+/** Speaker / muted-speaker affordance next to Story / exploration mode. */
+function AudioMuteToggle({
+  muted,
+  onChange,
+}: {
+  muted: boolean
+  onChange: (muted: boolean) => void
+}) {
+  return (
+    <button
+      type="button"
+      className={`noise-mute-btn${muted ? ' is-muted' : ''}`}
+      aria-pressed={muted}
+      aria-label={muted ? 'Unmute audio' : 'Mute audio'}
+      title={muted ? 'Unmute audio' : 'Mute audio'}
+      onClick={() => onChange(!muted)}
+    >
+      {muted ? (
+        <svg
+          className="noise-mute-btn__icon"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path
+            fill="currentColor"
+            d="M16.5 12a4.5 4.5 0 0 0-2.4-4l1.1-1.1A6 6 0 0 1 18.5 12c0 1.2-.35 2.3-.95 3.25l-1.15-1.15c.4-.65.6-1.35.6-2.1ZM4.27 3 3 4.27 7.73 9H4v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06a8.99 8.99 0 0 0 3.73-1.81L19.73 21 21 19.73 4.27 3ZM12 4 9.91 6.09 12 8.18V4Z"
+          />
+        </svg>
+      ) : (
+        <svg
+          className="noise-mute-btn__icon"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path
+            fill="currentColor"
+            d="M3 9v6h4l5 5V4L7 9H3Zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05c1.48-.73 2.5-2.25 2.5-4.02ZM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77Z"
+          />
+        </svg>
+      )}
+    </button>
+  )
 }
 
 export function NoiseMap({ story = null }: NoiseMapProps) {
@@ -2271,6 +2320,12 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
             >
               exploration mode
             </button>
+            {story?.onAudioMutedChange ? (
+              <AudioMuteToggle
+                muted={Boolean(story.audioMuted)}
+                onChange={story.onAudioMutedChange}
+              />
+            ) : null}
           </div>
         ) : (
           <div className="noise-controls noise-controls--story">
@@ -2283,6 +2338,12 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
             >
               Story mode
             </button>
+            {story?.onAudioMutedChange ? (
+              <AudioMuteToggle
+                muted={Boolean(story.audioMuted)}
+                onChange={story.onAudioMutedChange}
+              />
+            ) : null}
           </div>
         )}
       </header>
@@ -2311,6 +2372,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
             haltToken={story?.calmHaltToken ?? 0}
             preview={story?.calmPreview ?? null}
             onPreviewChange={story?.onCalmPreviewChange}
+            muted={Boolean(story?.audioMuted)}
           />
         ) : null}
         {streamData && explore && !calmMode ? (

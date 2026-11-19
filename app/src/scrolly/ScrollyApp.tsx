@@ -44,6 +44,8 @@ export function ScrollyApp() {
   )
   const [soundHaltToken, setSoundHaltToken] = useState(0)
   const [calmHaltToken, setCalmHaltToken] = useState(0)
+  /** Session mute: silence audio; grain / preview UI keep running. */
+  const [audioMuted, setAudioMuted] = useState(false)
   const stepRefs = useRef<Record<string, HTMLElement | null>>({})
 
   useEffect(() => {
@@ -146,6 +148,8 @@ export function ScrollyApp() {
         calmHaltToken,
         calmPreview,
         onCalmPreviewChange,
+        audioMuted,
+        onAudioMutedChange: setAudioMuted,
       }
     : null
 
@@ -242,6 +246,7 @@ export function ScrollyApp() {
       <DbPlayProvider
         active={dbPlayActive}
         preview={dbPreview}
+        muted={audioMuted}
         onPreviewChange={onDbPreviewChange}
       >
       <ClickWaveOverlay />
@@ -415,6 +420,7 @@ export function ScrollyApp() {
                           ) : null}
                           <SoundScale
                             active={soundScaleActive}
+                            muted={audioMuted}
                             haltToken={soundHaltToken}
                             onPlayingChange={onSoundPlayingChange}
                           />

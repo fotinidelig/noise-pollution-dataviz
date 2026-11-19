@@ -70,6 +70,8 @@ type Props = {
   anchors?: SoundAnchor[]
   /** When false (scrolled away / Hide / jump), stop playback and clear grain. */
   active?: boolean
+  /** Silence clip audio only; keep playing UI + grain. */
+  muted?: boolean
   /**
    * Bump to force-stop without leaving the step (e.g. body DbPlay took over).
    * Keeps buttons interactive so the user can switch back to a sample.
@@ -86,13 +88,16 @@ type Props = {
 export function SoundScale({
   anchors = STORY_SOUND_ANCHORS,
   active = true,
+  muted = false,
   haltToken = 0,
   onPlayingChange,
 }: Props) {
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const playGenRef = useRef(0)
   const activeRef = useRef(active)
+  const mutedRef = useRef(muted)
   const [playingId, setPlayingId] = useState<string | null>(null)
+  const playingAnchorRef = useRef<SoundAnchor | null>(null)
   const sorted = useMemo(
     () => [...anchors].sort((a, b) => a.db - b.db),
     [anchors],
@@ -100,6 +105,7 @@ export function SoundScale({
   const onPlayingChangeRef = useRef(onPlayingChange)
   onPlayingChangeRef.current = onPlayingChange
   activeRef.current = active
+  mutedRef.current = muted
 
   const hardStop = (opts?: { clearSrc?: boolean }) => {
     // Invalidate any in-flight play() so a late resolve cannot resume audio.
@@ -117,6 +123,7 @@ export function SoundScale({
         a.load()
       }
     }
+    playingAnchorRef.current = null
     setPlayingId(null)
     onPlayingChangeRef.current?.(null)
   }
@@ -130,6 +137,30 @@ export function SoundScale({
     if (haltToken > 0) hardStop()
     // eslint-disable-next-line react-hooks/exhaustive-deps -- parent bumps token to yield to DbPlay
   }, [haltToken])
+
+  // Mute: pause audio but keep playingId / grain. Unmute: resume the same clip.
+  useEffect(() => {
+    const audio = audioRef.current
+    const anchor = playingAnchorRef.current
+    if (!audio || !anchor || !activeRef.current) return
+    if (muted) {
+      audio.pause()
+      return
+    }
+    playGenRef.current += 1
+    const gen = playGenRef.current
+    void audio.play().then(
+      () => {
+        if (playGenRef.current !== gen || !activeRef.current || mutedRef.current) {
+          audio.pause()
+        }
+      },
+      () => {
+        /* autoplay / interrupted — leave UI state; user can click again */
+      },
+    )
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to mute flips
+  }, [muted])
 
   useEffect(() => {
     return () => {
@@ -147,11 +178,13 @@ export function SoundScale({
         a.load()
       }
       audioRef.current = null
+      playingAnchorRef.current = null
       onPlayingChangeRef.current?.(null)
     }
   }, [])
 
   const setPlaying = (anchor: SoundAnchor | null) => {
+    playingAnchorRef.current = anchor
     setPlayingId(anchor?.id ?? null)
     onPlayingChangeRef.current?.(anchor)
   }
@@ -176,8 +209,8 @@ export function SoundScale({
 
     const audio = ensureAudio()
 
-    // Toggle off the same clip.
-    if (playingId === anchor.id && !audio.paused) {
+    // Toggle off the same clip (UI-playing even when muted / paused).
+    if (playingId === anchor.id) {
       hardStop()
       return
     }
@@ -195,6 +228,9 @@ export function SoundScale({
     }
     setPlaying(anchor)
 
+    // Muted: keep grain / playing UI, skip audible start.
+    if (mutedRef.current) return
+
     try {
       await audio.play()
     } catch {
@@ -202,7 +238,7 @@ export function SoundScale({
       return
     }
 
-    // Leave / Hide / jump won the race — kill the late start.
+    // Leave / Hide / jump won the race — clear UI. Mute mid-start: keep grain.
     if (playGenRef.current !== gen || !activeRef.current) {
       audio.pause()
       try {
@@ -211,6 +247,10 @@ export function SoundScale({
         /* ignore */
       }
       if (playGenRef.current === gen) setPlaying(null)
+      return
+    }
+    if (mutedRef.current) {
+      audio.pause()
     }
   }
 

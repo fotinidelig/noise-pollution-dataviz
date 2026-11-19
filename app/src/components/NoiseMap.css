@@ -140,6 +140,49 @@
   border-color: #ff9ada;
 }
 
+/* Session mute — sits beside Story / exploration mode; does not replace it. */
+.noise-mute-btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0.4rem 0.55rem;
+  color: #9db0cc;
+  border: 1px solid rgba(120, 160, 220, 0.22);
+  background: rgba(8, 12, 24, 0.72);
+  cursor: pointer;
+  transition: color 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+
+.noise-mute-btn:hover,
+.noise-mute-btn:focus-visible {
+  color: #e8f0ff;
+  border-color: rgba(120, 160, 220, 0.45);
+  outline: none;
+}
+
+.noise-controls--story .noise-mute-btn {
+  color: #F56DC0;
+  border-color: #F56DC0;
+}
+
+.noise-controls--story .noise-mute-btn:hover,
+.noise-controls--story .noise-mute-btn:focus-visible {
+  color: #ff9ada;
+  border-color: #ff9ada;
+}
+
+.noise-mute-btn.is-muted {
+  color: #7f92b0;
+}
+
+.noise-mute-btn__icon {
+  display: block;
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
 .seg {
   display: inline-flex;
   padding: 0.2rem;
