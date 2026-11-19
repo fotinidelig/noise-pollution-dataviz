@@ -93,7 +93,7 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
     },
     {
       id: 'birds',
-      railLabel: 'Birds',
+      railLabel: 'Intro',
       title: 'Do you hear the birds singing?',
       questions: [],
       body: [
