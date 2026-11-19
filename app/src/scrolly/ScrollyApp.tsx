@@ -132,9 +132,15 @@ export function ScrollyApp() {
     el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
-  const grainOn = Boolean(playingSound) && active?.id === 'sounds' && !dismissed
-  const grainStrength = playingSound ? grainIntensity(playingSound.db) : 0
-  const grainDensity = playingSound ? loudnessRatio(playingSound.db) : 1
+  // Facts: always-on grain locked at 75 dB. Sounds: grain only while a sample plays.
+  const FACTS_GRAIN_DB = 75
+  const factsGrain = active?.id === 'hero' && !dismissed
+  const soundsGrain =
+    Boolean(playingSound) && active?.id === 'sounds' && !dismissed
+  const grainOn = factsGrain || soundsGrain
+  const grainDb = factsGrain ? FACTS_GRAIN_DB : playingSound?.db
+  const grainStrength = grainDb != null ? grainIntensity(grainDb) : 0
+  const grainDensity = grainDb != null ? loudnessRatio(grainDb) : 1
 
   useEffect(() => {
     if (active?.id !== 'sounds' || dismissed) setPlayingSound(null)
@@ -186,15 +192,6 @@ export function ScrollyApp() {
                 >
                   {step.id === 'hero' && step.stats && step.stats.length > 0 ? (
                     <div className="scrolly-step__facts-panel">
-                      <button
-                        type="button"
-                        className="scrolly-step__close"
-                        aria-label="Close story and explore the map"
-                        title="Close story · explore map"
-                        onClick={dismissStory}
-                      >
-                        ×
-                      </button>
                       <div
                         className="scrolly-step__facts"
                         role="list"

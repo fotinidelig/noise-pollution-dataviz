@@ -69,7 +69,7 @@ html {
 }
 
 .scrolly-step__stack--facts {
-  max-width: min(920px, 96vw);
+  max-width: min(1100px, 96vw);
   width: 100%;
 }
 
@@ -103,13 +103,6 @@ html {
   border: 1px solid var(--accent-magenta, #f500ab);
   backdrop-filter: blur(10px);
   box-shadow: 0 0 22px rgba(245, 0, 171, 0.18);
-}
-
-.scrolly-step__facts-panel .scrolly-step__close {
-  position: absolute;
-  top: -0.15rem;
-  right: 0;
-  z-index: 1;
 }
 
 .scrolly-step__facts-panel .scrolly-step__next {

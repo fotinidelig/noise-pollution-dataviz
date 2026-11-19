@@ -111,6 +111,7 @@ export type StoryMetrics = {
 
 export type StoryStepId =
   | 'hero'
+  | 'birds'
   | 'europe'
   | 'germany'
   | 'paris'

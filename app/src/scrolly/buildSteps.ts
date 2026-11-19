@@ -54,8 +54,8 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
   return [
     {
       id: 'hero',
-      railLabel: 'Intro',
-      // A11y / nav only — intro UI shows facts alone, no title/subtitle prose.
+      railLabel: 'Facts',
+      // A11y / nav only — Facts UI shows fact boxes alone, no title/subtitle prose.
       title: 'Key noise facts',
       questions: [],
       body: [],
@@ -72,10 +72,31 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
           value: `~${hsdMillions}M`,
           label: 'highly sleep disturbed — like a vacuum at night',
         },
+        {
+          // Lecocq et al., Science 2020 — global hiFSAN up to ~50% lower (Mar–May 2020).
+          value: 'Almost 50%',
+          label: 'COVID-era noise pollution lower',
+        },
       ],
       map: {
         center: [10, 50],
         zoom: 3.2,
+        source: 'road',
+        metric: 'Lden',
+        highlightId: null,
+      },
+    },
+    {
+      id: 'birds',
+      railLabel: 'Birds',
+      title: 'Do you hear the birds singing?',
+      questions: [],
+      body: [
+        `Or are our cities too loud? Explore ${hi('EU data')} on noise pollution to find out.`,
+      ],
+      map: {
+        center: [10, 50],
+        zoom: 3.3,
         source: 'road',
         metric: 'Lden',
         highlightId: null,
