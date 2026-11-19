@@ -316,3 +316,76 @@
   font-size: 0.9rem;
   color: #7f92b0;
 }
+
+/*
+ * Seoul site sound-wave markers (MapLibre Marker HTML).
+ * Max radius scales with mean_db via --seoul-wave-scale (set in JS).
+ * pointer-events none so the MapLibre cyan hit/center layers own hover.
+ */
+.seoul-wave-marker,
+.seoul-wave,
+.seoul-wave__ring,
+.maplibregl-marker.seoul-wave {
+  pointer-events: none !important;
+}
+
+.seoul-wave {
+  --seoul-wave-dur: 2.35s;
+  --seoul-wave-size: 2.15rem;
+  --seoul-wave-op: 0.62;
+  --seoul-wave-scale: 2.2;
+  --seoul-wave-stagger: 0.72s;
+  --seoul-wave-color: #f56dc0;
+  position: relative;
+  width: 0;
+  height: 0;
+}
+
+.seoul-wave__ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--seoul-wave-size);
+  height: var(--seoul-wave-size);
+  margin: calc(var(--seoul-wave-size) / -2) 0 0 calc(var(--seoul-wave-size) / -2);
+  border-radius: 50%;
+  border: 1.45px solid var(--seoul-wave-color);
+  opacity: 0;
+  transform: scale(0.28);
+  animation: seoul-wave-pulse var(--seoul-wave-dur) ease-out infinite;
+}
+
+.seoul-wave__ring:nth-child(2) {
+  animation-delay: var(--seoul-wave-stagger);
+}
+
+.seoul-wave__ring:nth-child(3) {
+  animation-delay: calc(var(--seoul-wave-stagger) * 2);
+}
+
+@keyframes seoul-wave-pulse {
+  0% {
+    transform: scale(0.28);
+    opacity: var(--seoul-wave-op);
+  }
+  68% {
+    opacity: calc(var(--seoul-wave-op) * 0.28);
+  }
+  100% {
+    transform: scale(var(--seoul-wave-scale));
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seoul-wave__ring {
+    animation: none;
+    /* Static outer ring at site max reach so dB scale still reads. */
+    transform: scale(var(--seoul-wave-scale));
+    opacity: 0.38;
+  }
+
+  .seoul-wave__ring:nth-child(n + 2) {
+    opacity: 0;
+  }
+}

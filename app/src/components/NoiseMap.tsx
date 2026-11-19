@@ -81,8 +81,16 @@ const SEOUL_SITES_URL = 'data/seoul_road_sites.geojson'
 const HK_IMAGE_SRC = 'hk-l10-image'
 const HK_IMAGE_LAYER = 'hk-l10-layer'
 const SEOUL_SRC = 'seoul-road-sites'
-const SEOUL_CIRCLE_LAYER = 'seoul-road-circles'
+/** Larger soft hit pad so site hover stays easy while waves stay decorative. */
+const SEOUL_HIT_LAYER = 'seoul-road-hit'
+/** Small cyan center — same language as city ring centers. */
+const SEOUL_CENTER_LAYER = 'seoul-road-centers'
 const SEOUL_LABEL_LAYER = 'seoul-road-labels'
+/** Linear dB → CSS wave scale-end (louder = farther-reaching rings). */
+const SEOUL_DB_MIN = 64
+const SEOUL_DB_MAX = 74
+const SEOUL_WAVE_SCALE_MIN = 1.55
+const SEOUL_WAVE_SCALE_MAX = 3.35
 const CALM_URL = dataUrl('data/calm_spaces.json')
 const CALM_SRC = 'calm-spaces'
 const CALM_CIRCLE_LAYER = 'calm-spaces-circles'
@@ -101,6 +109,31 @@ function formatPeople(n: number): string {
   if (n >= 10_000) return `${Math.round(n / 1000)}k`
   if (n >= 1000) return `${(n / 1000).toFixed(1)}k`
   return String(Math.round(n))
+}
+
+/** Map Seoul site mean_db → CSS `--seoul-wave-scale` (linear in dB). */
+function seoulDbToWaveScale(meanDb: number): number {
+  const t = Math.min(
+    1,
+    Math.max(0, (meanDb - SEOUL_DB_MIN) / (SEOUL_DB_MAX - SEOUL_DB_MIN)),
+  )
+  return SEOUL_WAVE_SCALE_MIN + t * (SEOUL_WAVE_SCALE_MAX - SEOUL_WAVE_SCALE_MIN)
+}
+
+function makeSeoulWaveElement(meanDb: number): HTMLDivElement {
+  const el = document.createElement('div')
+  el.className = 'seoul-wave'
+  el.setAttribute('aria-hidden', 'true')
+  // Inline so MapLibre marker defaults cannot steal map hover.
+  el.style.pointerEvents = 'none'
+  el.style.setProperty('--seoul-wave-scale', String(seoulDbToWaveScale(meanDb)))
+  for (let i = 0; i < 3; i++) {
+    const ring = document.createElement('span')
+    ring.className = 'seoul-wave__ring'
+    ring.style.pointerEvents = 'none'
+    el.appendChild(ring)
+  }
+  return el
 }
 
 function meanDb(metric: NoiseMetric, bands: { band: string; people: number }[]) {
@@ -351,6 +384,9 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
   /** Skip redundant setPaintProperty when focus id is unchanged. */
   const lastPaintedFocusRef = useRef<string | null | undefined>(undefined)
   const hoverMoveRafRef = useRef(0)
+  /** CSS sound-wave markers for Seoul sites (pointer-events none). */
+  const seoulMarkersRef = useRef<maplibregl.Marker[]>([])
+  const seoulSitesDataRef = useRef<FeatureCollection<Point> | null>(null)
 
   sourceRef.current = source
   metricRef.current = metric
@@ -1054,25 +1090,61 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
       }
     }
 
+    const clearSeoulMarkers = () => {
+      for (const m of seoulMarkersRef.current) m.remove()
+      seoulMarkersRef.current = []
+    }
+
+    const syncSeoulMarkers = (data: FeatureCollection<Point>) => {
+      clearSeoulMarkers()
+      if (cancelled || !showSeoul) return
+      for (const f of data.features) {
+        if (f.geometry?.type !== 'Point') continue
+        const mean = Number(f.properties?.mean_db)
+        const el = makeSeoulWaveElement(Number.isFinite(mean) ? mean : SEOUL_DB_MIN)
+        const marker = new maplibregl.Marker({
+          element: el,
+          // Decorative only — MapLibre hit layer owns hover.
+          className: 'seoul-wave-marker',
+        })
+          .setLngLat(f.geometry.coordinates as [number, number])
+          .addTo(map)
+        seoulMarkersRef.current.push(marker)
+      }
+    }
+
     const ensureSeoul = async () => {
       if (!showSeoul) {
-        setVis(SEOUL_CIRCLE_LAYER, false)
+        clearSeoulMarkers()
+        setVis(SEOUL_HIT_LAYER, false)
+        setVis(SEOUL_CENTER_LAYER, false)
         setVis(SEOUL_LABEL_LAYER, false)
         return
       }
       try {
+        let data = seoulSitesDataRef.current
         if (!map.getSource(SEOUL_SRC)) {
-          const data = await fetch(asset(SEOUL_SITES_URL)).then((r) => {
+          data = (await fetch(asset(SEOUL_SITES_URL)).then((r) => {
             if (!r.ok) throw new Error(`Seoul sites ${r.status}`)
             return r.json()
-          })
+          })) as FeatureCollection<Point>
           if (cancelled) return
+          seoulSitesDataRef.current = data
           map.addSource(SEOUL_SRC, { type: 'geojson', data })
+        } else if (!data) {
+          data = (await fetch(asset(SEOUL_SITES_URL)).then((r) => {
+            if (!r.ok) throw new Error(`Seoul sites ${r.status}`)
+            return r.json()
+          })) as FeatureCollection<Point>
+          if (cancelled) return
+          seoulSitesDataRef.current = data
         }
-        if (cancelled) return
-        if (!map.getLayer(SEOUL_CIRCLE_LAYER)) {
+        if (cancelled || !data) return
+
+        // Soft cyan hit halo (query target) under the compact center dot.
+        if (!map.getLayer(SEOUL_HIT_LAYER)) {
           map.addLayer({
-            id: SEOUL_CIRCLE_LAYER,
+            id: SEOUL_HIT_LAYER,
             type: 'circle',
             source: SEOUL_SRC,
             layout: { visibility: 'visible' },
@@ -1080,24 +1152,50 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
               'circle-radius': [
                 'interpolate',
                 ['linear'],
-                ['get', 'mean_db'],
-                64,
+                ['zoom'],
+                7,
                 12,
-                70,
-                22,
-                74,
-                32,
+                10,
+                14,
+                12,
+                16,
               ],
-              'circle-color': '#F56DC0',
-              'circle-opacity': 0.72,
-              'circle-stroke-color': '#00B8CC',
-              'circle-stroke-width': 1.6,
+              'circle-color': '#00b8cc',
+              'circle-opacity': 0.16,
+              'circle-stroke-width': 0,
             },
           })
         } else {
-          setVis(SEOUL_CIRCLE_LAYER, true)
-          map.setPaintProperty(SEOUL_CIRCLE_LAYER, 'circle-opacity', 0.72)
+          setVis(SEOUL_HIT_LAYER, true)
         }
+
+        if (!map.getLayer(SEOUL_CENTER_LAYER)) {
+          map.addLayer({
+            id: SEOUL_CENTER_LAYER,
+            type: 'circle',
+            source: SEOUL_SRC,
+            layout: { visibility: 'visible' },
+            paint: {
+              'circle-radius': [
+                'interpolate',
+                ['linear'],
+                ['zoom'],
+                7,
+                4.5,
+                10,
+                5.5,
+                12,
+                6.5,
+              ],
+              'circle-color': '#00b8cc',
+              'circle-opacity': 0.95,
+              'circle-stroke-width': 0,
+            },
+          })
+        } else {
+          setVis(SEOUL_CENTER_LAYER, true)
+        }
+
         if (!map.getLayer(SEOUL_LABEL_LAYER)) {
           map.addLayer({
             id: SEOUL_LABEL_LAYER,
@@ -1108,7 +1206,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
               'text-field': ['get', 'name_en'],
               'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
               'text-size': 12,
-              'text-offset': [0, 1.3],
+              'text-offset': [0, 1.35],
               'text-anchor': 'top',
               'text-optional': true,
             },
@@ -1121,6 +1219,8 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
         } else {
           setVis(SEOUL_LABEL_LAYER, true)
         }
+
+        syncSeoulMarkers(data)
       } catch (err) {
         console.warn('[NoiseMap] Seoul overlay failed', err)
       }
@@ -1139,6 +1239,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     return () => {
       cancelled = true
       map.off('style.load', run)
+      clearSeoulMarkers()
     }
   }, [mapReady, story?.overlays?.hongkong, story?.overlays?.seoul])
 
@@ -1798,6 +1899,8 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
       if (rebuildRetryTimer.current != null) {
         window.clearTimeout(rebuildRetryTimer.current)
       }
+      for (const m of seoulMarkersRef.current) m.remove()
+      seoulMarkersRef.current = []
       popup.remove()
       map.remove()
       mapRef.current = null
@@ -1931,19 +2034,24 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
       // City overlays take tooltip priority when unlocked
       if (
         overlaysRef.current.seoul &&
-        map.getLayer(SEOUL_CIRCLE_LAYER) &&
-        map.getLayoutProperty(SEOUL_CIRCLE_LAYER, 'visibility') !== 'none'
+        map.getLayer(SEOUL_HIT_LAYER) &&
+        map.getLayoutProperty(SEOUL_HIT_LAYER, 'visibility') !== 'none'
       ) {
         const seoulHits = map.queryRenderedFeatures(e.point, {
-          layers: [SEOUL_CIRCLE_LAYER],
+          layers: [SEOUL_HIT_LAYER, SEOUL_CENTER_LAYER],
         })
         if (seoulHits.length) {
           cancelPendingClear()
           const p = seoulHits[0].properties ?? {}
           map.getCanvas().style.cursor = 'pointer'
           lastTipIdRef.current = `seoul:${String(p.name_en ?? '')}`
+          const coords = (seoulHits[0].geometry as Point | undefined)?.coordinates
+          const tipLngLat =
+            coords && coords.length >= 2
+              ? (coords as [number, number])
+              : e.lngLat
           popup
-            .setLngLat(e.lngLat)
+            .setLngLat(tipLngLat)
             .setHTML(
               `<div class="tip tip--seoul"><span class="tip-seoul-line"><span class="tip-seoul-name">${String(p.name_en ?? '')}</span><span class="tip-seoul-sep" aria-hidden="true">·</span><span class="tip-seoul-db">${Number(p.mean_db).toFixed(1)} dB noise</span></span></div>`,
             )
