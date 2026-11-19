@@ -123,7 +123,7 @@ export type StoryStepId =
   | 'explore'
 
 export type StoryStat = {
-  /** Big figure shown in the intro row (e.g. "1 in 5", "~3.3M"). */
+  /** Big figure shown in the intro row (e.g. "1 in 5", "about 3.3M"). */
   value: string
   /** Short label under the figure. */
   label: string
@@ -162,20 +162,20 @@ export function soundRange(s: { sound_name: string; db_min: number; db_max: numb
   return `${s.db_min}–${s.db_max} dB · ${s.sound_name}`
 }
 
-/** Map a measured level onto vacuum (~70) ↔ blender (~80–90). */
+/** Map a measured level onto vacuum (about 70) ↔ blender (about 80–90). */
 export function vacuumBlenderCompare(db: number): string {
   const rounded = Math.round(db)
   if (db < 68) {
-    return `quieter than a vacuum cleaner (~70 dB) — around ${rounded} dB`
+    return `quieter than a vacuum cleaner (about 70 dB) — around ${rounded} dB`
   }
   if (db <= 72) {
-    return `about as loud as a vacuum cleaner (~70 dB)`
+    return `about as loud as a vacuum cleaner (about 70 dB)`
   }
   if (db < 78) {
-    return `between a vacuum cleaner (~70 dB) and a blender (~80–90 dB) — around ${rounded} dB`
+    return `between a vacuum cleaner (about 70 dB) and a blender (about 80–90 dB) — around ${rounded} dB`
   }
   if (db <= 92) {
-    return `toward a blender (~80–90 dB) — around ${rounded} dB`
+    return `toward a blender (about 80–90 dB) — around ${rounded} dB`
   }
-  return `louder than a blender (~80–90 dB) — around ${rounded} dB`
+  return `louder than a blender (about 80–90 dB) — around ${rounded} dB`
 }

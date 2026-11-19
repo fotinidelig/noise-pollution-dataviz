@@ -103,6 +103,7 @@ html {
   border: 1px solid var(--accent-magenta, #f500ab);
   backdrop-filter: blur(10px);
   box-shadow: 0 0 22px rgba(245, 0, 171, 0.18);
+  text-align: center;
 }
 
 .scrolly-step__facts-panel .scrolly-step__next {

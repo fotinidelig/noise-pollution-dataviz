@@ -15,27 +15,27 @@ export type SoundAnchor = {
 
 const BASE = import.meta.env.BASE_URL || '/'
 
-/** Quietest → loudest; scale ends near ~90 dB (motorcycle). */
+/** Quietest → loudest; scale ends near about 90 dB (motorcycle). */
 export const STORY_SOUND_ANCHORS: SoundAnchor[] = [
   {
     id: 'water',
     label: 'Water stream',
     db: 45,
-    dbNote: '~40–50',
+    dbNote: 'about 40–50',
     src: `${BASE}audio/water-stream.mp3`,
   },
   {
     id: 'birds',
     label: 'Birds',
     db: 52,
-    dbNote: '~44–60',
+    dbNote: 'about 44–60',
     src: `${BASE}audio/birds-singing.mp3`,
   },
   {
     id: 'vacuum',
     label: 'Vacuum',
     db: 70,
-    dbNote: '~70',
+    dbNote: 'about 70',
     src: `${BASE}audio/vacuum-cleaner.mp3`,
     highlight: true,
   },
@@ -43,14 +43,14 @@ export const STORY_SOUND_ANCHORS: SoundAnchor[] = [
     id: 'blender',
     label: 'Blender',
     db: 85,
-    dbNote: '~80–90',
+    dbNote: 'about 80–90',
     src: `${BASE}audio/blender.mp3`,
   },
   {
     id: 'motorcycle',
     label: 'Motorcycle',
     db: 90,
-    dbNote: '~90',
+    dbNote: 'about 90',
     src: `${BASE}audio/motorcycle-passing.mp3`,
   },
 ]
@@ -170,7 +170,7 @@ export function SoundScale({
             </span>
             <span className="sound-scale__label">{a.label}</span>
             <span className="sound-scale__db">
-              {a.dbNote ?? `~${a.db}`} dB
+              {a.dbNote ?? `about ${a.db}`} dB
             </span>
             <span className="sound-scale__play">
               {playingId === a.id ? 'playing' : 'play'}
