@@ -2281,7 +2281,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
               aria-label="Switch to exploration mode"
               onClick={() => setModeOverride('explore')}
             >
-              {story?.calm && modeOverride === 'auto' ? 'Calm spaces' : 'Story mode'}
+              Story mode
             </button>
           </div>
         )}
