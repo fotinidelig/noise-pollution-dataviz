@@ -132,8 +132,11 @@ function buildTooltipHtml(
     )
   }
   subParts.push(citiesLabel)
+  // Bands arrive ascending (quiet→loud); tip lists loud→quiet.
   const rows = bands
     .filter((b) => b.people > 0)
+    .slice()
+    .reverse()
     .map(
       (b) =>
         `<div class="tip-row"><span class="tip-swatch" style="background:${b.color}"></span><span>${b.label}</span><span class="tip-num">${formatPeople(b.people)}</span></div>`,
