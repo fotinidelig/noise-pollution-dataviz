@@ -109,6 +109,17 @@ html {
   margin-top: 0.95rem;
 }
 
+/* Facts intro: magenta scroll chevron to match fact-box accent */
+.scrolly-step__facts-panel .scrolly-step__next-chevron {
+  border-right-color: var(--accent-magenta, #f500ab);
+  border-bottom-color: var(--accent-magenta, #f500ab);
+}
+
+.scrolly-step__facts-panel .scrolly-step__next:focus-visible .scrolly-step__next-chevron {
+  border-color: var(--accent-magenta-soft, #f56dc0);
+  box-shadow: 0 0 10px rgba(245, 0, 171, 0.45);
+}
+
 /* Sound ladder: wide enough for quiet→loud markers + play hits. */
 .scrolly-step--sounds .scrolly-step__stack {
   max-width: min(760px, 94vw);
