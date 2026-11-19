@@ -163,7 +163,7 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       id: 'paris',
       railLabel: 'Paris',
       year: paris.year,
-      title: `Paris night: ${paris.max_db.toFixed(0)} dB at ${paris.loudest_site}`,
+      title: `A Paris night on the highway reaches ${paris.max_db.toFixed(0)} dB on average`,
       questions: [],
       body: [
         `In ${paris.year}, night noise at the loudest Paris road site in this set — ${hi(paris.loudest_site)} — reaches about ${hiDb(paris.max_db, 1)}, between a ${hiLoud('vacuum cleaner (about 70 dB)')} and a ${hiLoud('blender (about 80–90 dB)')}.`,
