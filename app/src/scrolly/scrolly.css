@@ -77,9 +77,10 @@ html {
   padding-bottom: 1rem;
 }
 
-/* Calm beat: wider card; vertically centered like other steps for now. */
+/* Calm beat: wider card; ~50px above vertical center. */
 .scrolly-step--calm .scrolly-step__stack {
   max-width: min(680px, 94vw);
+  margin-top: -50px;
 }
 
 .scrolly-step--calm .scrolly-step__card {
