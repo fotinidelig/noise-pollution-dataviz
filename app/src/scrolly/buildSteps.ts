@@ -90,7 +90,8 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       ],
       map: {
         center: [10, 50],
-        zoom: 3.4,
+        // Closer Europe frame; center unchanged from intro/sounds.
+        zoom: 4.1,
         source: 'road',
         metric: 'Lden',
         highlightId: null,

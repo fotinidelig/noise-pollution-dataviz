@@ -132,11 +132,6 @@ export function ScrollyApp() {
     el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
-  const showScrollCue =
-    !dismissed &&
-    active?.id !== 'explore' &&
-    active?.id !== undefined
-
   const grainOn = Boolean(playingSound) && active?.id === 'sounds' && !dismissed
   const grainStrength = playingSound ? grainIntensity(playingSound.db) : 0
   const grainDensity = playingSound ? loudnessRatio(playingSound.db) : 1
@@ -154,7 +149,7 @@ export function ScrollyApp() {
   }
 
   return (
-    <main className={`scrolly-root${dismissed ? ' is-dismissed' : ''}${showScrollCue ? '' : ' is-explore'}`}>
+    <main className={`scrolly-root${dismissed ? ' is-dismissed' : ''}`}>
       <ProgressRail steps={steps} activeId={active.id} onJump={jump} />
 
       <div className="scrolly-map-sticky">
@@ -269,13 +264,6 @@ export function ScrollyApp() {
           )
         })}
       </div>
-
-      {showScrollCue ? (
-        <div className="scrolly-scroll-cue" aria-hidden="true">
-          <span className="scrolly-scroll-cue__label">Scroll</span>
-          <span className="scrolly-scroll-cue__chevron" />
-        </div>
-      ) : null}
     </main>
   )
 }

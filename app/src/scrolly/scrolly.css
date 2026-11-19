@@ -1,3 +1,8 @@
+/* Document is the scrollport; snap each story beat to the top. */
+html {
+  scroll-snap-type: y proximity;
+}
+
 .scrolly-root {
   position: relative;
   min-height: 100svh;
@@ -44,6 +49,8 @@
   /* Balanced inset so the card sits on the viewport centre; rail overlays left. */
   padding: 2rem 1.5rem;
   pointer-events: none;
+  scroll-snap-align: start;
+  scroll-snap-stop: normal;
 }
 
 .scrolly-step__stack {
@@ -137,14 +144,26 @@
   height: 0.55rem;
   border-right: 1.5px solid #4DD4E6;
   border-bottom: 1.5px solid #4DD4E6;
-  transform: rotate(45deg);
+  /* translate before rotate so the bob stays vertical on screen */
+  transform: translateY(0) rotate(45deg);
   opacity: 0.75;
   transition: opacity 0.15s ease, border-color 0.15s ease;
+  animation: scrolly-next-bob 1.6s ease-in-out infinite;
 }
 
 .scrolly-step__next:hover .scrolly-step__next-chevron,
 .scrolly-step__next:focus-visible .scrolly-step__next-chevron {
   opacity: 1;
+}
+
+@keyframes scrolly-next-bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(45deg);
+  }
+  50% {
+    transform: translateY(3px) rotate(45deg);
+  }
 }
 
 .scrolly-hk-colorbar {
@@ -176,49 +195,6 @@
   font-size: 0.85rem;
   letter-spacing: 0.04em;
   color: #9db0cc;
-}
-
-.scrolly-scroll-cue {
-  position: fixed;
-  z-index: 6;
-  left: 50%;
-  bottom: 1.1rem;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.2rem;
-  pointer-events: none;
-  color: #9db0cc;
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-  font-size: 0.85rem;
-  animation: scrolly-cue-pulse 1.8s ease-in-out infinite;
-}
-
-.scrolly-scroll-cue__chevron {
-  width: 0.7rem;
-  height: 0.7rem;
-  border-right: 2px solid #4DD4E6;
-  border-bottom: 2px solid #4DD4E6;
-  transform: rotate(45deg);
-  margin-top: 0.1rem;
-}
-
-@keyframes scrolly-cue-pulse {
-  0%,
-  100% {
-    opacity: 0.45;
-    transform: translateX(-50%) translateY(0);
-  }
-  50% {
-    opacity: 1;
-    transform: translateX(-50%) translateY(4px);
-  }
-}
-
-.scrolly-root.is-explore .scrolly-scroll-cue {
-  display: none;
 }
 
 .scrolly-step__close {
