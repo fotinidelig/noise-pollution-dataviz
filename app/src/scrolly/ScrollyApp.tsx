@@ -14,6 +14,16 @@ import './scrolly.css'
 
 const STORY_URL = `${import.meta.env.BASE_URL || '/'}data/scrolly_story_v1.json`
 
+function bodyHtml(p: string) {
+  return p
+    .replace(
+      /\*\*\*(.+?)\*\*\*/g,
+      '<span class="scrolly-hi scrolly-hi--loud">$1</span>',
+    )
+    .replace(/\*\*(.+?)\*\*/g, '<span class="scrolly-hi">$1</span>')
+    .replace(/\n/g, '<br/>')
+}
+
 /**
  * × on each story card dismisses the narrative overlay and jumps to Explore
  * (free pan/zoom). Progress-rail clicks reopen that beat and show the card again.
@@ -249,27 +259,37 @@ export function ScrollyApp() {
                       {step.subtitle ? (
                         <p className="scrolly-step__subtitle">{step.subtitle}</p>
                       ) : null}
-                      {step.body.map((p) => (
-                        <p
-                          key={p.slice(0, 48)}
-                          className="scrolly-step__body"
-                          dangerouslySetInnerHTML={{
-                            __html: p
-                              .replace(
-                                /\*\*\*(.+?)\*\*\*/g,
-                                '<span class="scrolly-hi scrolly-hi--loud">$1</span>',
-                              )
-                              .replace(/\*\*(.+?)\*\*/g, '<span class="scrolly-hi">$1</span>')
-                              .replace(/\n/g, '<br/>'),
-                          }}
-                        />
-                      ))}
                       {step.id === 'sounds' ? (
-                        <SoundScale
-                          active={isActiveCard}
-                          onPlayingChange={setPlayingSound}
-                        />
-                      ) : null}
+                        <>
+                          {step.body[0] ? (
+                            <p
+                              className="scrolly-step__body"
+                              dangerouslySetInnerHTML={{
+                                __html: bodyHtml(step.body[0]),
+                              }}
+                            />
+                          ) : null}
+                          <SoundScale
+                            active={isActiveCard}
+                            onPlayingChange={setPlayingSound}
+                          />
+                          {step.body.slice(1).map((p) => (
+                            <p
+                              key={p.slice(0, 48)}
+                              className="scrolly-step__body"
+                              dangerouslySetInnerHTML={{ __html: bodyHtml(p) }}
+                            />
+                          ))}
+                        </>
+                      ) : (
+                        step.body.map((p) => (
+                          <p
+                            key={p.slice(0, 48)}
+                            className="scrolly-step__body"
+                            dangerouslySetInnerHTML={{ __html: bodyHtml(p) }}
+                          />
+                        ))
+                      )}
                       {nextStep ? (
                         <button
                           type="button"

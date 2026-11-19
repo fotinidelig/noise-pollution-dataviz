@@ -106,10 +106,12 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
     {
       id: 'sounds',
       railLabel: 'Sounds',
-      title: 'But what does noise look like?',
+      title: 'But what does noise feel like?',
       questions: [],
+      // First line above SoundScale; remainder below (see ScrollyApp).
       body: [
-        `People experiencing ${hi('sleep disturbances')} are exposed to more than ${hiLoud('70 dB')}.`,
+        `Let's look at a few sound examples.`,
+        `According to WHO, people experiencing ${hi('sleep disturbances')} are chronically exposed to more than ${hiLoud('70 dB')} at night.`,
       ],
       map: {
         center: [10, 50],
