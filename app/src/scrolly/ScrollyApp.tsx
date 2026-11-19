@@ -2,9 +2,11 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion } from 'motion/react'
 import { NoiseMap, type StoryMapControl } from '../components/NoiseMap'
 import { buildSteps } from './buildSteps'
+import { DbPlayProvider, type DbPreview } from './DbPlay'
 import { bobTween, cardFade, factFade } from './motionPresets'
 import { ClickWaveOverlay } from './ClickWaveOverlay'
 import { ProgressRail } from './ProgressRail'
+import { renderStoryBody } from './renderStoryBody'
 import { SoundGrainOverlay } from './SoundGrainOverlay'
 import {
   SoundScale,
@@ -16,16 +18,6 @@ import type { StoryMetrics, StoryStepId } from './storyTypes'
 import './scrolly.css'
 
 const STORY_URL = `${import.meta.env.BASE_URL || '/'}data/scrolly_story_v1.json`
-
-function bodyHtml(p: string) {
-  return p
-    .replace(
-      /\*\*\*(.+?)\*\*\*/g,
-      '<span class="scrolly-hi scrolly-hi--loud">$1</span>',
-    )
-    .replace(/\*\*(.+?)\*\*/g, '<span class="scrolly-hi">$1</span>')
-    .replace(/\n/g, '<br/>')
-}
 
 /**
  * Hide on each story card only fades the narrative box away. Map camera, zoom,
@@ -42,6 +34,8 @@ export function ScrollyApp() {
   const [cardHidden, setCardHidden] = useState(false)
   const [unlocked, setUnlocked] = useState({ hongkong: false, seoul: false })
   const [playingSound, setPlayingSound] = useState<SoundAnchor | null>(null)
+  const [dbPreview, setDbPreview] = useState<DbPreview | null>(null)
+  const [soundHaltToken, setSoundHaltToken] = useState(0)
   const stepRefs = useRef<Record<string, HTMLElement | null>>({})
 
   useEffect(() => {
@@ -155,21 +149,47 @@ export function ScrollyApp() {
     setCardHidden(true)
   }
 
-  // Facts: always-on grain locked at 75 dB. Sounds: grain only while a sample plays.
+  // Facts: always-on grain at 75 dB (no DbPlay). Sounds samples / body DbPlay otherwise.
   const FACTS_GRAIN_DB = 75
   const factsGrain = active?.id === 'hero' && !cardHidden
+  const dbPlayGrain = Boolean(dbPreview) && !cardHidden && active?.id !== 'hero'
   const soundsGrain =
-    Boolean(playingSound) && active?.id === 'sounds' && !cardHidden
-  const grainOn = factsGrain || soundsGrain
-  const grainDb = factsGrain ? FACTS_GRAIN_DB : playingSound?.db
+    Boolean(playingSound) && active?.id === 'sounds' && !cardHidden && !dbPreview
+  const grainOn = factsGrain || dbPlayGrain || soundsGrain
+  const grainDb = factsGrain
+    ? FACTS_GRAIN_DB
+    : dbPreview?.db ?? playingSound?.db
   const grainStrength = grainDb != null ? grainIntensity(grainDb) : 0
   const grainDensity = grainDb != null ? loudnessRatio(grainDb) : 1
 
-  // Clear grain + guarantee Sounds clips stop on step change / Hide / Explore jump.
-  // SoundScale also hard-stops via `active`; this covers parent grain state immediately.
+  // Clear Sounds clips + body dB preview on step change / Hide / Explore jump.
+  // SoundScale / DbPlayProvider also hard-stop via `active`.
   useEffect(() => {
     if (active?.id !== 'sounds' || cardHidden) setPlayingSound(null)
   }, [active?.id, cardHidden])
+
+  // Any beat change or Hide tears down body dB preview (Facts never hosts one).
+  useEffect(() => {
+    setDbPreview(null)
+  }, [active?.id, cardHidden])
+
+  const onDbPreviewChange = (next: DbPreview | null) => {
+    setDbPreview(next)
+    // Mutual exclusion with SoundScale samples (keep ladder clickable).
+    if (next) {
+      setPlayingSound(null)
+      setSoundHaltToken((n) => n + 1)
+    }
+  }
+
+  const onSoundPlayingChange = (anchor: SoundAnchor | null) => {
+    setPlayingSound(anchor)
+    if (anchor) setDbPreview(null)
+  }
+
+  // Facts has no DbPlay; elsewhere stop on Hide / leave via active=false.
+  const dbPlayActive = !cardHidden && active?.id !== 'hero'
+  const soundScaleActive = activeId === 'sounds' && !cardHidden
 
   if (!metrics || !steps.length) {
     return (
@@ -181,6 +201,11 @@ export function ScrollyApp() {
 
   return (
     <main className={`scrolly-root${cardHidden ? ' is-card-hidden' : ''}`}>
+      <DbPlayProvider
+        active={dbPlayActive}
+        preview={dbPreview}
+        onPreviewChange={onDbPreviewChange}
+      >
       <ClickWaveOverlay />
       <ProgressRail
         steps={steps}
@@ -346,32 +371,26 @@ export function ScrollyApp() {
                       {step.id === 'sounds' ? (
                         <>
                           {step.body[0] ? (
-                            <p
-                              className="scrolly-step__body"
-                              dangerouslySetInnerHTML={{
-                                __html: bodyHtml(step.body[0]),
-                              }}
-                            />
+                            <p className="scrolly-step__body">
+                              {renderStoryBody(step.body[0])}
+                            </p>
                           ) : null}
                           <SoundScale
-                            active={activeId === 'sounds' && !cardHidden}
-                            onPlayingChange={setPlayingSound}
+                            active={soundScaleActive}
+                            haltToken={soundHaltToken}
+                            onPlayingChange={onSoundPlayingChange}
                           />
                           {step.body.slice(1).map((p) => (
-                            <p
-                              key={p.slice(0, 48)}
-                              className="scrolly-step__body"
-                              dangerouslySetInnerHTML={{ __html: bodyHtml(p) }}
-                            />
+                            <p key={p.slice(0, 48)} className="scrolly-step__body">
+                              {renderStoryBody(p)}
+                            </p>
                           ))}
                         </>
                       ) : (
                         step.body.map((p) => (
-                          <p
-                            key={p.slice(0, 48)}
-                            className="scrolly-step__body"
-                            dangerouslySetInnerHTML={{ __html: bodyHtml(p) }}
-                          />
+                          <p key={p.slice(0, 48)} className="scrolly-step__body">
+                            {renderStoryBody(p)}
+                          </p>
                         ))
                       )}
                       {nextStep ? (
@@ -413,6 +432,7 @@ export function ScrollyApp() {
           )
         })}
       </div>
+      </DbPlayProvider>
     </main>
   )
 }

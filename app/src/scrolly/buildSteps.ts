@@ -11,10 +11,20 @@ function hiLoud(s: string) {
   return `***${s}***`
 }
 
-/** dB figure: magenta from vacuum territory (~70+) upward. */
+/**
+ * Interactive standalone dB figure → `<DbPlay>` via `renderStoryBody`.
+ * Only single levels (e.g. `75 dB` / `about 70 dB`) — never ranges or ±deltas.
+ * Marker: `⟦db:<level>:<loud 0|1>:<label>⟧`
+ */
+function dbPlay(db: number, label?: string, loud?: boolean) {
+  const text = label ?? `${db} dB`
+  const isLoud = loud ?? db >= 70
+  return `⟦db:${db}:${isLoud ? '1' : '0'}:${text}⟧`
+}
+
+/** Measured / cited dB figure (interactive). Magenta from ~70+ upward. */
 function hiDb(db: number, digits = 0) {
-  const label = `${db.toFixed(digits)} dB`
-  return db >= 70 ? hiLoud(label) : hi(label)
+  return dbPlay(Number(db.toFixed(digits)), `${db.toFixed(digits)} dB`)
 }
 
 /** Clear the centered ~420px story card (city sits just right of card edge). */
@@ -112,8 +122,8 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       // First line above SoundScale; remainder below (see ScrollyApp).
       body: [
         `Let's look at a few sound examples.`,
-        `As a rule of thumb, each ${hi('+10 dB')} sounds about ${hi('twice')} as loud. Exposure at ${hiLoud('≥75 dB')} is about ${hi('4×')} as loud as ${hi('55dB')}. That is the world those highly annoyed people live in.`,
-        `According to WHO, people experiencing ${hi('sleep disturbances')} are chronically exposed to more than ${hiLoud('70 dB')} at night.`,
+        `As a rule of thumb, each ${hi('+10 dB')} sounds about ${hi('twice')} as loud. Exposure at ${dbPlay(75, '≥75 dB')} is about ${hi('4×')} as loud as ${dbPlay(55, '55 dB')}. That is the world those highly annoyed people live in.`,
+        `According to WHO, people experiencing ${hi('sleep disturbances')} are chronically exposed to more than ${dbPlay(70)} at night.`,
       ],
       map: {
         center: [10, 50],
@@ -130,7 +140,7 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       title: 'Noise pollution disturbs millions',
       questions: [],
       body: [
-        `About ${hi(whoAbove)} people in European cities live in official noise levels that already sit above ${hi('WHO road-traffic guidance')} (about ${hi('53 dB')}). Roughly ${hi(ha)} people are ${hi('highly annoyed')} by road, rail, or aircraft noise.`,
+        `About ${hi(whoAbove)} people in European cities live in official noise levels that already sit above ${hi('WHO road-traffic guidance')} (about ${dbPlay(53)}). Roughly ${hi(ha)} people are ${hi('highly annoyed')} by road, rail, or aircraft noise.`,
       ],
       map: {
         center: [10, 50],
@@ -148,8 +158,8 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       title: `In Germany ${dePeople} people must listen to a vacuum cleaner all day — ${de.berlin_share_of_germany_pct}% are in Berlin`,
       questions: [],
       body: [
-        `In German cities, about ${hi(dePeople)} people live with long-term day–evening–night averages above ${hiLoud('75 dB')}. Of them, about ${hi(berlinPeople)} — ${hi(`${de.berlin_share_of_germany_pct}%`)} — are in Berlin.`,
-        `${hiLoud('75 dB')} sits between a ${hiLoud('vacuum cleaner (about 70 dB)')} and a ${hiLoud('blender (about 80–90 dB)')}.`,
+        `In German cities, about ${hi(dePeople)} people live with long-term day–evening–night averages above ${dbPlay(75)}. Of them, about ${hi(berlinPeople)} — ${hi(`${de.berlin_share_of_germany_pct}%`)} — are in Berlin.`,
+        `${dbPlay(75)} sits between a ${hiLoud('vacuum cleaner')} (${dbPlay(70, 'about 70 dB')}) and a ${hiLoud('blender')} (${hiLoud('about 80–90 dB')}).`,
       ],
       map: {
         center: cardClearCenter(de.lon, de.lat, 7.1, CARD_CLEAR_PX + EXTRA_EIGHTH_PX),
@@ -166,7 +176,7 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       title: `A Paris night on the highway reaches ${paris.max_db.toFixed(0)} dB on average`,
       questions: [],
       body: [
-        `In ${paris.year}, night noise at the loudest Paris road site in this set — ${hi(paris.loudest_site)} — reaches about ${hiDb(paris.max_db, 1)}, between a ${hiLoud('vacuum cleaner (about 70 dB)')} and a ${hiLoud('blender (about 80–90 dB)')}.`,
+        `In ${paris.year}, night noise at the loudest Paris road site in this set — ${hi(paris.loudest_site)} — reaches about ${hiDb(paris.max_db, 1)}, between a ${hiLoud('vacuum cleaner')} (${dbPlay(70, 'about 70 dB')}) and a ${hiLoud('blender')} (${hiLoud('about 80–90 dB')}).`,
         `According to the data for road maps in Paris, about ${hi(formatPeople(paris.road_ha ?? 0))} people are ${hi('highly annoyed')} and about ${hi(formatPeople(paris.road_hsd ?? 0))} are ${hi('highly sleep disturbed')} due to traffic noise.`,
       ],
       map: {
@@ -201,8 +211,8 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       title: 'In Hong Kong more than 1 million people are exposed to road traffic higher than 70dBs',
       questions: [],
       body: [
-        `At least ${hi('1 million')} Hong Kong residents have to live with road traffic noise above ${hiLoud('70 dB')}.`,
-        `On the ${hk.year} Hong Kong ${hi('citywide traffic-noise map')} (modelled area levels, not one microphone), about ${hi(`${hk.pct_valid_gt70.toFixed(0)}%`)} of the mapped territory sits above ${hiLoud('70 dB')} — roughly ${hi(`${hk.area_km2_gt70.toFixed(0)} km²`)}.`,
+        `At least ${hi('1 million')} Hong Kong residents have to live with road traffic noise above ${dbPlay(70)}.`,
+        `On the ${hk.year} Hong Kong ${hi('citywide traffic-noise map')} (modelled area levels, not one microphone), about ${hi(`${hk.pct_valid_gt70.toFixed(0)}%`)} of the mapped territory sits above ${dbPlay(70)} — roughly ${hi(`${hk.area_km2_gt70.toFixed(0)} km²`)}.`,
       ],
       map: {
         center: cardClearCenter(hk.lon, hk.lat, 8.7, CARD_CLEAR_PX + EXTRA_EIGHTH_PX),
@@ -235,9 +245,9 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       title: 'Places where you might hear birds',
       questions: [],
       body: [
-        `A Grand Canyon fall night near ${hi('15 dB')} is quieter than a ${hi('whisper (about 25–30 dB)')}; a Berlin park hour near ${hi('49 dB')} is calm for a city, not silent.`,
-        `From Berlin’s park hour to mapped traffic at ${hiLoud('about 75 dB')} is about ${hi('+26 dB')} — roughly ${hi('6× as loud')}.`,
-        `Distant bird calls sit around ${hi('44–60 dB')}; dawn-chorus ambient often ${hi('about 45–50 dB(A)')} (dense urban choruses higher). Denali (about ${hi('18 dB')}) and Haleakalā (about ${hi('23 dB')}) leave headroom to hear birds; Stockholm parks (about ${hi('55 dB')}) already meet conversation territory — still nowhere near a ${hiLoud('blender (about 80–90 dB)')}.`,
+        `A Grand Canyon fall night near ${dbPlay(15)} is quieter than a ${hi('whisper (about 25–30 dB)')}; a Berlin park hour near ${dbPlay(49)} is calm for a city, not silent.`,
+        `From Berlin’s park hour to mapped traffic at ${dbPlay(75, 'about 75 dB')} is about ${hi('+26 dB')} — roughly ${hi('6× as loud')}.`,
+        `Distant bird calls sit around ${hi('44–60 dB')}; dawn-chorus ambient often ${hi('about 45–50 dB(A)')} (dense urban choruses higher). Denali (about ${dbPlay(18)}) and Haleakalā (about ${dbPlay(23)}) leave headroom to hear birds; Stockholm parks (about ${dbPlay(55)}) already meet conversation territory — still nowhere near a ${hiLoud('blender')} (${hiLoud('about 80–90 dB')}).`,
       ],
       map: {
         center: [-40, 45],

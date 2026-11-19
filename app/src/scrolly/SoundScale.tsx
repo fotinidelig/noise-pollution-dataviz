@@ -70,6 +70,11 @@ type Props = {
   anchors?: SoundAnchor[]
   /** When false (scrolled away / Hide / jump), stop playback and clear grain. */
   active?: boolean
+  /**
+   * Bump to force-stop without leaving the step (e.g. body DbPlay took over).
+   * Keeps buttons interactive so the user can switch back to a sample.
+   */
+  haltToken?: number
   /** Fired when playback starts/stops so the parent can show full-screen grain. */
   onPlayingChange?: (anchor: SoundAnchor | null) => void
 }
@@ -81,6 +86,7 @@ type Props = {
 export function SoundScale({
   anchors = STORY_SOUND_ANCHORS,
   active = true,
+  haltToken = 0,
   onPlayingChange,
 }: Props) {
   const audioRef = useRef<HTMLAudioElement | null>(null)
@@ -119,6 +125,11 @@ export function SoundScale({
     if (!active) hardStop()
     // eslint-disable-next-line react-hooks/exhaustive-deps -- stop when leaving the sounds beat
   }, [active])
+
+  useEffect(() => {
+    if (haltToken > 0) hardStop()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- parent bumps token to yield to DbPlay
+  }, [haltToken])
 
   useEffect(() => {
     return () => {
