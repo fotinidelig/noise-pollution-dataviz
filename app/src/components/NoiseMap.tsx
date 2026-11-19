@@ -67,6 +67,8 @@ const COUNTRY_DRILL_ZOOM = COUNTRY_VIEW_MAX_ZOOM + 0.65
 const CITY_DRILL_ZOOM = CITY_CLUSTER_MAX_ZOOM + 0.55
 const DRILL_ZOOM_STEP = 1.45
 const DRILL_DURATION_MS = 950
+/** Debounce empty hit clears — gaps between hit circles / ring samples. */
+const HOVER_CLEAR_MS = 90
 const dataUrl = (path: string) => {
   const base = import.meta.env.BASE_URL || '/'
   const p = path.startsWith('/') ? path.slice(1) : path
@@ -230,9 +232,15 @@ function fitCountryDrill(
   })
 }
 
-type DrillHit = {
-  geometry: { type: 'Point'; coordinates: [number, number] | number[] }
-  properties: Record<string, unknown> | null
+/** Sync hover/tooltip payload — filled in rebuildRings, read on pointer move. */
+type HoverTarget = {
+  id: string
+  series: HoverSeries
+  coords: [number, number]
+  cityCount: number
+  title: string
+  /** Cache miss on a cluster hit — resolve leaves once, then cache. */
+  pendingClusterId?: number
 }
 
 export type StoryMapControl = {
@@ -299,19 +307,22 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     height: number
   } | null>(null)
   const pinnedIdRef = useRef<string | null>(null)
+  /** Map-pointer owned — never clobber from React render (tipAnchor etc.). */
   const hoveredIdRef = useRef<string | null>(null)
   const focusIdRef = useRef<string | null>(null)
   const hoverGenRef = useRef(0)
   const clearHoverTimer = useRef<number | null>(null)
+  /** id → series/coords built with rings; hover stays sync (no getClusterLeaves). */
+  const hoverCacheRef = useRef(new Map<string, HoverTarget>())
+  const drillingRef = useRef(false)
+  const lastTipIdRef = useRef<string | null>(null)
 
   sourceRef.current = source
   metricRef.current = metric
   citiesRef.current = chartCities
   pinnedIdRef.current = pinnedId
-  hoveredIdRef.current = hoveredId
 
   const focusId = hoveredId ?? pinnedId ?? (storyLocked ? story?.highlightId ?? null : null)
-  focusIdRef.current = focusId
 
   /**
    * Paint-only pulse layer (twins of static rings + outer).
@@ -478,8 +489,158 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     hoveredIdRef.current = id
     focusIdRef.current = id ?? pinnedIdRef.current
     applyFocusPaint(focusIdRef.current)
+    if (id == null) lastTipIdRef.current = null
     setHoveredId(id)
     setHoverSeries(series)
+  }
+
+  /** Suppress hover-clear + ring rebuild mid click-zoom; rebuild once at moveend. */
+  const beginDrill = (run: () => void) => {
+    const map = mapRef.current
+    if (!map) return
+    drillingRef.current = true
+    cancelPendingClear()
+    const finish = () => {
+      drillingRef.current = false
+      scheduleRebuild()
+    }
+    map.once('moveend', finish)
+    run()
+  }
+
+  const targetFromCacheOrData = (id: string): HoverTarget | null => {
+    const cached = hoverCacheRef.current.get(id)
+    if (cached) return cached
+
+    if (id.startsWith('country:')) {
+      const country = id.slice('country:'.length)
+      const agg = countryAggsRef.current.find((a) => a.country === country)
+      if (!agg) return null
+      return {
+        id: agg.id,
+        series: agg.series,
+        coords: [agg.lon, agg.lat],
+        cityCount: agg.cityCount,
+        title: agg.country,
+      }
+    }
+
+    if (id.startsWith('cluster:')) return null
+
+    const city = citiesRef.current.find((c) => c.id === id)
+    if (!city || city.lon == null || city.lat == null) return null
+    const tip = city.series[`${sourceRef.current}__${metricRef.current}`]
+    if (!tip) return null
+    return {
+      id,
+      series: seriesFromBands(id, city.agglomeration, tip.bands),
+      coords: [city.lon, city.lat],
+      cityCount: 1,
+      title: city.agglomeration,
+    }
+  }
+
+  /** Hit circles first; visible rings as fallback (same path for hover + click). */
+  const resolveNoiseTarget = (
+    map: maplibregl.Map,
+    point: maplibregl.PointLike,
+  ): HoverTarget | null => {
+    const hitLayers = countryModeRef.current
+      ? [COUNTRY_HIT_LAYER]
+      : [HIT_LAYER]
+    const feats = map.queryRenderedFeatures(point, { layers: hitLayers })
+    if (feats.length) {
+      const feat = feats[0]
+      const props = feat.properties ?? {}
+      const coords = (feat.geometry as Point).coordinates as [number, number]
+      const src = sourceRef.current
+      const met = metricRef.current
+
+      if (props.kind === 'country') {
+        const id = String(props.id ?? '')
+        if (!id) return null
+        const cached = targetFromCacheOrData(id)
+        if (cached) return cached
+        let series: HoverSeries | null = null
+        try {
+          series = JSON.parse(String(props.series || 'null')) as HoverSeries
+        } catch {
+          series = null
+        }
+        if (!series) return null
+        return {
+          id,
+          series,
+          coords,
+          cityCount: Number(props.cityCount ?? 0) || 0,
+          title: series.name,
+        }
+      }
+
+      if (props.cluster) {
+        const clusterId = Number(props.cluster_id)
+        if (!Number.isFinite(clusterId)) return null
+        const cached = targetFromCacheOrData(`cluster:${clusterId}`)
+        if (cached) return cached
+        return {
+          id: `cluster:${clusterId}`,
+          series: {
+            id: `cluster:${clusterId}`,
+            name: '…',
+            total: 0,
+            points: [],
+          },
+          coords,
+          cityCount: 0,
+          title: '…',
+          pendingClusterId: clusterId,
+        }
+      }
+
+      const id = String(props.id ?? '')
+      if (!id) return null
+      const cached = targetFromCacheOrData(id)
+      if (cached) return cached
+      const tip = tipFromProps(props.tooltip, src, met)
+      if (!tip) return null
+      const bands = seriesToBands(met, tip)
+      return {
+        id,
+        series: seriesFromBands(id, String(props.agglomeration ?? ''), bands),
+        coords,
+        cityCount: 1,
+        title: String(props.agglomeration ?? ''),
+      }
+    }
+
+    if (!map.getLayer(RINGS_LAYER)) return null
+    const ringHits = map.queryRenderedFeatures(point, { layers: [RINGS_LAYER] })
+    const ringId = String(ringHits[0]?.properties?.id ?? '')
+    if (!ringId) return null
+    return targetFromCacheOrData(ringId)
+  }
+
+  const showNoisePopup = (
+    map: maplibregl.Map,
+    popup: maplibregl.Popup,
+    target: HoverTarget,
+  ) => {
+    const met = metricRef.current
+    const html = buildTooltipHtml(
+      target.title,
+      target.cityCount,
+      met,
+      target.series.points.map((b) => ({ ...b, rings: 0 })),
+    )
+    if (lastTipIdRef.current !== target.id) {
+      lastTipIdRef.current = target.id
+      popup.setLngLat(target.coords).setHTML(html).addTo(map)
+      return
+    }
+    // Same city: keep HTML; only re-anchor if needed (centers are stable)
+    if (!popup.isOpen()) {
+      popup.setLngLat(target.coords).setHTML(html).addTo(map)
+    }
   }
 
   // Sync story camera / layer locks (scrolly)
@@ -1199,11 +1360,21 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     }
 
     const ringFeatures: Feature[] = []
+    const cache = hoverCacheRef.current
+    cache.clear()
 
     if (useCountryView) {
       setCountryMode(true)
       for (const agg of countryAggsRef.current) {
         if (!agg.bands.some((b) => b.people > 0)) continue
+        const series = seriesFromBands(agg.id, agg.country, agg.bands)
+        cache.set(agg.id, {
+          id: agg.id,
+          series,
+          coords: [agg.lon, agg.lat],
+          cityCount: agg.cityCount,
+          title: agg.country,
+        })
         ringFeatures.push(
           ...buildEqualSpacedRings({
             lon: agg.lon,
@@ -1222,6 +1393,14 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
       for (const unit of cityUnits) {
         const bands = aggregateBands(met, unit.tips)
         if (!bands.some((b) => b.people > 0)) continue
+        const series = seriesFromBands(unit.id, unit.label, bands)
+        cache.set(unit.id, {
+          id: unit.id,
+          series,
+          coords: [unit.lon, unit.lat],
+          cityCount: unit.cityCount,
+          title: unit.label,
+        })
         ringFeatures.push(
           ...buildEqualSpacedRings({
             lon: unit.lon,
@@ -1244,6 +1423,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
   }
 
   const scheduleRebuild = () => {
+    if (drillingRef.current) return
     if (rebuildTimer.current != null) window.clearTimeout(rebuildTimer.current)
     rebuildTimer.current = window.setTimeout(() => {
       void rebuildRings()
@@ -1384,7 +1564,8 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
         },
       })
 
-      // Invisible hit targets only (no cyan dots)
+      // Invisible hit targets only (no cyan dots). Sized to cover ring cores;
+      // hover also falls back to RINGS_LAYER for outer arcs.
       map.addLayer({
         id: HIT_LAYER,
         type: 'circle',
@@ -1395,11 +1576,11 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
             ['linear'],
             ['zoom'],
             3,
-            16,
-            7,
             22,
-            11,
+            7,
             30,
+            11,
+            40,
           ],
           'circle-opacity': 0,
           'circle-stroke-width': 0,
@@ -1449,11 +1630,11 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
             ['linear'],
             ['zoom'],
             2,
-            22,
-            5,
             28,
+            5,
+            36,
             7,
-            34,
+            44,
           ],
           'circle-opacity': 0,
           'circle-stroke-width': 0,
@@ -1461,9 +1642,9 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
         },
       })
 
+      // moveend/zoomend only — never idle (pulse paint would retrigger rebuild loops)
       map.on('moveend', scheduleRebuild)
       map.on('zoomend', scheduleRebuild)
-      map.on('idle', scheduleRebuild)
       map.on('sourcedata', (e) => {
         if (e.sourceId === CITIES_SOURCE && e.isSourceLoaded) scheduleRebuild()
       })
@@ -1480,145 +1661,67 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     // Story mode: pin only — never easeTo (keeps scrolly flyTos authoritative).
     map.on('click', (e) => {
       const canDrill = exploreRef.current
-      const hitLayers = countryModeRef.current
-        ? [COUNTRY_HIT_LAYER]
-        : [HIT_LAYER]
-      let hits: DrillHit[] = map.queryRenderedFeatures(e.point, {
-        layers: hitLayers,
-      }) as DrillHit[]
-
-      // Rings are larger than hit circles — resolve id from the visible stack.
-      if (!hits.length && map.getLayer(RINGS_LAYER)) {
-        const ringHits = map.queryRenderedFeatures(e.point, {
-          layers: [RINGS_LAYER],
-        })
-        const ringId = String(ringHits[0]?.properties?.id ?? '')
-        if (ringId.startsWith('country:')) {
-          const country = ringId.slice('country:'.length)
-          const agg = countryAggsRef.current.find((a) => a.country === country)
-          if (agg) {
-            hits = [
-              {
-                geometry: { type: 'Point', coordinates: [agg.lon, agg.lat] },
-                properties: {
-                  kind: 'country',
-                  id: agg.id,
-                  country: agg.country,
-                  cityCount: agg.cityCount,
-                  series: JSON.stringify(agg.series),
-                },
-              },
-            ]
-          }
-        } else if (ringId.startsWith('cluster:')) {
-          const clusterId = Number(ringId.slice('cluster:'.length))
-          if (Number.isFinite(clusterId)) {
-            hits = [
-              {
-                geometry: {
-                  type: 'Point',
-                  coordinates: [e.lngLat.lng, e.lngLat.lat],
-                },
-                properties: { cluster: true, cluster_id: clusterId },
-              },
-            ]
-          }
-        } else if (ringId) {
-          const city = citiesRef.current.find((c) => c.id === ringId)
-          if (city && city.lon != null && city.lat != null) {
-            const tip =
-              city.series[`${sourceRef.current}__${metricRef.current}`]
-            hits = [
-              {
-                geometry: {
-                  type: 'Point',
-                  coordinates: [city.lon, city.lat],
-                },
-                properties: {
-                  id: city.id,
-                  agglomeration: city.agglomeration,
-                  country: city.country,
-                  tooltip: tip ? JSON.stringify(tip) : '',
-                },
-              },
-            ]
-          }
-        }
-      }
-
-      if (!hits.length) {
+      const target = resolveNoiseTarget(map, e.point)
+      if (!target) {
         pinnedIdRef.current = null
+        focusIdRef.current = hoveredIdRef.current
         setPinnedId(null)
         setPinnedSeries(null)
         applyFocusPaint(hoveredIdRef.current)
         return
       }
-      const feat = hits[0]
-      const props = feat.properties ?? {}
 
-      if (props.kind === 'country') {
-        const id = String(props.id ?? '')
-        if (!id) return
-        let series: HoverSeries | null = null
-        try {
-          series = JSON.parse(String(props.series || 'null')) as HoverSeries
-        } catch {
-          series = null
-        }
-        if (!series) return
-        pinnedIdRef.current = id
-        setPinnedId(id)
-        setPinnedSeries(series)
-        setMapHover(id, series)
-        if (canDrill) {
-          const coords = (feat.geometry as Point).coordinates as [
-            number,
-            number,
-          ]
-          fitCountryDrill(
-            map,
-            citiesRef.current,
-            String(props.country ?? series.name),
-            coords,
-          )
-        }
+      const pinAndTip = (t: HoverTarget) => {
+        pinnedIdRef.current = t.id
+        focusIdRef.current = t.id
+        setPinnedId(t.id)
+        setPinnedSeries(t.series)
+        setMapHover(t.id, t.series)
+        showNoisePopup(map, popup, t)
+      }
+
+      if (!canDrill) {
+        if (target.pendingClusterId == null) pinAndTip(target)
         return
       }
 
-      if (props.cluster) {
-        if (!canDrill) return
-        const clusterId = Number(props.cluster_id)
+      if (target.id.startsWith('country:')) {
+        pinAndTip(target)
+        beginDrill(() => {
+          fitCountryDrill(
+            map,
+            citiesRef.current,
+            target.title,
+            target.coords,
+          )
+        })
+        return
+      }
+
+      if (target.id.startsWith('cluster:')) {
+        const clusterId = Number(
+          target.pendingClusterId ?? target.id.slice('cluster:'.length),
+        )
+        if (!Number.isFinite(clusterId)) return
         const citySource = map.getSource(CITIES_SOURCE) as maplibregl.GeoJSONSource
+        if (target.pendingClusterId == null) pinAndTip(target)
         void citySource.getClusterExpansionZoom(clusterId).then((zoom) => {
-          const coords = (feat.geometry as Point).coordinates as [number, number]
-          // Same expansion zoom MapLibre uses for cluster click-to-zoom.
-          map.easeTo({
-            center: coords,
-            zoom,
-            duration: DRILL_DURATION_MS,
-            essential: true,
+          beginDrill(() => {
+            map.easeTo({
+              center: target.coords,
+              zoom,
+              duration: DRILL_DURATION_MS,
+              essential: true,
+            })
           })
         })
         return
       }
 
-      const id = String(props.id ?? '')
-      if (!id) return
-
-      const src = sourceRef.current
-      const met = metricRef.current
-      const tip = tipFromProps(props.tooltip, src, met)
-      if (!tip) return
-      const bands = seriesToBands(met, tip)
-      const series = seriesFromBands(id, String(props.agglomeration ?? ''), bands)
-      pinnedIdRef.current = id
-      setPinnedId(id)
-      setPinnedSeries(series)
-      setMapHover(id, series)
-      if (canDrill) {
-        const coords = (feat.geometry as Point).coordinates as [number, number]
-        easeDrillTo(map, coords, CITY_DRILL_ZOOM)
-      }
+      pinAndTip(target)
+      beginDrill(() => {
+        easeDrillTo(map, target.coords, CITY_DRILL_ZOOM)
+      })
     })
 
     return () => {
@@ -1669,7 +1772,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     applyFocusPaint(focusId)
   }, [focusId])
 
-  // Hover — paint updates are synchronous via setMapHover; empty hits are debounced
+  // Hover — sync resolve via ring cache; empty hits debounced; no work while drilling
   useEffect(() => {
     const map = mapRef.current
     const popup = popupRef.current
@@ -1679,16 +1782,18 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
       cancelPendingClear()
       map.getCanvas().style.cursor = ''
       popup.remove()
+      lastTipIdRef.current = null
       setMapHover(null, null)
     }
 
     const scheduleClearHover = () => {
+      if (drillingRef.current) return
       if (clearHoverTimer.current != null) return
       clearHoverTimer.current = window.setTimeout(() => {
         clearHoverTimer.current = null
-        // Only clear if we still have no pending newer hover
+        if (drillingRef.current) return
         if (hoveredIdRef.current != null) clearHoverNow()
-      }, 50)
+      }, HOVER_CLEAR_MS)
     }
 
     const sampleHkDb = (lng: number, lat: number): number | null => {
@@ -1706,7 +1811,9 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
       return 30 + (q / 254) * 70
     }
 
-    const onMove = async (e: maplibregl.MapMouseEvent) => {
+    const onMove = (e: maplibregl.MapMouseEvent) => {
+      if (drillingRef.current) return
+
       // Calm spaces bubbles (story beat or explore toggle)
       if (
         calmModeRef.current &&
@@ -1722,6 +1829,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
           const id = String(p.id ?? '')
           map.getCanvas().style.cursor = 'pointer'
           setCalmFocusId(id || null)
+          lastTipIdRef.current = `calm:${id}`
           const day =
             p.day_db != null && p.day_db !== ''
               ? Number(p.day_db)
@@ -1763,6 +1871,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
           cancelPendingClear()
           const p = seoulHits[0].properties ?? {}
           map.getCanvas().style.cursor = 'pointer'
+          lastTipIdRef.current = `seoul:${String(p.name_en ?? '')}`
           popup
             .setLngLat(e.lngLat)
             .setHTML(
@@ -1781,6 +1890,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
         if (db != null) {
           cancelPendingClear()
           map.getCanvas().style.cursor = 'crosshair'
+          lastTipIdRef.current = 'hk-sample'
           popup
             .setLngLat(e.lngLat)
             .setHTML(
@@ -1791,58 +1901,18 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
         }
       }
 
-      const hitLayers = countryModeRef.current
-        ? [COUNTRY_HIT_LAYER]
-        : [HIT_LAYER]
-      const feats = map.queryRenderedFeatures(e.point, { layers: hitLayers })
-      if (!feats.length) {
-        // Gaps between hit circles — debounce clear to avoid flicker / stuck dim
+      const target = resolveNoiseTarget(map, e.point)
+      if (!target) {
         scheduleClearHover()
         return
       }
-      cancelPendingClear()
 
-      const feat = feats[0]
-      const props = feat.properties ?? {}
-      const src = sourceRef.current
-      const met = metricRef.current
-      const coords = (feat.geometry as Point).coordinates as [number, number]
+      cancelPendingClear()
       map.getCanvas().style.cursor = 'pointer'
 
-      if (props.kind === 'country') {
-        let series: HoverSeries | null = null
-        try {
-          series = JSON.parse(String(props.series || 'null')) as HoverSeries
-        } catch {
-          series = null
-        }
-        if (!series) {
-          scheduleClearHover()
-          return
-        }
-        if (hoveredIdRef.current !== series.id) {
-          setMapHover(series.id, series)
-        } else {
-          applyFocusPaint(series.id)
-        }
-        popup
-          .setLngLat(coords)
-          .setHTML(
-            buildTooltipHtml(
-              series.name,
-              Number(props.cityCount ?? 0) || 0,
-              met,
-              series.points.map((b) => ({ ...b, rings: 0 })),
-            ),
-          )
-          .addTo(map)
-        return
-      }
-
-      if (props.cluster) {
-        const clusterId = Number(props.cluster_id)
-        const hoverId = `cluster:${clusterId}`
-        // Optimistic paint before async leaves resolve
+      if (target.pendingClusterId != null) {
+        const clusterId = target.pendingClusterId
+        const hoverId = target.id
         if (hoveredIdRef.current !== hoverId) {
           applyFocusPaint(hoverId)
           hoveredIdRef.current = hoverId
@@ -1850,68 +1920,48 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
         }
         const gen = ++hoverGenRef.current
         const citySource = map.getSource(CITIES_SOURCE) as maplibregl.GeoJSONSource
-        let leaves: Feature[] = []
-        try {
-          leaves = await getClusterLeaves(citySource, clusterId)
-        } catch {
-          if (gen === hoverGenRef.current) scheduleClearHover()
-          return
-        }
-        if (gen !== hoverGenRef.current) return
-        const tips: ChartSeries[] = []
-        for (const leaf of leaves) {
-          const tip = tipFromProps(leaf.properties?.tooltip, src, met)
-          if (tip) tips.push(tip)
-        }
-        const bands = aggregateBands(met, tips)
-        const series = seriesFromBands(
-          hoverId,
-          `${leaves.length} cities`,
-          bands,
-        )
-        setMapHover(series.id, series)
-        popup
-          .setLngLat(coords)
-          .setHTML(
-            buildTooltipHtml(
-              series.name,
-              leaves.length,
-              met,
-              bands.map((b) => ({ ...b, rings: 0 })),
-            ),
-          )
-          .addTo(map)
+        void getClusterLeaves(citySource, clusterId)
+          .then((leaves) => {
+            if (gen !== hoverGenRef.current) return
+            const src = sourceRef.current
+            const met = metricRef.current
+            const tips: ChartSeries[] = []
+            for (const leaf of leaves) {
+              const tip = tipFromProps(leaf.properties?.tooltip, src, met)
+              if (tip) tips.push(tip)
+            }
+            const bands = aggregateBands(met, tips)
+            const series = seriesFromBands(
+              hoverId,
+              `${leaves.length} cities`,
+              bands,
+            )
+            const filled: HoverTarget = {
+              id: hoverId,
+              series,
+              coords: target.coords,
+              cityCount: leaves.length,
+              title: series.name,
+            }
+            hoverCacheRef.current.set(hoverId, filled)
+            setMapHover(filled.id, filled.series)
+            showNoisePopup(map, popup, filled)
+          })
+          .catch(() => {
+            if (gen === hoverGenRef.current) scheduleClearHover()
+          })
         return
       }
 
-      const id = String(props.id ?? '')
-      const tip = tipFromProps(props.tooltip, src, met)
-      if (!tip) {
-        scheduleClearHover()
-        return
+      if (hoveredIdRef.current !== target.id) {
+        setMapHover(target.id, target.series)
       }
-      const bands = seriesToBands(met, tip)
-      const series = seriesFromBands(id, String(props.agglomeration ?? ''), bands)
-      if (hoveredIdRef.current !== id) {
-        setMapHover(id, series)
-      } else {
-        applyFocusPaint(id)
-      }
-      popup
-        .setLngLat(coords)
-        .setHTML(
-          buildTooltipHtml(
-            String(props.agglomeration ?? ''),
-            1,
-            met,
-            bands.map((b) => ({ ...b, rings: 0 })),
-          ),
-        )
-        .addTo(map)
+      showNoisePopup(map, popup, target)
     }
 
     const canvas = map.getCanvas()
     const onCanvasLeave = () => {
+      if (drillingRef.current) return
       // Prefer canvas mouseleave over map mouseout (avoids popup/control fights)
       clearHoverNow()
     }
