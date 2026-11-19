@@ -1,0 +1,63 @@
+/* Ephemeral click pulses — fixed overlay, never captures input. */
+.click-wave-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.click-wave {
+  --cw-size: 1.15rem;
+  --cw-op: 0.7;
+  --cw-scale-end: 2.6;
+  --cw-dur: 0.78s;
+  --cw-stagger: 0.12s;
+  position: absolute;
+  width: 0;
+  height: 0;
+  transform: translate(-50%, -50%);
+}
+
+.click-wave__ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--cw-size);
+  height: var(--cw-size);
+  margin: calc(var(--cw-size) / -2) 0 0 calc(var(--cw-size) / -2);
+  border-radius: 50%;
+  border: 1.5px solid var(--cw-color, #70f1ff);
+  opacity: 0;
+  transform: scale(0.22);
+  animation: click-wave-pulse var(--cw-dur) ease-out forwards;
+}
+
+.click-wave__ring:nth-child(2) {
+  animation-delay: var(--cw-stagger);
+}
+
+.click-wave__ring:nth-child(3) {
+  animation-delay: calc(var(--cw-stagger) * 2);
+}
+
+@keyframes click-wave-pulse {
+  0% {
+    transform: scale(0.22);
+    opacity: var(--cw-op);
+  }
+  65% {
+    opacity: calc(var(--cw-op) * 0.3);
+  }
+  100% {
+    transform: scale(var(--cw-scale-end));
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .click-wave__ring {
+    animation: none;
+    opacity: 0;
+  }
+}

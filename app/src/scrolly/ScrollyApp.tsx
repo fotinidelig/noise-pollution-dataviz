@@ -3,6 +3,7 @@ import { motion } from 'motion/react'
 import { NoiseMap, type StoryMapControl } from '../components/NoiseMap'
 import { buildSteps } from './buildSteps'
 import { bobTween, cardFade, factFade } from './motionPresets'
+import { ClickWaveOverlay } from './ClickWaveOverlay'
 import { ProgressRail } from './ProgressRail'
 import { SoundGrainOverlay } from './SoundGrainOverlay'
 import {
@@ -178,6 +179,7 @@ export function ScrollyApp() {
 
   return (
     <main className={`scrolly-root${cardHidden ? ' is-card-hidden' : ''}`}>
+      <ClickWaveOverlay />
       <ProgressRail
         steps={steps}
         activeId={active.id}
@@ -204,7 +206,7 @@ export function ScrollyApp() {
           return (
             <section
               key={step.id}
-              className={`scrolly-step${step.id === 'hero' ? ' scrolly-step--hero' : ''}${step.id === 'sounds' ? ' scrolly-step--sounds' : ''}${step.id === 'calm' ? ' scrolly-step--calm' : ''}${isActiveCard ? ' is-active' : ''}${isActiveHidden ? ' is-card-hidden' : ''}`}
+              className={`scrolly-step${step.id === 'hero' ? ' scrolly-step--hero' : ''}${step.id === 'birds' ? ' scrolly-step--intro' : ''}${step.id === 'sounds' ? ' scrolly-step--sounds' : ''}${step.id === 'calm' ? ' scrolly-step--calm' : ''}${isActiveCard ? ' is-active' : ''}${isActiveHidden ? ' is-card-hidden' : ''}`}
               data-step-id={step.id}
               ref={(el) => {
                 stepRefs.current[step.id] = el
@@ -282,14 +284,28 @@ export function ScrollyApp() {
                 ) : (
                   <div className="scrolly-step__card-shell">
                     {/* Sibling behind the card — not a card child */}
-                    <span
-                      className="scrolly-step__corner-wave"
-                      aria-hidden="true"
-                    >
-                      <span className="scrolly-step__corner-wave-ring" />
-                      <span className="scrolly-step__corner-wave-ring" />
-                      <span className="scrolly-step__corner-wave-ring" />
-                    </span>
+                    {step.id === 'birds' ? (
+                      <span
+                        className="scrolly-step__corner-wave scrolly-step__corner-wave--intro"
+                        aria-hidden="true"
+                      >
+                        {/* dB band palette: quiet → loud */}
+                        <span className="scrolly-step__corner-wave-ring" />
+                        <span className="scrolly-step__corner-wave-ring" />
+                        <span className="scrolly-step__corner-wave-ring" />
+                        <span className="scrolly-step__corner-wave-ring" />
+                        <span className="scrolly-step__corner-wave-ring" />
+                      </span>
+                    ) : (
+                      <span
+                        className="scrolly-step__corner-wave"
+                        aria-hidden="true"
+                      >
+                        <span className="scrolly-step__corner-wave-ring" />
+                        <span className="scrolly-step__corner-wave-ring" />
+                        <span className="scrolly-step__corner-wave-ring" />
+                      </span>
+                    )}
                     <div className="scrolly-step__card">
                       <button
                         type="button"

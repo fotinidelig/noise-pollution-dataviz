@@ -308,6 +308,48 @@ html {
   animation-delay: calc(var(--sw-stagger) * 2);
 }
 
+.scrolly-step.is-active .scrolly-step__corner-wave-ring:nth-child(4) {
+  animation-delay: calc(var(--sw-stagger) * 3);
+}
+
+.scrolly-step.is-active .scrolly-step__corner-wave-ring:nth-child(5) {
+  animation-delay: calc(var(--sw-stagger) * 4);
+}
+
+/*
+ * Intro (birds) — mid-left, larger than default corner rings, LDEN band palette.
+ * Still z-index 0 under the card so only the spill past the left edge shows.
+ */
+.scrolly-step__corner-wave--intro {
+  --sw-dur: 2.55s;
+  --sw-size: 5.8rem;
+  --sw-op: 0.68;
+  --sw-scale-end: 3.55;
+  --sw-stagger: 0.5s;
+  top: 50%;
+  left: 0;
+}
+
+.scrolly-step__corner-wave--intro .scrolly-step__corner-wave-ring:nth-child(1) {
+  --sw-color: #7186fe; /* 55–59 dB */
+}
+
+.scrolly-step__corner-wave--intro .scrolly-step__corner-wave-ring:nth-child(2) {
+  --sw-color: #70f1ff; /* 60–64 dB */
+}
+
+.scrolly-step__corner-wave--intro .scrolly-step__corner-wave-ring:nth-child(3) {
+  --sw-color: #d2ffad; /* 65–69 dB */
+}
+
+.scrolly-step__corner-wave--intro .scrolly-step__corner-wave-ring:nth-child(4) {
+  --sw-color: #ff9c33; /* 70–74 dB */
+}
+
+.scrolly-step__corner-wave--intro .scrolly-step__corner-wave-ring:nth-child(5) {
+  --sw-color: #ff476c; /* ≥75 dB */
+}
+
 @keyframes scrolly-corner-wave {
   0% {
     transform: scale(0.28);
