@@ -253,7 +253,7 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
     {
       id: 'explore',
       railLabel: 'Explore',
-      title: "now it's your turn: look a bit closer",
+      title: "Now it's your turn: look a bit closer",
       questions: [],
       body: [
         `Zoom into ${hi('countries')} or ${hi('cities')} to see who is most exposed — and explore impacts on ${hi('human annoyance')} and potential ${hi('sleep disturbance')}.`,
