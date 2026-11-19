@@ -269,16 +269,26 @@ export function ScrollyApp() {
                         onClick={() => jump(nextStep.id)}
                       >
                         <motion.span
-                          className="scrolly-step__next-chevron"
+                          className="scrolly-step__chevron-bob"
                           aria-hidden="true"
                           animate={{ y: [0, 6, 0] }}
                           transition={bobTween}
-                        />
+                        >
+                          <span className="scrolly-step__next-chevron" />
+                        </motion.span>
                       </button>
                     ) : null}
                   </div>
                 ) : (
                   <div className="scrolly-step__card">
+                    <span
+                      className="scrolly-step__corner-wave"
+                      aria-hidden="true"
+                    >
+                      <span className="scrolly-step__corner-wave-ring" />
+                      <span className="scrolly-step__corner-wave-ring" />
+                      <span className="scrolly-step__corner-wave-ring" />
+                    </span>
                     <button
                       type="button"
                       className="scrolly-step__hide"
@@ -297,11 +307,13 @@ export function ScrollyApp() {
                         onClick={() => jump(prevStep.id)}
                       >
                         <motion.span
-                          className="scrolly-step__prev-chevron"
+                          className="scrolly-step__chevron-bob"
                           aria-hidden="true"
                           animate={{ y: [0, -6, 0] }}
                           transition={bobTween}
-                        />
+                        >
+                          <span className="scrolly-step__prev-chevron" />
+                        </motion.span>
                       </button>
                     ) : null}
                     {step.year != null ? (
@@ -351,11 +363,13 @@ export function ScrollyApp() {
                         onClick={() => jump(nextStep.id)}
                       >
                         <motion.span
-                          className="scrolly-step__next-chevron"
+                          className="scrolly-step__chevron-bob"
                           aria-hidden="true"
                           animate={{ y: [0, 6, 0] }}
                           transition={bobTween}
-                        />
+                        >
+                          <span className="scrolly-step__next-chevron" />
+                        </motion.span>
                       </button>
                     ) : null}
                   </div>

@@ -175,6 +175,8 @@ html {
   border: 1px solid rgba(120, 160, 220, 0.22);
   backdrop-filter: blur(10px);
   box-shadow: 0 0 28px rgba(0, 0, 0, 0.35);
+  /* Let corner wave rings spill past the card edge. */
+  overflow: visible;
 }
 
 .scrolly-step__prev,
@@ -214,6 +216,13 @@ html {
   box-shadow: 0 0 10px rgba(77, 212, 230, 0.35);
 }
 
+/* Bob wrapper owns translateY; chevron child keeps CSS rotate intact. */
+.scrolly-step__chevron-bob {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .scrolly-step__prev-chevron,
 .scrolly-step__next-chevron {
   display: block;
@@ -226,11 +235,12 @@ html {
 }
 
 .scrolly-step__next-chevron {
-  /* rotate only — vertical bob is motion/react (bobTween) */
+  /* Down chevron — bob lives on .scrolly-step__chevron-bob */
   transform: rotate(45deg);
 }
 
 .scrolly-step__prev-chevron {
+  /* Up chevron */
   transform: rotate(-135deg);
 }
 
@@ -239,6 +249,76 @@ html {
 .scrolly-step__next:hover .scrolly-step__next-chevron,
 .scrolly-step__next:focus-visible .scrolly-step__next-chevron {
   opacity: 1;
+}
+
+/*
+ * Top-left corner sound-wave rings (map-matched #9bb7c2).
+ * Tune: --sw-count via markup; --sw-dur, --sw-size, --sw-color, --sw-op,
+ * --sw-scale-end, --sw-stagger below.
+ */
+.scrolly-step__corner-wave {
+  --sw-dur: 2.4s;
+  --sw-size: 3.2rem;
+  --sw-color: #9bb7c2;
+  --sw-op: 0.55;
+  --sw-scale-end: 2.35;
+  --sw-stagger: 0.8s;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: visible;
+}
+
+.scrolly-step__corner-wave-ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--sw-size);
+  height: var(--sw-size);
+  margin: calc(var(--sw-size) / -2) 0 0 calc(var(--sw-size) / -2);
+  border-radius: 50%;
+  border: 1.4px solid var(--sw-color);
+  opacity: 0;
+  transform: scale(0.28);
+  animation: none;
+}
+
+/* Pulse only on the active beat so idle cards stay quiet. */
+.scrolly-step.is-active .scrolly-step__corner-wave-ring {
+  animation: scrolly-corner-wave var(--sw-dur) ease-out infinite;
+}
+
+.scrolly-step.is-active .scrolly-step__corner-wave-ring:nth-child(2) {
+  animation-delay: var(--sw-stagger);
+}
+
+.scrolly-step.is-active .scrolly-step__corner-wave-ring:nth-child(3) {
+  animation-delay: calc(var(--sw-stagger) * 2);
+}
+
+@keyframes scrolly-corner-wave {
+  0% {
+    transform: scale(0.28);
+    opacity: var(--sw-op);
+  }
+  70% {
+    opacity: calc(var(--sw-op) * 0.28);
+  }
+  100% {
+    transform: scale(var(--sw-scale-end));
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scrolly-step.is-active .scrolly-step__corner-wave-ring {
+    animation: none;
+    opacity: 0;
+  }
 }
 
 .scrolly-hk-colorbar {
