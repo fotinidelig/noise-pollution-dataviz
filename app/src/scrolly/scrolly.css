@@ -80,7 +80,7 @@ html {
 }
 
 .scrolly-step__stack--facts {
-  max-width: min(1100px, 96vw);
+  max-width: min(1280px, 98vw);
   width: 100%;
 }
 
@@ -96,20 +96,23 @@ html {
 .scrolly-step__facts {
   display: flex;
   flex-direction: row;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   justify-content: center;
   align-items: stretch;
-  gap: 0.85rem;
+  gap: 0.85rem 1rem;
   width: 100%;
   margin: 0;
   text-align: center;
 }
 
 .scrolly-step__fact-box {
-  flex: 1 1 0;
-  min-width: 0;
-  max-width: 17rem;
-  padding: 1rem 0.85rem 1.05rem;
+  box-sizing: border-box;
+  /* Size to title + body — do not equal-shrink (clips Hegarty figures). */
+  flex: 0 1 auto;
+  width: max-content;
+  max-width: min(22rem, 100%);
+  min-width: min(11.5rem, 100%);
+  padding: 1.15rem 1.35rem 1.2rem;
   background: rgba(3, 5, 10, 0.55);
   border: 1px solid var(--accent-magenta, #f500ab);
   backdrop-filter: blur(10px);
@@ -123,7 +126,9 @@ html {
 
 .scrolly-step__fact-box > * {
   width: 100%;
+  max-width: 100%;
   text-align: center;
+  box-sizing: border-box;
 }
 
 .scrolly-step__facts-panel .scrolly-step__next {
@@ -377,20 +382,23 @@ html {
   width: 100%;
   margin: 0;
   font-family: var(--font-display, "BBH Hegarty", "Helvetica Neue", Arial, sans-serif);
-  font-size: clamp(1.55rem, 3.4vw, 2.45rem);
-  line-height: 1.05;
+  font-size: clamp(1.45rem, 2.8vw, 2.2rem);
+  line-height: 1.1;
   letter-spacing: 0.02em;
   color: #e8f0ff;
   text-align: center;
+  white-space: nowrap;
+  overflow: visible;
   text-shadow: 0 0 14px rgba(245, 0, 171, 0.28);
 }
 
 .scrolly-step__stat-label {
   width: 100%;
-  margin-top: 0.35rem;
+  max-width: 16.5rem;
+  margin: 0.45rem auto 0;
   color: #9db0cc;
   font-size: clamp(0.78rem, 1.35vw, 0.92rem);
-  line-height: 1.25;
+  line-height: 1.3;
   letter-spacing: 0.01em;
   text-align: center;
 }
@@ -524,14 +532,22 @@ html {
   }
 
   .scrolly-step__facts {
-    gap: 0.45rem;
+    gap: 0.55rem 0.65rem;
   }
 
   .scrolly-step__fact-box {
-    padding: 0.75rem 0.45rem 0.8rem;
+    width: max-content;
+    max-width: calc(100vw - 2rem);
+    min-width: 0;
+    padding: 0.95rem 1.05rem 1rem;
+  }
+
+  .scrolly-step__stat-value {
+    font-size: clamp(1.25rem, 6.5vw, 1.75rem);
   }
 
   .scrolly-step__stat-label {
+    max-width: 14rem;
     font-size: 0.72rem;
   }
 
