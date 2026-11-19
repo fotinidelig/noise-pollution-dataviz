@@ -19,16 +19,17 @@
 
 ## Insight copy (Fotini pass + loudness doubling)
 
-**Rule (state once on Europe):** each **+10 dB ≈ twice as loud** (NIDCD rule of thumb). Express contrasts as doubling steps; round with “about / roughly”. Magenta only for very loud sounds. Do **not** claim browser audio is calibrated.
+**Rule (state once on Sounds):** each **+10 dB ≈ twice as loud** (NIDCD rule of thumb). Express contrasts as doubling steps; round with “about / roughly”. Magenta only for very loud sounds. Do **not** claim browser audio is calibrated.
 
 ### Intro
 
 **Do you hear the birds?**  
 Or are our cities too loud? We’ll look at noise levels around Europe and the world to find out.
 
-### Sounds — But what does noise look like? *(2nd beat, right after intro)*
+### Sounds — But what does noise feel like? *(2nd beat, right after intro)*
 
-**People experiencing sleep disturbances are exposed to more than 70 dB.**
+As a rule of thumb, each **+10 dB** sounds about **twice** as loud. Exposure at **≥75 dB** is about **4×** as loud as **55dB**. That is the world those highly annoyed people live in.  
+According to WHO, people experiencing **sleep disturbances** are chronically exposed to more than **70 dB** at night.
 
 Horizontal quiet→loud ladder (equally spaced markers; click-to-play `app/public/audio/*.mp3`):
 
@@ -46,8 +47,7 @@ Browser playback is **not** calibrated SPL — clips show character; labels carr
 
 ### Europe (2021) — Noise pollution disturbs millions
 
-About **74.1 million** people in European cities live in official **noise levels** that already sit above **WHO road-traffic guidance (~53 dB)**. Roughly **12.5 million** people are **highly annoyed** by road, rail, or aircraft noise.  
-As a rule of thumb, each **+10 dB** sounds about **twice** as loud. Exposure at **≥75 dB** is about **4×** as loud as **55dB**. That is the world those highly annoyed people live in.
+About **74.1 million** people in European cities live in official **noise levels** that already sit above **WHO road-traffic guidance (~53 dB)**. Roughly **12.5 million** people are **highly annoyed** by road, rail, or aircraft noise.
 
 ### Germany · Berlin (2021)
 

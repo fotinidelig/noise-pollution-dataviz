@@ -112,6 +112,7 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       // First line above SoundScale; remainder below (see ScrollyApp).
       body: [
         `Let's look at a few sound examples.`,
+        `As a rule of thumb, each ${hi('+10 dB')} sounds about ${hi('twice')} as loud. Exposure at ${hiLoud('≥75 dB')} is about ${hi('4×')} as loud as ${hi('55dB')}. That is the world those highly annoyed people live in.`,
         `According to WHO, people experiencing ${hi('sleep disturbances')} are chronically exposed to more than ${hiLoud('70 dB')} at night.`,
       ],
       map: {
@@ -130,7 +131,6 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       questions: [],
       body: [
         `About ${hi(whoAbove)} people in European cities live in official noise levels that already sit above ${hi('WHO road-traffic guidance')} (about ${hi('53 dB')}). Roughly ${hi(ha)} people are ${hi('highly annoyed')} by road, rail, or aircraft noise.`,
-        `As a rule of thumb, each ${hi('+10 dB')} sounds about ${hi('twice')} as loud. Exposure at ${hiLoud('≥75 dB')} is about ${hi('4×')} as loud as ${hi('55dB')}. That is the world those highly annoyed people live in.`,
       ],
       map: {
         center: [10, 50],
