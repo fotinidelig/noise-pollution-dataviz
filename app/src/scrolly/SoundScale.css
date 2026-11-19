@@ -109,7 +109,7 @@
 }
 
 .sound-scale__label {
-  font-family: var(--font-display, "VT323", "Courier New", monospace);
+  font-family: var(--font-display, "BBH Hegarty", "Helvetica Neue", Arial, sans-serif);
   font-size: 0.98rem;
   line-height: 1.15;
   letter-spacing: 0.02em;

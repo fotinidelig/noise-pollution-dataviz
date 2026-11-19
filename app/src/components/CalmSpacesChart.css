@@ -57,7 +57,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   color: #e8f2ea;
-  font-family: var(--font-display, "VT323", "Courier New", monospace);
+  font-family: var(--font-display, "BBH Hegarty", "Helvetica Neue", Arial, sans-serif);
   font-size: 1.2rem;
   letter-spacing: 0.03em;
   line-height: 1.2;
@@ -201,7 +201,7 @@
 }
 
 .calm-chart__tip .tip-name {
-  font-family: var(--font-display, "VT323", "Courier New", monospace);
+  font-family: var(--font-display, "BBH Hegarty", "Helvetica Neue", Arial, sans-serif);
   color: #f2f7f3;
   font-size: 1.35rem;
   line-height: 1.15;
