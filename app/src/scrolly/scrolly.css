@@ -108,13 +108,12 @@ html {
   box-shadow: 0 0 28px rgba(0, 0, 0, 0.35);
 }
 
+.scrolly-step__prev,
 .scrolly-step__next {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-  margin-top: 0.85rem;
-  padding: 0.35rem 0 0.1rem;
   border: 0;
   background: transparent;
   color: #9db0cc;
@@ -122,30 +121,54 @@ html {
   font: inherit;
 }
 
+.scrolly-step__next {
+  margin-top: 0.85rem;
+  padding: 0.35rem 0 0.1rem;
+}
+
+.scrolly-step__prev {
+  margin: 0 0 0.45rem;
+  padding: 0.1rem 0 0.35rem;
+}
+
+.scrolly-step__prev:hover,
+.scrolly-step__prev:focus-visible,
 .scrolly-step__next:hover,
 .scrolly-step__next:focus-visible {
   color: #e8f0ff;
   outline: none;
 }
 
+.scrolly-step__prev:focus-visible .scrolly-step__prev-chevron,
 .scrolly-step__next:focus-visible .scrolly-step__next-chevron {
   border-color: #4DD4E6;
   box-shadow: 0 0 10px rgba(77, 212, 230, 0.35);
 }
 
+.scrolly-step__prev-chevron,
 .scrolly-step__next-chevron {
   display: block;
   width: 0.55rem;
   height: 0.55rem;
   border-right: 1.5px solid #4DD4E6;
   border-bottom: 1.5px solid #4DD4E6;
-  /* translate before rotate so the bob stays vertical on screen */
-  transform: translateY(0) rotate(45deg);
   opacity: 0.75;
   transition: opacity 0.15s ease, border-color 0.15s ease;
+}
+
+.scrolly-step__next-chevron {
+  /* translate before rotate so the bob stays vertical on screen */
+  transform: translateY(0) rotate(45deg);
   animation: scrolly-next-bob 1.6s ease-in-out infinite;
 }
 
+.scrolly-step__prev-chevron {
+  transform: translateY(0) rotate(-135deg);
+  animation: scrolly-prev-bob 1.6s ease-in-out infinite;
+}
+
+.scrolly-step__prev:hover .scrolly-step__prev-chevron,
+.scrolly-step__prev:focus-visible .scrolly-step__prev-chevron,
 .scrolly-step__next:hover .scrolly-step__next-chevron,
 .scrolly-step__next:focus-visible .scrolly-step__next-chevron {
   opacity: 1;
@@ -158,6 +181,16 @@ html {
   }
   50% {
     transform: translateY(3px) rotate(45deg);
+  }
+}
+
+@keyframes scrolly-prev-bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-135deg);
+  }
+  50% {
+    transform: translateY(-3px) rotate(-135deg);
   }
 }
 
@@ -385,7 +418,8 @@ html {
 }
 
 .scrolly-rail__label {
-  max-width: 4.8rem;
+  /* Fit longest label ("Hong Kong") with uppercase + letter-spacing */
+  max-width: 8rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

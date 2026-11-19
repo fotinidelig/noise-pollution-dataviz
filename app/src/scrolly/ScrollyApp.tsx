@@ -165,6 +165,7 @@ export function ScrollyApp() {
       <div className="scrolly-steps" aria-hidden={dismissed}>
         {steps.map((step, index) => {
           const isActiveCard = step.id === active.id && !dismissed
+          const prevStep = index > 0 ? steps[index - 1] : null
           const nextStep = steps[index + 1]
           return (
             <section
@@ -187,6 +188,17 @@ export function ScrollyApp() {
                     >
                       ×
                     </button>
+                    {prevStep ? (
+                      <button
+                        type="button"
+                        className="scrolly-step__prev"
+                        aria-label={`Previous story: ${prevStep.title}`}
+                        title={`Previous: ${prevStep.railLabel}`}
+                        onClick={() => jump(prevStep.id)}
+                      >
+                        <span className="scrolly-step__prev-chevron" aria-hidden="true" />
+                      </button>
+                    ) : null}
                     {step.year != null ? (
                       <p className="scrolly-step__year">Year {step.year}</p>
                     ) : null}
