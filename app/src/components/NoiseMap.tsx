@@ -30,7 +30,10 @@ import {
   type HoverSeries,
 } from './CityWaveChart'
 import { ThemeRiverChart, type StreamData } from './ThemeRiverChart'
-import { CalmSpacesChart } from './CalmSpacesChart'
+import {
+  CalmSpacesChart,
+  type CalmScatterPreview,
+} from './CalmSpacesChart'
 import {
   calmPlacesToGeoJSON,
   type CalmSpacesData,
@@ -337,7 +340,15 @@ export type StoryMapControl = {
   calm?: boolean
   /** Once unlocked in the story, keep city overlays visible. */
   overlays?: { hongkong?: boolean; seoul?: boolean }
+  /** Calm scatter nature preview — active while on the calm beat. */
+  calmScatterActive?: boolean
+  /** Bump to yield to DbPlay / SoundScale. */
+  calmHaltToken?: number
+  calmPreview?: CalmScatterPreview | null
+  onCalmPreviewChange?: (preview: CalmScatterPreview | null) => void
 }
+
+export type { CalmScatterPreview }
 
 type NoiseMapProps = {
   story?: StoryMapControl | null
@@ -2296,6 +2307,10 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
             data={calmData}
             focusId={calmFocusId}
             onHoverPlace={(id) => setCalmFocusId(id)}
+            active={Boolean(story?.calmScatterActive)}
+            haltToken={story?.calmHaltToken ?? 0}
+            preview={story?.calmPreview ?? null}
+            onPreviewChange={story?.onCalmPreviewChange}
           />
         ) : null}
         {streamData && explore && !calmMode ? (

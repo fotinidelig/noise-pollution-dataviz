@@ -6,33 +6,85 @@ import {
   buildCalmPoints,
   orderCalmPlaces,
   quietnessRadius,
+  type CalmPeriod,
   type CalmPlace,
+  type CalmPoint,
   type CalmSpacesData,
 } from '../lib/calmSpaces'
+import {
+  NatureClipPlayer,
+  natureClipForPeriod,
+} from '../scrolly/natureAudio'
 import './CalmSpacesChart.css'
+
+export type CalmScatterPreview = {
+  /** Stable id: `${placeId}-${period}`. */
+  id: string
+  placeId: string
+  period: CalmPeriod
+  db: number
+}
 
 type Props = {
   data: CalmSpacesData | null
   focusId: string | null
   onHoverPlace: (id: string | null) => void
   collapsed?: boolean
+  /** When false (leave calm step), stop nature preview. */
+  active?: boolean
+  /**
+   * Bump to force-stop without leaving calm (DbPlay / SoundScale took over).
+   * Chart stays interactive so the user can switch back to a point.
+   */
+  haltToken?: number
+  /** Controlled preview so the parent can drive SoundGrainOverlay. */
+  preview?: CalmScatterPreview | null
+  onPreviewChange?: (preview: CalmScatterPreview | null) => void
 }
 
 const DAY = '#7eb8a8'
 const NIGHT = '#5b7fbf'
+
+function pointId(pt: Pick<CalmPoint, 'placeId' | 'period'>): string {
+  return `${pt.placeId}-${pt.period}`
+}
+
+function previewFromPoint(pt: CalmPoint): CalmScatterPreview {
+  return {
+    id: pointId(pt),
+    placeId: pt.placeId,
+    period: pt.period,
+    db: pt.db,
+  }
+}
 
 export function CalmSpacesChart({
   data,
   focusId,
   onHoverPlace,
   collapsed = false,
+  active = true,
+  haltToken = 0,
+  preview = null,
+  onPreviewChange,
 }: Props) {
   const wrapRef = useRef<HTMLDivElement | null>(null)
   const plotRef = useRef<HTMLDivElement | null>(null)
   const dotsGRef = useRef<SVGGElement | null>(null)
+  const playerRef = useRef<NatureClipPlayer | null>(null)
+  const activeRef = useRef(active)
+  const previewRef = useRef(preview)
+  const onPreviewChangeRef = useRef(onPreviewChange)
   const [size, setSize] = useState({ w: 880, h: 220 })
   const [localHover, setLocalHover] = useState<string | null>(null)
+  const [hoverPointId, setHoverPointId] = useState<string | null>(null)
   const [hidden, setHidden] = useState(false)
+
+  activeRef.current = active
+  previewRef.current = preview
+  onPreviewChangeRef.current = onPreviewChange
+
+  if (!playerRef.current) playerRef.current = new NatureClipPlayer()
 
   useEffect(() => {
     const el = plotRef.current
@@ -89,10 +141,47 @@ export function CalmSpacesChart({
     return { margin, innerW, innerH, x, y, bands, yMin, yMax }
   }, [ordered, points, size.w, size.h])
 
+  const hardStop = () => {
+    playerRef.current?.stop()
+    onPreviewChangeRef.current?.(null)
+  }
+
+  // Leave calm step: hard-clear preview + audio.
+  useEffect(() => {
+    if (!active) hardStop()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- stop when leaving calm
+  }, [active])
+
+  // Shared halt with DbPlay / SoundScale.
+  useEffect(() => {
+    if (haltToken > 0) hardStop()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- parent bumps token
+  }, [haltToken])
+
+  // Drive nature clip from controlled preview (generation token inside player).
+  useEffect(() => {
+    const player = playerRef.current
+    if (!player) return
+    if (!active || !preview) {
+      player.stop()
+      return
+    }
+    void player.play(natureClipForPeriod(preview.period), preview.db)
+  }, [active, preview])
+
+  useEffect(() => {
+    return () => {
+      playerRef.current?.dispose()
+      playerRef.current = null
+      onPreviewChangeRef.current?.(null)
+    }
+  }, [])
+
   const activeId = localHover ?? focusId
   const activePlace = activeId
     ? ordered.find((p) => p.id === activeId) ?? null
     : null
+  const playingId = preview?.id ?? null
 
   // Efficient D3 opacity tween on focus leave/enter — avoid React remount flash.
   useEffect(() => {
@@ -135,40 +224,68 @@ export function CalmSpacesChart({
 
   if (!layout) return null
 
-  const onMove = (ev: React.MouseEvent<SVGSVGElement>) => {
-    const svg = ev.currentTarget
-    const rect = svg.getBoundingClientRect()
-    const px = ev.clientX - rect.left - layout.margin.left
-    let best: CalmPlace | null = null
-    let bestDist = Infinity
-    for (const p of ordered) {
-      const cx = layout.x(p.id) ?? 0
-      const d = Math.abs(cx - px)
-      if (d < bestDist) {
-        bestDist = d
-        best = p
-      }
-    }
-    if (!best || bestDist > 28) {
-      if (localHover) {
-        setLocalHover(null)
-        onHoverPlace(null)
-      }
-      return
-    }
-    setLocalHover(best.id)
-    onHoverPlace(best.id)
-  }
-
-  const onLeave = () => {
-    setLocalHover(null)
-    onHoverPlace(null)
-  }
-
   const dbExtent = {
     min: Math.min(...points.map((p) => p.db)),
     max: Math.max(...points.map((p) => p.db)),
   }
+
+  const nearestPoint = (
+    px: number,
+    py: number,
+  ): { place: CalmPlace; point: CalmPoint; dist: number } | null => {
+    let best: CalmPoint | null = null
+    let bestDist = Infinity
+    for (const pt of points) {
+      const cx = layout.x(pt.placeId) ?? 0
+      const cy = layout.y(pt.db)
+      const d = Math.hypot(cx - px, cy - py)
+      const hitR = quietnessRadius(pt.db, dbExtent.min, dbExtent.max, 4, 9.5) + 10
+      if (d < bestDist && d <= hitR) {
+        bestDist = d
+        best = pt
+      }
+    }
+    if (!best) return null
+    return { place: best.place, point: best, dist: bestDist }
+  }
+
+  const onMove = (ev: React.MouseEvent<SVGSVGElement>) => {
+    const svg = ev.currentTarget
+    const rect = svg.getBoundingClientRect()
+    const px = ev.clientX - rect.left - layout.margin.left
+    const py = ev.clientY - rect.top - layout.margin.top
+    const hit = nearestPoint(px, py)
+    if (!hit) {
+      if (localHover) {
+        setLocalHover(null)
+        onHoverPlace(null)
+      }
+      if (hoverPointId) setHoverPointId(null)
+      return
+    }
+    setLocalHover(hit.place.id)
+    onHoverPlace(hit.place.id)
+    setHoverPointId(pointId(hit.point))
+  }
+
+  const onLeave = () => {
+    setLocalHover(null)
+    setHoverPointId(null)
+    onHoverPlace(null)
+  }
+
+  const togglePoint = (pt: CalmPoint) => {
+    if (!activeRef.current) return
+    const id = pointId(pt)
+    if (previewRef.current?.id === id) {
+      hardStop()
+      return
+    }
+    onPreviewChangeRef.current?.(previewFromPoint(pt))
+  }
+
+  const overPoint = Boolean(hoverPointId)
+  const overPlaying = Boolean(hoverPointId && hoverPointId === playingId)
 
   return (
     <div
@@ -194,8 +311,10 @@ export function CalmSpacesChart({
           aria-expanded={true}
           onClick={() => {
             setLocalHover(null)
+            setHoverPointId(null)
             onHoverPlace(null)
             setHidden(true)
+            hardStop()
           }}
         >
           hide
@@ -203,11 +322,22 @@ export function CalmSpacesChart({
       </div>
       <div className="calm-chart__plot" ref={plotRef}>
         <svg
-          className="calm-chart__svg"
+          className={`calm-chart__svg${overPoint ? ' is-over-dot' : ''}${overPlaying ? ' is-playing-dot' : ''}`}
           width={size.w}
           height={size.h}
           onMouseMove={onMove}
           onMouseLeave={onLeave}
+          onClick={(ev) => {
+            const svg = ev.currentTarget
+            const rect = svg.getBoundingClientRect()
+            const px = ev.clientX - rect.left - layout.margin.left
+            const py = ev.clientY - rect.top - layout.margin.top
+            const hit = nearestPoint(px, py)
+            if (!hit) return
+            ev.preventDefault()
+            ev.stopPropagation()
+            togglePoint(hit.point)
+          }}
           role="img"
         >
           <g transform={`translate(${layout.margin.left},${layout.margin.top})`}>
@@ -242,11 +372,14 @@ export function CalmSpacesChart({
                 const cy = layout.y(pt.db)
                 const r = quietnessRadius(pt.db, dbExtent.min, dbExtent.max, 4, 9.5)
                 const focused = activeId === pt.placeId
+                const id = pointId(pt)
+                const playing = playingId === id
                 return (
                   <circle
-                    key={`${pt.placeId}-${pt.period}`}
-                    className={`calm-chart__dot calm-chart__dot--${pt.period}${focused ? ' is-focus' : ''}`}
+                    key={id}
+                    className={`calm-chart__dot calm-chart__dot--${pt.period}${focused ? ' is-focus' : ''}${playing ? ' is-playing' : ''}`}
                     data-place-id={pt.placeId}
+                    data-point-id={id}
                     cx={cx}
                     cy={cy}
                     r={r}
@@ -288,6 +421,14 @@ export function CalmSpacesChart({
             </div>
           ) : null}
           <div className="tip-metric">{activePlace.metric}</div>
+          {preview && preview.placeId === activePlace.id ? (
+            <div className="tip-play">
+              {preview.period === 'day' ? 'Day' : 'Night'} · hearing{' '}
+              {preview.db.toFixed(1)} dB
+            </div>
+          ) : (
+            <div className="tip-play tip-play--hint">Click a point to hear</div>
+          )}
         </div>
       ) : null}
     </div>

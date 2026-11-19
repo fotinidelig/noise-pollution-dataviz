@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion } from 'motion/react'
-import { NoiseMap, type StoryMapControl } from '../components/NoiseMap'
+import {
+  NoiseMap,
+  type CalmScatterPreview,
+  type StoryMapControl,
+} from '../components/NoiseMap'
 import { buildSteps } from './buildSteps'
 import { DbPlayProvider, type DbPreview } from './DbPlay'
 import { bobTween, cardFade, factFade } from './motionPresets'
@@ -35,7 +39,11 @@ export function ScrollyApp() {
   const [unlocked, setUnlocked] = useState({ hongkong: false, seoul: false })
   const [playingSound, setPlayingSound] = useState<SoundAnchor | null>(null)
   const [dbPreview, setDbPreview] = useState<DbPreview | null>(null)
+  const [calmPreview, setCalmPreview] = useState<CalmScatterPreview | null>(
+    null,
+  )
   const [soundHaltToken, setSoundHaltToken] = useState(0)
+  const [calmHaltToken, setCalmHaltToken] = useState(0)
   const stepRefs = useRef<Record<string, HTMLElement | null>>({})
 
   useEffect(() => {
@@ -112,6 +120,16 @@ export function ScrollyApp() {
     return () => obs.disconnect()
   }, [steps])
 
+  const onCalmPreviewChange = (next: CalmScatterPreview | null) => {
+    setCalmPreview(next)
+    // Mutual exclusion with story DbPlay / SoundScale.
+    if (next) {
+      setDbPreview(null)
+      setPlayingSound(null)
+      setSoundHaltToken((n) => n + 1)
+    }
+  }
+
   const mapControl: StoryMapControl | null = active?.map
     ? {
         center: active.map.center,
@@ -124,6 +142,10 @@ export function ScrollyApp() {
         stepId: active.id,
         calm: calmStep,
         overlays,
+        calmScatterActive: calmStep,
+        calmHaltToken,
+        calmPreview,
+        onCalmPreviewChange,
       }
     : null
 
@@ -149,16 +171,21 @@ export function ScrollyApp() {
     setCardHidden(true)
   }
 
-  // Facts: always-on grain at 75 dB (no DbPlay). Sounds samples / body DbPlay otherwise.
+  // Facts: always-on grain at 75 dB (no DbPlay). Sounds / body DbPlay / calm scatter otherwise.
   const FACTS_GRAIN_DB = 75
   const factsGrain = active?.id === 'hero' && !cardHidden
   const dbPlayGrain = Boolean(dbPreview) && !cardHidden && active?.id !== 'hero'
   const soundsGrain =
-    Boolean(playingSound) && active?.id === 'sounds' && !cardHidden && !dbPreview
-  const grainOn = factsGrain || dbPlayGrain || soundsGrain
+    Boolean(playingSound) &&
+    active?.id === 'sounds' &&
+    !cardHidden &&
+    !dbPreview &&
+    !calmPreview
+  const calmGrain = Boolean(calmPreview) && calmStep
+  const grainOn = factsGrain || dbPlayGrain || soundsGrain || calmGrain
   const grainDb = factsGrain
     ? FACTS_GRAIN_DB
-    : dbPreview?.db ?? playingSound?.db
+    : calmPreview?.db ?? dbPreview?.db ?? playingSound?.db
   const grainStrength = grainDb != null ? grainIntensity(grainDb) : 0
   const grainDensity = grainDb != null ? loudnessRatio(grainDb) : 1
 
@@ -173,18 +200,29 @@ export function ScrollyApp() {
     setDbPreview(null)
   }, [active?.id, cardHidden])
 
+  // Calm scatter nature preview lives on the map chart — stop only when leaving calm.
+  useEffect(() => {
+    if (!calmStep) setCalmPreview(null)
+  }, [calmStep])
+
   const onDbPreviewChange = (next: DbPreview | null) => {
     setDbPreview(next)
-    // Mutual exclusion with SoundScale samples (keep ladder clickable).
+    // Mutual exclusion with SoundScale samples + calm scatter (keep them clickable).
     if (next) {
       setPlayingSound(null)
       setSoundHaltToken((n) => n + 1)
+      setCalmPreview(null)
+      setCalmHaltToken((n) => n + 1)
     }
   }
 
   const onSoundPlayingChange = (anchor: SoundAnchor | null) => {
     setPlayingSound(anchor)
-    if (anchor) setDbPreview(null)
+    if (anchor) {
+      setDbPreview(null)
+      setCalmPreview(null)
+      setCalmHaltToken((n) => n + 1)
+    }
   }
 
   // Facts has no DbPlay; elsewhere stop on Hide / leave via active=false.
