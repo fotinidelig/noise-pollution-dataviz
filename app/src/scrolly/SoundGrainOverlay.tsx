@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { easeInOutCubic, motionDur } from './motionPresets'
 import './SoundGrainOverlay.css'
 
 type Props = {
@@ -9,7 +10,7 @@ type Props = {
   active: boolean
 }
 
-const FADE_MS = 480
+const FADE_MS = Math.round(motionDur.grain * 1000)
 
 /** Full-screen particle grain; fades in/out via opacity + canvas alpha tween. */
 export function SoundGrainOverlay({ density, intensity, active }: Props) {
@@ -34,7 +35,7 @@ export function SoundGrainOverlay({ density, intensity, active }: Props) {
     setShown(false)
   }, [active])
 
-  // Canvas alpha tween tracks shown state (same duration as CSS opacity).
+  // Canvas alpha tween tracks shown state (same duration/curve as UI grain fade).
   useEffect(() => {
     const start = performance.now()
     const from = fadeRef.current
@@ -42,9 +43,7 @@ export function SoundGrainOverlay({ density, intensity, active }: Props) {
     let raf = 0
     const tick = (t: number) => {
       const u = Math.min(1, (t - start) / FADE_MS)
-      // ease-in-out
-      const e = u < 0.5 ? 2 * u * u : 1 - (-2 * u + 2) ** 2 / 2
-      fadeRef.current = from + (to - from) * e
+      fadeRef.current = from + (to - from) * easeInOutCubic(u)
       if (u < 1) raf = requestAnimationFrame(tick)
       else fadeRef.current = to
     }

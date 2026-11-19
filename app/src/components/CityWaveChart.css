@@ -31,19 +31,6 @@
   overflow: visible;
 }
 
-.wave-active {
-  animation: wave-in 180ms ease-out;
-}
-
-@keyframes wave-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
 .wave-seg {
   fill: none;
   stroke-linecap: round;

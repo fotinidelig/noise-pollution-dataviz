@@ -62,17 +62,7 @@ html {
   flex-direction: column;
   gap: 0.55rem;
   align-items: center;
-  transition:
-    opacity 220ms ease,
-    transform 220ms ease,
-    visibility 220ms ease;
-}
-
-.scrolly-step__stack.is-faded {
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(0.35rem);
-  pointer-events: none;
+  /* Enter/exit opacity+y driven by motion/react (cardFade). */
 }
 
 .scrolly-step--hero .scrolly-step__stack {
@@ -236,14 +226,12 @@ html {
 }
 
 .scrolly-step__next-chevron {
-  /* translate before rotate so the bob stays vertical on screen */
-  transform: translateY(0) rotate(45deg);
-  animation: scrolly-next-bob 1.6s ease-in-out infinite;
+  /* rotate only — vertical bob is motion/react (bobTween) */
+  transform: rotate(45deg);
 }
 
 .scrolly-step__prev-chevron {
-  transform: translateY(0) rotate(-135deg);
-  animation: scrolly-prev-bob 1.6s ease-in-out infinite;
+  transform: rotate(-135deg);
 }
 
 .scrolly-step__prev:hover .scrolly-step__prev-chevron,
@@ -251,26 +239,6 @@ html {
 .scrolly-step__next:hover .scrolly-step__next-chevron,
 .scrolly-step__next:focus-visible .scrolly-step__next-chevron {
   opacity: 1;
-}
-
-@keyframes scrolly-next-bob {
-  0%,
-  100% {
-    transform: translateY(0) rotate(45deg);
-  }
-  50% {
-    transform: translateY(6px) rotate(45deg);
-  }
-}
-
-@keyframes scrolly-prev-bob {
-  0%,
-  100% {
-    transform: translateY(0) rotate(-135deg);
-  }
-  50% {
-    transform: translateY(-6px) rotate(-135deg);
-  }
 }
 
 .scrolly-hk-colorbar {
@@ -503,7 +471,7 @@ html {
   box-shadow:
     0 0 0 2px rgba(245, 0, 171, 0.45),
     0 0 16px rgba(245, 0, 171, 0.9);
-  transform: scale(1.25);
+  /* scale via motion/react (railTween) */
 }
 
 .scrolly-rail__stop.is-active .scrolly-rail__label {

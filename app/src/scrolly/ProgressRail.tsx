@@ -1,4 +1,6 @@
+import { motion } from 'motion/react'
 import type { StoryStep } from './storyTypes'
+import { railTween } from './motionPresets'
 
 type Props = {
   steps: StoryStep[]
@@ -35,7 +37,11 @@ export function ProgressRail({
                 title={reopenCue ? 'Show story card' : undefined}
                 onClick={() => onJump(s.id)}
               >
-                <span className="scrolly-rail__dot" />
+                <motion.span
+                  className="scrolly-rail__dot"
+                  animate={{ scale: active ? 1.25 : 1 }}
+                  transition={railTween}
+                />
                 <span className="scrolly-rail__label">{s.railLabel}</span>
               </button>
             </li>

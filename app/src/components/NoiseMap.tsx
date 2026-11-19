@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Feature, FeatureCollection, Point } from 'geojson'
 import * as maplibregl from 'maplibre-gl'
+import { motion } from 'motion/react'
 import 'maplibre-gl/dist/maplibre-gl.css'
+import { titleFade } from '../scrolly/motionPresets'
 import { hydrateChartCities } from '../lib/chartData'
 import {
   EUROPE_BOUNDS,
@@ -1932,13 +1934,20 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
   return (
     <section className={`noise-shell${calmMode ? ' noise-shell--calm' : ''}`}>
       <header className="noise-top">
-        <div
-          className={`noise-brand${explore ? ' is-visible' : ''}`}
+        <motion.div
+          className="noise-brand"
           aria-hidden={!explore}
+          initial={false}
+          animate={
+            explore
+              ? { opacity: 1, y: 0, pointerEvents: 'auto' as const }
+              : { opacity: 0, y: -11, pointerEvents: 'none' as const }
+          }
+          transition={titleFade}
         >
           <h1>Do you hear the birds?</h1>
           <p className="noise-sub">The world might be too noisy to do that.</p>
-        </div>
+        </motion.div>
         {explore ? (
           <div className="noise-controls" role="group" aria-label="Noise layer controls">
             <div className="seg" role="radiogroup" aria-label="Source">

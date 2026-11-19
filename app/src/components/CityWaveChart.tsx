@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { scaleLinear } from 'd3-scale'
+import { select } from 'd3-selection'
 import { curveMonotoneY, line as d3Line } from 'd3-shape'
+import 'd3-transition'
 import {
   LDEN_BANDS,
   LNIGHT_BANDS,
@@ -56,12 +58,15 @@ type Props = {
 }
 
 type Pt = { x: number; y: number; color: string; t: number }
+type Seg = { x1: number; y1: number; x2: number; y2: number; color: string }
 
 const LDEN_KEYS = ['55-59', '60-64', '65-69', '70-74', '>75'] as const
 const LNIGHT_KEYS = ['50-54', '55-59', '60-64', '65-69', '>70'] as const
 
 /** Uniform stroke for every segment — abstract sidecar line. */
 const STROKE_WIDTH = 2.4
+const LEAVE_MS = 200
+const ENTER_MS = 160
 
 function lerpColor(a: string, b: string, t: number): string {
   const parse = (hex: string) => {
@@ -122,6 +127,17 @@ function sampleWavePath(
   return samples
 }
 
+function samplesToSegs(samples: Pt[]): Seg[] {
+  if (samples.length < 2) return []
+  const segs: Seg[] = []
+  for (let i = 0; i < samples.length - 1; i++) {
+    const a = samples[i]
+    const b = samples[i + 1]
+    segs.push({ x1: a.x, y1: a.y, x2: b.x, y2: b.y, color: a.color })
+  }
+  return segs
+}
+
 export function CityWaveChart({
   cities,
   source,
@@ -134,7 +150,11 @@ export function CityWaveChart({
   sidecar = null,
 }: Props) {
   const plotRef = useRef<HTMLDivElement | null>(null)
+  const waveGRef = useRef<SVGGElement | null>(null)
   const [size, setSize] = useState({ w: 160, h: 200 })
+  /** Keep sidecar mounted through leave fade so D3 can tween opacity out. */
+  const [panelLive, setPanelLive] = useState(false)
+  const lastSidecar = useRef(sidecar)
 
   useEffect(() => {
     const el = plotRef.current
@@ -149,7 +169,7 @@ export function CityWaveChart({
     })
     ro.observe(el)
     return () => ro.disconnect()
-  }, [])
+  }, [panelLive])
 
   const bandMeta = metric === 'Lden' ? LDEN_BANDS : LNIGHT_BANDS
   const bandKeys = metric === 'Lden' ? [...LDEN_KEYS] : [...LNIGHT_KEYS]
@@ -210,6 +230,12 @@ export function CityWaveChart({
     bandMeta,
   ])
 
+  if (sidecar) lastSidecar.current = sidecar
+  const show = Boolean(active && sidecar)
+  useEffect(() => {
+    if (show) setPanelLive(true)
+  }, [show])
+
   const pad = { top: 10, right: 14, bottom: 10, left: 10 }
   const innerW = Math.max(40, size.w - pad.left - pad.right)
   const innerH = Math.max(40, size.h - pad.top - pad.bottom)
@@ -217,7 +243,6 @@ export function CityWaveChart({
   const anchors = useMemo(() => {
     if (!active?.points.length) return []
     const n = active.points.length
-    // Index scale: lowest present dB → bottom, highest → top (no zero bands)
     const y = scaleLinear()
       .domain([0, Math.max(1, n - 1)])
       .range([innerH, 0])
@@ -233,17 +258,68 @@ export function CityWaveChart({
   }, [active, innerW, innerH])
 
   const samples = useMemo(() => sampleWavePath(anchors, 22), [anchors])
+  const segs = useMemo(() => samplesToSegs(samples), [samples])
 
-  if (!active || !sidecar) return null
+  // Efficient D3 join — update stroke/geometry in place; fade out on leave (no remount flash).
+  useEffect(() => {
+    const node = waveGRef.current
+    if (!node) return
+    const g = select(node)
+    const data = show ? segs : []
+
+    const sel = g.selectAll<SVGLineElement, Seg>('line.wave-seg').data(data, (_, i) => String(i))
+
+    sel
+      .exit()
+      .transition()
+      .duration(LEAVE_MS)
+      .attr('opacity', 0)
+      .remove()
+      .on('end', () => {
+        if (!show && g.selectAll('line.wave-seg').empty()) setPanelLive(false)
+      })
+
+    const enter = sel
+      .enter()
+      .append('line')
+      .attr('class', 'wave-seg')
+      .attr('stroke-width', STROKE_WIDTH)
+      .attr('opacity', 0)
+      .attr('x1', (d) => d.x1)
+      .attr('y1', (d) => d.y1)
+      .attr('x2', (d) => d.x2)
+      .attr('y2', (d) => d.y2)
+      .attr('stroke', (d) => d.color)
+
+    enter.transition().duration(ENTER_MS).attr('opacity', 1)
+
+    sel
+      .interrupt()
+      .attr('x1', (d) => d.x1)
+      .attr('y1', (d) => d.y1)
+      .attr('x2', (d) => d.x2)
+      .attr('y2', (d) => d.y2)
+      .attr('stroke', (d) => d.color)
+      .transition()
+      .duration(ENTER_MS)
+      .attr('opacity', 1)
+
+    if (!show && data.length === 0 && g.selectAll('line.wave-seg').empty()) {
+      setPanelLive(false)
+    }
+  }, [segs, show])
+
+  const dock = sidecar ?? lastSidecar.current
+  if (!panelLive || !dock) return null
 
   return (
     <div
       className={`wave-panel wave-panel--sidecar${pinned ? ' is-pinned' : ''}`}
       aria-hidden="true"
       style={{
-        left: sidecar.left,
-        top: sidecar.top,
-        height: sidecar.height,
+        left: dock.left,
+        top: dock.top,
+        height: dock.height,
       }}
     >
       <div className="wave-panel__plot" ref={plotRef}>
@@ -255,25 +331,7 @@ export function CityWaveChart({
           aria-label="People by dB band"
         >
           <g transform={`translate(${pad.left},${pad.top})`}>
-            {samples.length > 1 ? (
-              <g className="wave-active">
-                {samples.slice(0, -1).map((a, i) => {
-                  const b = samples[i + 1]
-                  return (
-                    <line
-                      key={`s-${i}`}
-                      className="wave-seg"
-                      x1={a.x}
-                      y1={a.y}
-                      x2={b.x}
-                      y2={b.y}
-                      stroke={a.color}
-                      strokeWidth={STROKE_WIDTH}
-                    />
-                  )
-                })}
-              </g>
-            ) : null}
+            <g className="wave-active" ref={waveGRef} />
           </g>
         </svg>
       </div>

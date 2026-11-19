@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { motion } from 'motion/react'
 import { NoiseMap, type StoryMapControl } from '../components/NoiseMap'
 import { buildSteps } from './buildSteps'
+import { bobTween, cardFade, factFade } from './motionPresets'
 import { ProgressRail } from './ProgressRail'
 import { SoundGrainOverlay } from './SoundGrainOverlay'
 import {
@@ -208,12 +210,25 @@ export function ScrollyApp() {
                 stepRefs.current[step.id] = el
               }}
             >
-              <div
+              <motion.div
                 className={`scrolly-step__stack${
                   step.id === 'hero' && step.stats?.length
                     ? ' scrolly-step__stack--facts'
                     : ''
-                }${cardHidden && step.id === active.id ? ' is-faded' : ''}`}
+                }`}
+                initial={false}
+                animate={
+                  cardHidden && step.id === active.id
+                    ? { opacity: 0, y: 6 }
+                    : { opacity: 1, y: 0 }
+                }
+                transition={cardFade}
+                style={{
+                  pointerEvents:
+                    cardHidden && step.id === active.id ? 'none' : undefined,
+                  visibility:
+                    cardHidden && step.id === active.id ? 'hidden' : undefined,
+                }}
               >
                 {step.id === 'hero' && step.stats && step.stats.length > 0 ? (
                   <div className="scrolly-step__facts-panel">
@@ -222,11 +237,14 @@ export function ScrollyApp() {
                       role="list"
                       aria-label="Key noise impact figures"
                     >
-                      {step.stats.map((stat) => (
-                        <div
+                      {step.stats.map((stat, i) => (
+                        <motion.div
                           key={stat.value}
                           className="scrolly-step__fact-box"
                           role="listitem"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ ...factFade, delay: i * 0.05 }}
                         >
                           {stat.prefix ? (
                             <div className="scrolly-step__stat-prefix">
@@ -239,7 +257,7 @@ export function ScrollyApp() {
                           <div className="scrolly-step__stat-label">
                             {stat.label}
                           </div>
-                        </div>
+                        </motion.div>
                       ))}
                     </div>
                     {nextStep ? (
@@ -250,7 +268,12 @@ export function ScrollyApp() {
                         title={`Next: ${nextStep.railLabel}`}
                         onClick={() => jump(nextStep.id)}
                       >
-                        <span className="scrolly-step__next-chevron" aria-hidden="true" />
+                        <motion.span
+                          className="scrolly-step__next-chevron"
+                          aria-hidden="true"
+                          animate={{ y: [0, 6, 0] }}
+                          transition={bobTween}
+                        />
                       </button>
                     ) : null}
                   </div>
@@ -273,7 +296,12 @@ export function ScrollyApp() {
                         title={`Previous: ${prevStep.railLabel}`}
                         onClick={() => jump(prevStep.id)}
                       >
-                        <span className="scrolly-step__prev-chevron" aria-hidden="true" />
+                        <motion.span
+                          className="scrolly-step__prev-chevron"
+                          aria-hidden="true"
+                          animate={{ y: [0, -6, 0] }}
+                          transition={bobTween}
+                        />
                       </button>
                     ) : null}
                     {step.year != null ? (
@@ -322,7 +350,12 @@ export function ScrollyApp() {
                         title={`Next: ${nextStep.railLabel}`}
                         onClick={() => jump(nextStep.id)}
                       >
-                        <span className="scrolly-step__next-chevron" aria-hidden="true" />
+                        <motion.span
+                          className="scrolly-step__next-chevron"
+                          aria-hidden="true"
+                          animate={{ y: [0, 6, 0] }}
+                          transition={bobTween}
+                        />
                       </button>
                     ) : null}
                   </div>
@@ -340,7 +373,7 @@ export function ScrollyApp() {
                     </div>
                   </div>
                 ) : null}
-              </div>
+              </motion.div>
             </section>
           )
         })}

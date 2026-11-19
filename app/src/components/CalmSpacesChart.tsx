@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { scaleLinear, scalePoint } from 'd3-scale'
+import { select } from 'd3-selection'
+import 'd3-transition'
 import {
   buildCalmPoints,
   orderCalmPlaces,
@@ -27,6 +29,7 @@ export function CalmSpacesChart({
 }: Props) {
   const wrapRef = useRef<HTMLDivElement | null>(null)
   const plotRef = useRef<HTMLDivElement | null>(null)
+  const dotsGRef = useRef<SVGGElement | null>(null)
   const [size, setSize] = useState({ w: 880, h: 220 })
   const [localHover, setLocalHover] = useState<string | null>(null)
   const [hidden, setHidden] = useState(false)
@@ -86,6 +89,28 @@ export function CalmSpacesChart({
     return { margin, innerW, innerH, x, y, bands, yMin, yMax }
   }, [ordered, points, size.w, size.h])
 
+  const activeId = localHover ?? focusId
+  const activePlace = activeId
+    ? ordered.find((p) => p.id === activeId) ?? null
+    : null
+
+  // Efficient D3 opacity tween on focus leave/enter — avoid React remount flash.
+  useEffect(() => {
+    const node = dotsGRef.current
+    if (!node) return
+    const focus = activeId
+    select(node)
+      .selectAll<SVGCircleElement, unknown>('circle.calm-chart__dot')
+      .interrupt()
+      .transition()
+      .duration(180)
+      .attr('opacity', function () {
+        if (!focus) return 0.9
+        const id = this.getAttribute('data-place-id')
+        return id === focus ? 0.9 : 0.28
+      })
+  }, [activeId])
+
   if (!data || !places.length) return null
 
   if (hidden) {
@@ -109,11 +134,6 @@ export function CalmSpacesChart({
   }
 
   if (!layout) return null
-
-  const activeId = localHover ?? focusId
-  const activePlace = activeId
-    ? ordered.find((p) => p.id === activeId) ?? null
-    : null
 
   const onMove = (ev: React.MouseEvent<SVGSVGElement>) => {
     const svg = ev.currentTarget
@@ -216,24 +236,27 @@ export function CalmSpacesChart({
                 {b.continent}
               </text>
             ))}
-            {points.map((pt) => {
-              const cx = layout.x(pt.placeId) ?? 0
-              const cy = layout.y(pt.db)
-              const r = quietnessRadius(pt.db, dbExtent.min, dbExtent.max, 4, 9.5)
-              const focused = activeId === pt.placeId
-              return (
-                <circle
-                  key={`${pt.placeId}-${pt.period}`}
-                  className={`calm-chart__dot calm-chart__dot--${pt.period}${focused ? ' is-focus' : ''}`}
-                  cx={cx}
-                  cy={cy}
-                  r={r}
-                  fill={pt.period === 'day' ? DAY : NIGHT}
-                  stroke="rgba(255,255,255,0.35)"
-                  opacity={activeId && !focused ? 0.28 : 0.9}
-                />
-              )
-            })}
+            <g ref={dotsGRef}>
+              {points.map((pt) => {
+                const cx = layout.x(pt.placeId) ?? 0
+                const cy = layout.y(pt.db)
+                const r = quietnessRadius(pt.db, dbExtent.min, dbExtent.max, 4, 9.5)
+                const focused = activeId === pt.placeId
+                return (
+                  <circle
+                    key={`${pt.placeId}-${pt.period}`}
+                    className={`calm-chart__dot calm-chart__dot--${pt.period}${focused ? ' is-focus' : ''}`}
+                    data-place-id={pt.placeId}
+                    cx={cx}
+                    cy={cy}
+                    r={r}
+                    fill={pt.period === 'day' ? DAY : NIGHT}
+                    stroke="rgba(255,255,255,0.35)"
+                    opacity={0.9}
+                  />
+                )
+              })}
+            </g>
             {/* Place name only while hovered / focused from map */}
             {activePlace ? (
               <text

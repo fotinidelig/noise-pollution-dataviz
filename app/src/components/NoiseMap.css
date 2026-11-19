@@ -66,31 +66,9 @@
   pointer-events: auto;
 }
 
-/* Hidden through all story beats; fade/slide in only on Explore. */
+/* Hidden through story beats; enter/exit via motion/react (titleFade). */
 .noise-brand {
-  opacity: 0;
-  transform: translateY(-0.7rem);
   pointer-events: none;
-  transition:
-    opacity 0.65s ease,
-    transform 0.65s ease;
-}
-
-.noise-brand.is-visible {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .noise-brand {
-    transition: opacity 0.2s ease;
-    transform: none;
-  }
-
-  .noise-brand.is-visible {
-    transform: none;
-  }
 }
 
 .noise-brand h1 {
