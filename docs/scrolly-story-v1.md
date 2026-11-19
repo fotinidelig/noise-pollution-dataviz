@@ -72,7 +72,9 @@ On the **2020** Hong Kong **citywide traffic-noise map** (modelled area levels, 
 
 ### Seoul (2024)
 
-Among eight Seoul road sites, **Bukahyeon-dong** has the **highest mean** (~**73 dB**). Highest single reading ~**77 dB** at **Sookmyung Girls' HS (front)**.
+**Title:** In Seoul the highest average noise is around Bukahyeon-dong.
+
+Among eight Seoul road sites, **Bukahyeon-dong** has the **highest mean** (~**73 dB**). Highest single reading ~**77 dB** at the monitoring site at **Sookmyung Girls' High School (front gate)** (`숙명여고 앞`).
 
 ### Calm — Places where you might hear birds
 
@@ -93,4 +95,4 @@ Zoom into **countries** or **cities** for exposure and impacts on **human annoya
 | Hong Kong | `app/public/data/hong_kong_l10_overlay.png` + `.json` (EPSG:2326→WGS84 corners) |
 | Seoul | `app/public/data/seoul_road_sites.geojson` — `name_en` labels; Korean kept in `name_ko` |
 
-Seoul Latin names: Bukahyeon-dong, Sookmyung Girls' HS (front), IBK / corporate bank site, Banpo-bon-dong, Samsin Building, Hoegi-dong, Bulgwang-dong, Seongbuk Elementary.
+Seoul Latin names: Bukahyeon-dong, Sookmyung Girls' High School (front gate), IBK / corporate bank site, Banpo-bon-dong, Samsin Building, Hoegi-dong, Bulgwang-dong, Seongbuk Elementary.

@@ -219,10 +219,10 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       id: 'seoul',
       railLabel: 'Seoul',
       year: seoul.year,
-      title: `Seoul: highest mean at ${seoul.loudest_site}`,
+      title: 'In Seoul the highest average noise is around Bukahyeon-dong',
       questions: [],
       body: [
-        `Among eight Seoul road sites in ${seoul.year}, ${hi(seoul.loudest_site)} has the ${hi('highest mean')} — about ${hiDb(seoul.max_db_median)}. The ${hi('highest single reading')} is about ${hiDb(seoul.max_db_peak)}${seoul.peak_site ? ` at ${hi(seoul.peak_site)}` : ''}.`,
+        `Among eight Seoul road sites in ${seoul.year}, ${hi(seoul.loudest_site)} has the ${hi('highest mean')} — about ${hiDb(seoul.max_db_median)}. The ${hi('highest single reading')} is about ${hiDb(seoul.max_db_peak)}${seoul.peak_site ? ` at the monitoring site at ${hi(seoul.peak_site)}` : ''}.`,
       ],
       map: {
         center: cardClearCenter(seoul.lon, seoul.lat, 8.9, CARD_CLEAR_PX + EXTRA_EIGHTH_PX),
