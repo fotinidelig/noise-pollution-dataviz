@@ -165,6 +165,8 @@ export function ScrollyApp() {
   const grainStrength = grainDb != null ? grainIntensity(grainDb) : 0
   const grainDensity = grainDb != null ? loudnessRatio(grainDb) : 1
 
+  // Clear grain + guarantee Sounds clips stop on step change / Hide / Explore jump.
+  // SoundScale also hard-stops via `active`; this covers parent grain state immediately.
   useEffect(() => {
     if (active?.id !== 'sounds' || cardHidden) setPlayingSound(null)
   }, [active?.id, cardHidden])
@@ -352,7 +354,7 @@ export function ScrollyApp() {
                             />
                           ) : null}
                           <SoundScale
-                            active={isActiveCard}
+                            active={activeId === 'sounds' && !cardHidden}
                             onPlayingChange={setPlayingSound}
                           />
                           {step.body.slice(1).map((p) => (

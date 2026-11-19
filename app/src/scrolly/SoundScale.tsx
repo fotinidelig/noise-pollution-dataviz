@@ -68,18 +68,24 @@ export function grainIntensity(db: number, refDb = 45): number {
 
 type Props = {
   anchors?: SoundAnchor[]
-  /** When false (scrolled away), stop playback and clear grain. */
+  /** When false (scrolled away / Hide / jump), stop playback and clear grain. */
   active?: boolean
   /** Fired when playback starts/stops so the parent can show full-screen grain. */
   onPlayingChange?: (anchor: SoundAnchor | null) => void
 }
 
+/**
+ * Click-to-play dB ladder. Leave / Hide / unmount must always win over an
+ * in-flight `audio.play()` — a generation token invalidates stale starts.
+ */
 export function SoundScale({
   anchors = STORY_SOUND_ANCHORS,
   active = true,
   onPlayingChange,
 }: Props) {
   const audioRef = useRef<HTMLAudioElement | null>(null)
+  const playGenRef = useRef(0)
+  const activeRef = useRef(active)
   const [playingId, setPlayingId] = useState<string | null>(null)
   const sorted = useMemo(
     () => [...anchors].sort((a, b) => a.db - b.db),
@@ -87,28 +93,47 @@ export function SoundScale({
   )
   const onPlayingChangeRef = useRef(onPlayingChange)
   onPlayingChangeRef.current = onPlayingChange
+  activeRef.current = active
 
-  const stop = () => {
+  const hardStop = (opts?: { clearSrc?: boolean }) => {
+    // Invalidate any in-flight play() so a late resolve cannot resume audio.
+    playGenRef.current += 1
     const a = audioRef.current
     if (a) {
       a.pause()
-      a.currentTime = 0
+      try {
+        a.currentTime = 0
+      } catch {
+        /* ignore seek errors on empty/unready media */
+      }
+      if (opts?.clearSrc) {
+        a.removeAttribute('src')
+        a.load()
+      }
     }
     setPlayingId(null)
     onPlayingChangeRef.current?.(null)
   }
 
   useEffect(() => {
-    if (!active) stop()
+    if (!active) hardStop()
     // eslint-disable-next-line react-hooks/exhaustive-deps -- stop when leaving the sounds beat
   }, [active])
 
   useEffect(() => {
     return () => {
+      // Unmount: bump gen + tear down media; skip React state updates.
+      playGenRef.current += 1
       const a = audioRef.current
       if (a) {
         a.pause()
-        a.src = ''
+        try {
+          a.currentTime = 0
+        } catch {
+          /* ignore */
+        }
+        a.removeAttribute('src')
+        a.load()
       }
       audioRef.current = null
       onPlayingChangeRef.current?.(null)
@@ -120,27 +145,61 @@ export function SoundScale({
     onPlayingChangeRef.current?.(anchor)
   }
 
-  const play = async (anchor: SoundAnchor) => {
+  const ensureAudio = () => {
     let audio = audioRef.current
     if (!audio) {
       audio = new Audio()
+      audio.preload = 'auto'
       audioRef.current = audio
-      audio.addEventListener('ended', () => setPlaying(null))
+      audio.addEventListener('ended', () => {
+        // Ignore ended from a superseded element / generation.
+        if (!activeRef.current) return
+        setPlaying(null)
+      })
     }
+    return audio
+  }
+
+  const play = async (anchor: SoundAnchor) => {
+    if (!activeRef.current) return
+
+    const audio = ensureAudio()
+
+    // Toggle off the same clip.
     if (playingId === anchor.id && !audio.paused) {
-      audio.pause()
-      audio.currentTime = 0
-      setPlaying(null)
+      hardStop()
       return
     }
+
+    // New clip: bump gen so any previous in-flight play is discarded.
+    playGenRef.current += 1
+    const gen = playGenRef.current
+
     audio.pause()
     audio.src = anchor.src
-    audio.currentTime = 0
+    try {
+      audio.currentTime = 0
+    } catch {
+      /* ignore */
+    }
     setPlaying(anchor)
+
     try {
       await audio.play()
     } catch {
-      setPlaying(null)
+      if (playGenRef.current === gen) setPlaying(null)
+      return
+    }
+
+    // Leave / Hide / jump won the race — kill the late start.
+    if (playGenRef.current !== gen || !activeRef.current) {
+      audio.pause()
+      try {
+        audio.currentTime = 0
+      } catch {
+        /* ignore */
+      }
+      if (playGenRef.current === gen) setPlaying(null)
     }
   }
 
