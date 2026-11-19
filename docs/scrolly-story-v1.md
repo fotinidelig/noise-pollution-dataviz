@@ -38,7 +38,7 @@ Horizontal quiet→loud ladder (equally spaced markers; click-to-play `app/publi
 | Birds | ~44–60 dB | `birds-singing.mp3` |
 | Vacuum | **~70 dB** (HSD threshold highlight) | `vacuum-cleaner.mp3` (Freesound 76618) |
 | Blender | **~80–90 dB** | `blender.mp3` (Freesound 72304) |
-| Motorcycle | ~90 dB (loud end) | `motorcycle-passing.mp3` |
+| Motorcycle | ~90 dB (loud end) | `freesound_community-motorcycle-77112.mp3` (Freesound 77112) |
 
 While a sample plays: full-screen visible particle grain (count ∝ 2^((dB−45)/10), 2× per +10 dB) dims the map; only the playing column’s pulse rings animate.
 

@@ -51,7 +51,7 @@ export const STORY_SOUND_ANCHORS: SoundAnchor[] = [
     label: 'Motorcycle',
     db: 90,
     dbNote: 'about 90',
-    src: `${BASE}audio/motorcycle-passing.mp3`,
+    src: `${BASE}audio/freesound_community-motorcycle-77112.mp3`,
   },
 ]
 

@@ -18,7 +18,7 @@ Local CC0 / public-domain / CC-licensed clips for Fotini’s dB-focused scrolly 
 | Birds singing | `app/public/audio/birds-singing.mp3` | ~3.5 s | **US public domain** — credit National Park Service | [NPS American Robin](https://www.nps.gov/subjects/sound/sounds-american-robin.htm) | **~44–60 dB** |
 | Vacuum cleaner | `app/public/audio/vacuum-cleaner.mp3` | ~22 s | **CC-licensed via Freesound** — credit **freesound_community** | [Freesound id **76618**](https://freesound.org/people/freesound_community/sounds/76618/) | **~70 dB** |
 | Blender | `app/public/audio/blender.mp3` | (source length) | **CC-licensed via Freesound** — credit **freesound_community** | [Freesound `freesound_community-blender-72304`, id **72304**](https://freesound.org/people/freesound_community/sounds/72304/) | **~80–90 dB** |
-| Motorcycle passing | `app/public/audio/motorcycle-passing.mp3` | ~4.0 s | **US public domain** — credit National Park Service | [NPS Motorcycle](https://www.nps.gov/subjects/sound/sounds-motorcycle.htm) | **~90 dB** (loud end of the line) |
+| Motorcycle | `app/public/audio/freesound_community-motorcycle-77112.mp3` | ~21 s | **CC-licensed via Freesound** — credit **freesound_community** | [Freesound `freesound_community-motorcycle-77112`, id **77112**](https://freesound.org/people/freesound_community/sounds/77112/) | **~90 dB** (loud end of the line) |
 
 Gallery index (birds, stream, machines): [NPS Natural Sounds Sound Gallery](https://www.nps.gov/subjects/sound/gallery.htm).
 
@@ -32,6 +32,10 @@ Gallery index (birds, stream, machines): [NPS Natural Sounds Sound Gallery](http
 ### Vacuum history
 
 Earlier vacuum clip was Freesound Sadiquecat #817676 (CC0); swapped to **#76618** per Fotini (2026-11-18).
+
+### Motorcycle history
+
+Earlier motorcycle clip was NPS PD (`motorcycle-passing.mp3`); swapped to Freesound **#77112** (`freesound_community-motorcycle-77112`) per Fotini (2026-11-19).
 
 ---
 
