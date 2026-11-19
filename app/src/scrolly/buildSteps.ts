@@ -204,7 +204,7 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       title: 'In Hong Kong more than 1 million people are exposed to road traffic higher than 70dBs',
       questions: [],
       body: [
-        `UNEP Frontiers 2022: at least ${hi('1 million')} Hong Kong residents live with road traffic above ${hiLoud('70 dB')} — past a ${hiLoud('vacuum cleaner')}.`,
+        `At least ${hi('1 million')} Hong Kong residents have to live with road traffic noise above ${hiLoud('70 dB')}.`,
         `On the ${hk.year} Hong Kong ${hi('citywide traffic-noise map')} (modelled area levels, not one microphone), about ${hi(`${hk.pct_valid_gt70.toFixed(0)}%`)} of the mapped territory sits above ${hiLoud('70 dB')} — roughly ${hi(`${hk.area_km2_gt70.toFixed(0)} km²`)}.`,
       ],
       map: {
