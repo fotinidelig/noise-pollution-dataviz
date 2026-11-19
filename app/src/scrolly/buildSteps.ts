@@ -17,6 +17,21 @@ function hiDb(db: number, digits = 0) {
   return db >= 70 ? hiLoud(label) : hi(label)
 }
 
+/**
+ * Place the city just right of the centered story card (~420px).
+ * Westward center shift → geographic point sits east of viewport center.
+ * MapLibre story easeTo has no padding; pixel→lon uses 512px tiles.
+ */
+function cardClearCenter(
+  lon: number,
+  lat: number,
+  zoom: number,
+  pxRight = 220,
+): [number, number] {
+  const lonPerPx = 360 / (512 * 2 ** zoom)
+  return [lon - pxRight * lonPerPx, lat]
+}
+
 export function buildSteps(m: StoryMetrics): StoryStep[] {
   const eu = m.europe
   const de = m.germany
@@ -108,7 +123,7 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
         `${hiLoud('75 dB')} sits between a ${hiLoud('vacuum cleaner (~70 dB)')} and a ${hiLoud('blender (~80–90 dB)')}.`,
       ],
       map: {
-        center: [de.lon, de.lat],
+        center: cardClearCenter(de.lon, de.lat, 7.1),
         zoom: 7.1,
         source: 'road',
         metric: 'Lden',
@@ -143,7 +158,7 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
         `In ${madrid.year}, night noise at ${hi(`fixed outdoor noise monitoring station ${madrid.loudest_station_id}`)} sits around ${hiDb(madrid.max_db_median)} on a typical night, with peaks near ${hiDb(madrid.max_db_peak)}. Yes, that's ${hi('2 times')} the noise of a ${hiLoud('vacuum cleaner')}.`,
       ],
       map: {
-        center: [madrid.lon, madrid.lat],
+        center: cardClearCenter(madrid.lon, madrid.lat, 9.0),
         zoom: 9.0,
         source: 'road',
         metric: 'Lden',
@@ -161,7 +176,7 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
         `On the ${hk.year} Hong Kong ${hi('citywide traffic-noise map')} (modelled area levels, not one microphone), about ${hi(`${hk.pct_valid_gt70.toFixed(0)}%`)} of the mapped territory sits above ${hiLoud('70 dB')} — roughly ${hi(`${hk.area_km2_gt70.toFixed(0)} km²`)}.`,
       ],
       map: {
-        center: [hk.lon, hk.lat],
+        center: cardClearCenter(hk.lon, hk.lat, 8.7),
         zoom: 8.7,
         source: 'road',
         metric: 'Lden',
@@ -178,7 +193,7 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
         `Among eight Seoul road sites in ${seoul.year}, ${hi(seoul.loudest_site)} has the ${hi('highest mean')} — about ${hiDb(seoul.max_db_median)}. The ${hi('highest single reading')} is about ${hiDb(seoul.max_db_peak)}${seoul.peak_site ? ` at ${hi(seoul.peak_site)}` : ''}.`,
       ],
       map: {
-        center: [seoul.lon, seoul.lat],
+        center: cardClearCenter(seoul.lon, seoul.lat, 8.9),
         zoom: 8.9,
         source: 'road',
         metric: 'Lden',
