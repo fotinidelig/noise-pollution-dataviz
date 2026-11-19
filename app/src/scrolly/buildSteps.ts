@@ -55,9 +55,8 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
     {
       id: 'hero',
       railLabel: 'Intro',
-      title: 'Do you hear the birds?',
-      subtitle:
-        'Or are our cities too loud? We’ll look at noise levels around Europe and the world to find out.',
+      // A11y / nav only — intro UI shows facts alone, no title/subtitle prose.
+      title: 'Key noise facts',
       questions: [],
       body: [],
       stats: [

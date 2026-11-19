@@ -133,11 +133,11 @@ export type StoryStep = {
   railLabel: string
   year?: number | string
   title: string
-  /** Optional line under the title (hero intro). */
+  /** Optional line under the title (unused on fact-only intro). */
   subtitle?: string
   questions: string[]
   body: string[]
-  /** Intro wireframe: one row of big numbers with short labels. */
+  /** Intro: one centered row of distinct fact boxes (value + short label). */
   stats?: StoryStat[]
   map?: {
     center: [number, number]
