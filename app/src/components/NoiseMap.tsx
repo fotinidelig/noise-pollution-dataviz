@@ -1932,7 +1932,10 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
   return (
     <section className={`noise-shell${calmMode ? ' noise-shell--calm' : ''}`}>
       <header className="noise-top">
-        <div className="noise-brand">
+        <div
+          className={`noise-brand${explore ? ' is-visible' : ''}`}
+          aria-hidden={!explore}
+        >
           <h1>Do you hear the birds?</h1>
           <p className="noise-sub">The world might be too noisy to do that.</p>
         </div>
