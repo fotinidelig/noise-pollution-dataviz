@@ -22,7 +22,6 @@ import {
 import {
   aggregateBands,
   buildEqualSpacedRings,
-  seriesToBands,
 } from '../lib/ringGeometry'
 import {
   CityWaveChart,
@@ -239,8 +238,6 @@ type HoverTarget = {
   coords: [number, number]
   cityCount: number
   title: string
-  /** Cache miss on a cluster hit — resolve leaves once, then cache. */
-  pendingClusterId?: number
 }
 
 export type StoryMapControl = {
@@ -316,6 +313,9 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
   const hoverCacheRef = useRef(new Map<string, HoverTarget>())
   const drillingRef = useRef(false)
   const lastTipIdRef = useRef<string | null>(null)
+  /** Skip redundant setPaintProperty when focus id is unchanged. */
+  const lastPaintedFocusRef = useRef<string | null | undefined>(undefined)
+  const hoverMoveRafRef = useRef(0)
 
   sourceRef.current = source
   metricRef.current = metric
@@ -392,13 +392,16 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
   }
   paintRingSoundWaveRef.current = paintRingSoundWave
 
-  /** Apply ring/label dimming immediately (do not wait for React paint effect). */
-  const applyFocusPaint = (activeId: string | null) => {
+  /** Apply ring/label dimming immediately (skip if focus id unchanged). */
+  const applyFocusPaint = (activeId: string | null, force = false) => {
     const map = mapRef.current
     if (!map || !map.getLayer(RINGS_LAYER)) return
+    ringFocusIdRef.current = activeId
+    if (!force && lastPaintedFocusRef.current === activeId) return
+    lastPaintedFocusRef.current = activeId
+
     const dimming = Boolean(activeId)
     const id = activeId ?? ''
-    ringFocusIdRef.current = activeId
 
     // Static rings only — pulse layer is updated by the rAF loop
     map.setPaintProperty(
@@ -485,11 +488,17 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
 
   const setMapHover = (id: string | null, series: HoverSeries | null) => {
     cancelPendingClear()
+    const same = hoveredIdRef.current === id
     hoverGenRef.current += 1
     hoveredIdRef.current = id
     focusIdRef.current = id ?? pinnedIdRef.current
     applyFocusPaint(focusIdRef.current)
     if (id == null) lastTipIdRef.current = null
+    // Same city: skip React id churn; still allow series upgrades
+    if (same && id != null) {
+      if (series) setHoverSeries(series)
+      return
+    }
     setHoveredId(id)
     setHoverSeries(series)
   }
@@ -509,6 +518,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
   }
 
   const targetFromCacheOrData = (id: string): HoverTarget | null => {
+    if (!id) return null
     const cached = hoverCacheRef.current.get(id)
     if (cached) return cached
 
@@ -525,6 +535,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
       }
     }
 
+    // Clusters only exist in the rebuild cache
     if (id.startsWith('cluster:')) return null
 
     const city = citiesRef.current.find((c) => c.id === id)
@@ -540,84 +551,38 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     }
   }
 
-  /** Hit circles first; visible rings as fallback (same path for hover + click). */
+  const idFromHitProps = (props: Record<string, unknown>): string | null => {
+    if (props.kind === 'country') return String(props.id ?? '') || null
+    if (props.cluster) {
+      const clusterId = Number(props.cluster_id)
+      return Number.isFinite(clusterId) ? `cluster:${clusterId}` : null
+    }
+    return String(props.id ?? '') || null
+  }
+
+  /**
+   * Rings first (what you see), then hit circles — tip data always from cache/cities.
+   * Same path for hover + click; no async on the pointer path.
+   */
   const resolveNoiseTarget = (
     map: maplibregl.Map,
     point: maplibregl.PointLike,
   ): HoverTarget | null => {
+    if (map.getLayer(RINGS_LAYER)) {
+      const ringHits = map.queryRenderedFeatures(point, {
+        layers: [RINGS_LAYER],
+      })
+      const ringId = String(ringHits[0]?.properties?.id ?? '')
+      const fromRing = targetFromCacheOrData(ringId)
+      if (fromRing) return fromRing
+    }
+
     const hitLayers = countryModeRef.current
       ? [COUNTRY_HIT_LAYER]
       : [HIT_LAYER]
     const feats = map.queryRenderedFeatures(point, { layers: hitLayers })
-    if (feats.length) {
-      const feat = feats[0]
-      const props = feat.properties ?? {}
-      const coords = (feat.geometry as Point).coordinates as [number, number]
-      const src = sourceRef.current
-      const met = metricRef.current
-
-      if (props.kind === 'country') {
-        const id = String(props.id ?? '')
-        if (!id) return null
-        const cached = targetFromCacheOrData(id)
-        if (cached) return cached
-        let series: HoverSeries | null = null
-        try {
-          series = JSON.parse(String(props.series || 'null')) as HoverSeries
-        } catch {
-          series = null
-        }
-        if (!series) return null
-        return {
-          id,
-          series,
-          coords,
-          cityCount: Number(props.cityCount ?? 0) || 0,
-          title: series.name,
-        }
-      }
-
-      if (props.cluster) {
-        const clusterId = Number(props.cluster_id)
-        if (!Number.isFinite(clusterId)) return null
-        const cached = targetFromCacheOrData(`cluster:${clusterId}`)
-        if (cached) return cached
-        return {
-          id: `cluster:${clusterId}`,
-          series: {
-            id: `cluster:${clusterId}`,
-            name: '…',
-            total: 0,
-            points: [],
-          },
-          coords,
-          cityCount: 0,
-          title: '…',
-          pendingClusterId: clusterId,
-        }
-      }
-
-      const id = String(props.id ?? '')
-      if (!id) return null
-      const cached = targetFromCacheOrData(id)
-      if (cached) return cached
-      const tip = tipFromProps(props.tooltip, src, met)
-      if (!tip) return null
-      const bands = seriesToBands(met, tip)
-      return {
-        id,
-        series: seriesFromBands(id, String(props.agglomeration ?? ''), bands),
-        coords,
-        cityCount: 1,
-        title: String(props.agglomeration ?? ''),
-      }
-    }
-
-    if (!map.getLayer(RINGS_LAYER)) return null
-    const ringHits = map.queryRenderedFeatures(point, { layers: [RINGS_LAYER] })
-    const ringId = String(ringHits[0]?.properties?.id ?? '')
-    if (!ringId) return null
-    return targetFromCacheOrData(ringId)
+    if (!feats.length) return null
+    return targetFromCacheOrData(idFromHitProps(feats[0].properties ?? {}) ?? '')
   }
 
   const showNoisePopup = (
@@ -625,22 +590,20 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     popup: maplibregl.Popup,
     target: HoverTarget,
   ) => {
+    if (lastTipIdRef.current === target.id && popup.isOpen()) return
+    lastTipIdRef.current = target.id
     const met = metricRef.current
-    const html = buildTooltipHtml(
-      target.title,
-      target.cityCount,
-      met,
-      target.series.points.map((b) => ({ ...b, rings: 0 })),
-    )
-    if (lastTipIdRef.current !== target.id) {
-      lastTipIdRef.current = target.id
-      popup.setLngLat(target.coords).setHTML(html).addTo(map)
-      return
-    }
-    // Same city: keep HTML; only re-anchor if needed (centers are stable)
-    if (!popup.isOpen()) {
-      popup.setLngLat(target.coords).setHTML(html).addTo(map)
-    }
+    popup
+      .setLngLat(target.coords)
+      .setHTML(
+        buildTooltipHtml(
+          target.title,
+          target.cityCount,
+          met,
+          target.series.points.map((b) => ({ ...b, rings: 0 })),
+        ),
+      )
+      .addTo(map)
   }
 
   // Sync story camera / layer locks (scrolly)
@@ -1418,8 +1381,8 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
 
     const ringSource = map.getSource(RINGS_SOURCE) as maplibregl.GeoJSONSource
     ringSource.setData({ type: 'FeatureCollection', features: ringFeatures })
-    // Rings were replaced — re-apply focus paint so dimming never sticks/lags
-    applyFocusPaint(focusIdRef.current)
+    // Rings were replaced — force re-apply focus paint so dimming never sticks
+    applyFocusPaint(focusIdRef.current, true)
   }
 
   const scheduleRebuild = () => {
@@ -1671,22 +1634,16 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
         return
       }
 
-      const pinAndTip = (t: HoverTarget) => {
-        pinnedIdRef.current = t.id
-        focusIdRef.current = t.id
-        setPinnedId(t.id)
-        setPinnedSeries(t.series)
-        setMapHover(t.id, t.series)
-        showNoisePopup(map, popup, t)
-      }
+      pinnedIdRef.current = target.id
+      focusIdRef.current = target.id
+      setPinnedId(target.id)
+      setPinnedSeries(target.series)
+      setMapHover(target.id, target.series)
+      showNoisePopup(map, popup, target)
 
-      if (!canDrill) {
-        if (target.pendingClusterId == null) pinAndTip(target)
-        return
-      }
+      if (!canDrill) return
 
       if (target.id.startsWith('country:')) {
-        pinAndTip(target)
         beginDrill(() => {
           fitCountryDrill(
             map,
@@ -1699,12 +1656,9 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
       }
 
       if (target.id.startsWith('cluster:')) {
-        const clusterId = Number(
-          target.pendingClusterId ?? target.id.slice('cluster:'.length),
-        )
+        const clusterId = Number(target.id.slice('cluster:'.length))
         if (!Number.isFinite(clusterId)) return
         const citySource = map.getSource(CITIES_SOURCE) as maplibregl.GeoJSONSource
-        if (target.pendingClusterId == null) pinAndTip(target)
         void citySource.getClusterExpansionZoom(clusterId).then((zoom) => {
           beginDrill(() => {
             map.easeTo({
@@ -1718,7 +1672,6 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
         return
       }
 
-      pinAndTip(target)
       beginDrill(() => {
         easeDrillTo(map, target.coords, CITY_DRILL_ZOOM)
       })
@@ -1767,12 +1720,13 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pointsForToggle, countryAggs, source, metric])
 
-  // Safety net: keep paint aligned if React focus changes without map handler
+  // Story/pin focus from React only — map pointer owns hover paint via refs
   useEffect(() => {
+    if (hoveredIdRef.current) return
     applyFocusPaint(focusId)
   }, [focusId])
 
-  // Hover — sync resolve via ring cache; empty hits debounced; no work while drilling
+  // Hover — rings→cache resolve; rAF-throttled; empty hits debounced; skip while drilling
   useEffect(() => {
     const map = mapRef.current
     const popup = popupRef.current
@@ -1811,7 +1765,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
       return 30 + (q / 254) * 70
     }
 
-    const onMove = (e: maplibregl.MapMouseEvent) => {
+    const handlePointer = (e: maplibregl.MapMouseEvent) => {
       if (drillingRef.current) return
 
       // Calm spaces bubbles (story beat or explore toggle)
@@ -1909,54 +1863,22 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
 
       cancelPendingClear()
       map.getCanvas().style.cursor = 'pointer'
-
-      if (target.pendingClusterId != null) {
-        const clusterId = target.pendingClusterId
-        const hoverId = target.id
-        if (hoveredIdRef.current !== hoverId) {
-          applyFocusPaint(hoverId)
-          hoveredIdRef.current = hoverId
-          focusIdRef.current = hoverId
-        }
-        const gen = ++hoverGenRef.current
-        const citySource = map.getSource(CITIES_SOURCE) as maplibregl.GeoJSONSource
-        void getClusterLeaves(citySource, clusterId)
-          .then((leaves) => {
-            if (gen !== hoverGenRef.current) return
-            const src = sourceRef.current
-            const met = metricRef.current
-            const tips: ChartSeries[] = []
-            for (const leaf of leaves) {
-              const tip = tipFromProps(leaf.properties?.tooltip, src, met)
-              if (tip) tips.push(tip)
-            }
-            const bands = aggregateBands(met, tips)
-            const series = seriesFromBands(
-              hoverId,
-              `${leaves.length} cities`,
-              bands,
-            )
-            const filled: HoverTarget = {
-              id: hoverId,
-              series,
-              coords: target.coords,
-              cityCount: leaves.length,
-              title: series.name,
-            }
-            hoverCacheRef.current.set(hoverId, filled)
-            setMapHover(filled.id, filled.series)
-            showNoisePopup(map, popup, filled)
-          })
-          .catch(() => {
-            if (gen === hoverGenRef.current) scheduleClearHover()
-          })
-        return
-      }
-
       if (hoveredIdRef.current !== target.id) {
         setMapHover(target.id, target.series)
       }
       showNoisePopup(map, popup, target)
+    }
+
+    let pending: maplibregl.MapMouseEvent | null = null
+    const onMove = (e: maplibregl.MapMouseEvent) => {
+      pending = e
+      if (hoverMoveRafRef.current) return
+      hoverMoveRafRef.current = window.requestAnimationFrame(() => {
+        hoverMoveRafRef.current = 0
+        const ev = pending
+        pending = null
+        if (ev) handlePointer(ev)
+      })
     }
 
     const canvas = map.getCanvas()
@@ -1975,6 +1897,10 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
 
     return () => {
       cancelPendingClear()
+      if (hoverMoveRafRef.current) {
+        window.cancelAnimationFrame(hoverMoveRafRef.current)
+        hoverMoveRafRef.current = 0
+      }
       map.off('mousemove', onMove)
       canvas.removeEventListener('mouseleave', onCanvasLeave)
     }
