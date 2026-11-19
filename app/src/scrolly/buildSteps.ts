@@ -170,7 +170,7 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       questions: [],
       body: [
         `In ${paris.year}, night noise at the loudest Paris road site in this set — ${hi(paris.loudest_site)} — reaches about ${hiDb(paris.max_db, 1)}, between a ${hiLoud('vacuum cleaner (about 70 dB)')} and a ${hiLoud('blender (about 80–90 dB)')}.`,
-        `On the ${paris.end_year ?? 2021} END road maps for the ${hi(paris.agglomeration ?? 'Paris')} agglomeration, about ${hi(formatPeople(paris.road_ha ?? 0))} people are ${hi('highly annoyed')} and about ${hi(formatPeople(paris.road_hsd ?? 0))} are ${hi('highly sleep disturbed')}.`,
+        `According to the data for road maps in Paris, about ${hi(formatPeople(paris.road_ha ?? 0))} people are ${hi('highly annoyed')} and about ${hi(formatPeople(paris.road_hsd ?? 0))} are ${hi('highly sleep disturbed')} due to traffic noise.`,
       ],
       map: {
         center: [paris.lon, paris.lat],

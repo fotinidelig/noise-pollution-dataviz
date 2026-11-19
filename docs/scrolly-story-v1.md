@@ -58,7 +58,7 @@ About **110k** people above **75 dB**; **~11k (10.3%)** in Berlin.
 ### Paris (2025 site · 2021 END road HA/HSD)
 
 **Périphérique Vincennes** night ~**77.5 dB**, between a **vacuum cleaner (~70 dB)** and a **blender (~80–90 dB)**.  
-On the **2021** END **road** maps for the **Paris** agglomeration (`France|Paris`): about **993k** people **highly annoyed**, about **271k** **highly sleep disturbed** (ThemeRiver / WHO HA–HSD totals).
+According to the data for road maps in Paris, about **993k** people are **highly annoyed** and about **271k** are **highly sleep disturbed** due to traffic noise.
 
 ### Madrid (2026)
 
