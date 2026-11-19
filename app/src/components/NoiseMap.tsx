@@ -171,6 +171,41 @@ async function getClusterLeaves(
   return source.getClusterLeaves(clusterId, Infinity, 0)
 }
 
+/** Padded viewport box — only build city/cluster rings inside it. */
+type PadBounds = {
+  west: number
+  east: number
+  south: number
+  north: number
+}
+
+function padMapBounds(
+  bounds: maplibregl.LngLatBounds,
+  padFrac = 0.14,
+): PadBounds {
+  const west = bounds.getWest()
+  const east = bounds.getEast()
+  const south = bounds.getSouth()
+  const north = bounds.getNorth()
+  const lngPad = Math.max(0.12, (east - west) * padFrac)
+  const latPad = Math.max(0.08, (north - south) * padFrac)
+  return {
+    west: west - lngPad,
+    east: east + lngPad,
+    south: south - latPad,
+    north: north + latPad,
+  }
+}
+
+function inPadBounds(lon: number, lat: number, box: PadBounds): boolean {
+  return (
+    lon >= box.west &&
+    lon <= box.east &&
+    lat >= box.south &&
+    lat <= box.north
+  )
+}
+
 /** Step zoom like manual scroll: at least `floor`, else +DRILL_ZOOM_STEP. */
 function nextDrillZoom(currentZoom: number, floor: number): number {
   return Math.min(12, Math.max(currentZoom + DRILL_ZOOM_STEP, floor))
@@ -477,6 +512,47 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
           : 0.95,
       )
     }
+    // Visible ring-center markers stay clickable; dim with focus
+    if (map.getLayer(HIT_LAYER)) {
+      map.setPaintProperty(
+        HIT_LAYER,
+        'circle-opacity',
+        dimming
+          ? ([
+              'case',
+              [
+                'any',
+                ['==', ['to-string', ['get', 'id']], id],
+                [
+                  'all',
+                  ['has', 'cluster_id'],
+                  [
+                    '==',
+                    ['concat', 'cluster:', ['to-string', ['get', 'cluster_id']]],
+                    id,
+                  ],
+                ],
+              ],
+              0.95,
+              0.22,
+            ] as maplibregl.ExpressionSpecification)
+          : 0.92,
+      )
+    }
+    if (map.getLayer(COUNTRY_HIT_LAYER)) {
+      map.setPaintProperty(
+        COUNTRY_HIT_LAYER,
+        'circle-opacity',
+        dimming
+          ? ([
+              'case',
+              ['==', ['to-string', ['get', 'id']], id],
+              0.95,
+              0.22,
+            ] as maplibregl.ExpressionSpecification)
+          : 0.9,
+      )
+    }
   }
 
   const cancelPendingClear = () => {
@@ -503,12 +579,31 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     setHoverSeries(series)
   }
 
-  /** Suppress hover-clear + ring rebuild mid click-zoom; rebuild once at moveend. */
-  const beginDrill = (run: () => void) => {
+  /**
+   * Suppress hover-clear + ring rebuild mid click-zoom; rebuild once at moveend.
+   * Clears hover/pin so previous country/cluster focus cannot dim the next level,
+   * and the user must re-hover for a tooltip.
+   */
+  const beginDrill = (
+    run: () => void,
+    opts: { clearSelection?: boolean } = {},
+  ) => {
     const map = mapRef.current
     if (!map) return
     drillingRef.current = true
     cancelPendingClear()
+    if (opts.clearSelection !== false) {
+      popupRef.current?.remove()
+      lastTipIdRef.current = null
+      pinnedIdRef.current = null
+      hoveredIdRef.current = null
+      focusIdRef.current = null
+      applyFocusPaint(null)
+      setPinnedId(null)
+      setPinnedSeries(null)
+      setMapHover(null, null)
+      map.getCanvas().style.cursor = ''
+    }
     const finish = () => {
       drillingRef.current = false
       scheduleRebuild()
@@ -1205,8 +1300,13 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     setMapHover(id, series)
 
     // Stream chart is Explore-only; still guard for safety.
+    // Keep the selected city pinned (clearSelection: false).
     if (!exploreRef.current) return
-    easeDrillTo(map, [city.lon, city.lat], CITY_DRILL_ZOOM)
+    const lon = city.lon
+    const lat = city.lat
+    beginDrill(() => {
+      easeDrillTo(map, [lon, lat], CITY_DRILL_ZOOM)
+    }, { clearSelection: false })
   }
 
   const setCountryMode = (on: boolean) => {
@@ -1232,10 +1332,13 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     const met = metricRef.current
     const citySource = map.getSource(CITIES_SOURCE) as maplibregl.GeoJSONSource
 
-    // Clustered + unclustered points for the current zoom
-    const rendered = map.querySourceFeatures(CITIES_SOURCE)
-    const seenClusters = new Set<number>()
-    const seenCities = new Set<string>()
+    // Far zoom: country rings. Past the threshold: city/cluster rings
+    // (same band as manual zoom / click-drill — France → clusters → cities).
+    const zoom = map.getZoom()
+    const useCountryView = zoom < COUNTRY_VIEW_MAX_ZOOM
+    // Only expand/build cities inside the zoomed viewport (not all of Europe).
+    const viewBox = padMapBounds(map.getBounds())
+
     type CityUnit = {
       kind: 'city' | 'cluster'
       id: string
@@ -1247,58 +1350,67 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     }
     const cityUnits: CityUnit[] = []
 
-    for (const feat of rendered) {
-      const props = feat.properties ?? {}
-      const coords = (feat.geometry as Point | undefined)?.coordinates
-      if (!coords || feat.geometry?.type !== 'Point') continue
+    if (!useCountryView) {
+      // Ensure city hit markers are queryable after leaving country overview.
+      setCountryMode(false)
 
-      if (props.cluster) {
-        const clusterId = Number(props.cluster_id)
-        if (seenClusters.has(clusterId)) continue
-        seenClusters.add(clusterId)
-        let leaves: Feature[] = []
-        try {
-          leaves = await getClusterLeaves(citySource, clusterId)
-        } catch {
-          continue
+      // Clustered + unclustered points for the current zoom — filter to viewport
+      // so getClusterLeaves stays cheap after country/cluster drill-in.
+      const rendered = map.querySourceFeatures(CITIES_SOURCE)
+      const seenClusters = new Set<number>()
+      const seenCities = new Set<string>()
+
+      for (const feat of rendered) {
+        const props = feat.properties ?? {}
+        const coords = (feat.geometry as Point | undefined)?.coordinates
+        if (!coords || feat.geometry?.type !== 'Point') continue
+        const lon = coords[0]
+        const lat = coords[1]
+        if (!inPadBounds(lon, lat, viewBox)) continue
+
+        if (props.cluster) {
+          const clusterId = Number(props.cluster_id)
+          if (seenClusters.has(clusterId)) continue
+          seenClusters.add(clusterId)
+          let leaves: Feature[] = []
+          try {
+            leaves = await getClusterLeaves(citySource, clusterId)
+          } catch {
+            continue
+          }
+          const tips: ChartSeries[] = []
+          for (const leaf of leaves) {
+            const tip = tipFromProps(leaf.properties?.tooltip, src, met)
+            if (tip) tips.push(tip)
+          }
+          if (!tips.length) continue
+          cityUnits.push({
+            kind: 'cluster',
+            id: `cluster:${clusterId}`,
+            lon,
+            lat,
+            label: `${leaves.length} cities`,
+            tips,
+            cityCount: leaves.length,
+          })
+        } else {
+          const id = String(props.id ?? '')
+          if (!id || seenCities.has(id)) continue
+          seenCities.add(id)
+          const tip = tipFromProps(props.tooltip, src, met)
+          if (!tip) continue
+          cityUnits.push({
+            kind: 'city',
+            id,
+            lon,
+            lat,
+            label: String(props.agglomeration ?? id),
+            tips: [tip],
+            cityCount: 1,
+          })
         }
-        const tips: ChartSeries[] = []
-        for (const leaf of leaves) {
-          const tip = tipFromProps(leaf.properties?.tooltip, src, met)
-          if (tip) tips.push(tip)
-        }
-        if (!tips.length) continue
-        cityUnits.push({
-          kind: 'cluster',
-          id: `cluster:${clusterId}`,
-          lon: coords[0],
-          lat: coords[1],
-          label: `${leaves.length} cities`,
-          tips,
-          cityCount: leaves.length,
-        })
-      } else {
-        const id = String(props.id ?? '')
-        if (!id || seenCities.has(id)) continue
-        seenCities.add(id)
-        const tip = tipFromProps(props.tooltip, src, met)
-        if (!tip) continue
-        cityUnits.push({
-          kind: 'city',
-          id,
-          lon: coords[0],
-          lat: coords[1],
-          label: String(props.agglomeration ?? id),
-          tips: [tip],
-          cityCount: 1,
-        })
       }
     }
-
-    // Far zoom: country rings. Past the threshold: city/cluster rings
-    // (same band as manual zoom / click-drill — France → clusters → cities).
-    const zoom = map.getZoom()
-    const useCountryView = zoom < COUNTRY_VIEW_MAX_ZOOM
 
     // After fitBounds/easeTo, cluster tiles can lag — retry instead of wiping rings.
     if (!useCountryView && cityUnits.length === 0) {
@@ -1329,6 +1441,7 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     if (useCountryView) {
       setCountryMode(true)
       for (const agg of countryAggsRef.current) {
+        if (!inPadBounds(agg.lon, agg.lat, viewBox)) continue
         if (!agg.bands.some((b) => b.people > 0)) continue
         const series = seriesFromBands(agg.id, agg.country, agg.bands)
         cache.set(agg.id, {
@@ -1527,8 +1640,8 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
         },
       })
 
-      // Invisible hit targets only (no cyan dots). Sized to cover ring cores;
-      // hover also falls back to RINGS_LAYER for outer arcs.
+      // Visible ring-center markers (also the primary click/hover target).
+      // Outer ring arcs remain a hover fallback via RINGS_LAYER.
       map.addLayer({
         id: HIT_LAYER,
         type: 'circle',
@@ -1539,15 +1652,27 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
             ['linear'],
             ['zoom'],
             3,
-            22,
+            5,
             7,
-            30,
+            6.5,
             11,
-            40,
+            8,
           ],
-          'circle-opacity': 0,
-          'circle-stroke-width': 0,
-          'circle-color': '#000000',
+          'circle-color': '#e8f0ff',
+          'circle-opacity': 0.92,
+          'circle-stroke-color': '#00b8cc',
+          'circle-stroke-width': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            3,
+            1.2,
+            8,
+            1.8,
+            11,
+            2.2,
+          ],
+          'circle-stroke-opacity': 0.9,
         },
       })
 
@@ -1593,15 +1718,27 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
             ['linear'],
             ['zoom'],
             2,
-            28,
+            6,
             5,
-            36,
+            7.5,
             7,
-            44,
+            9,
           ],
-          'circle-opacity': 0,
-          'circle-stroke-width': 0,
-          'circle-color': '#000000',
+          'circle-color': '#e8f0ff',
+          'circle-opacity': 0.9,
+          'circle-stroke-color': '#00b8cc',
+          'circle-stroke-width': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            2,
+            1.4,
+            5,
+            2,
+            7,
+            2.4,
+          ],
+          'circle-stroke-opacity': 0.92,
         },
       })
 
@@ -1634,15 +1771,18 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
         return
       }
 
-      pinnedIdRef.current = target.id
-      focusIdRef.current = target.id
-      setPinnedId(target.id)
-      setPinnedSeries(target.series)
-      setMapHover(target.id, target.series)
-      showNoisePopup(map, popup, target)
+      if (!canDrill) {
+        pinnedIdRef.current = target.id
+        focusIdRef.current = target.id
+        setPinnedId(target.id)
+        setPinnedSeries(target.series)
+        setMapHover(target.id, target.series)
+        showNoisePopup(map, popup, target)
+        return
+      }
 
-      if (!canDrill) return
-
+      // Explore click-zoom: clear selection in beginDrill so next-level rings
+      // are not dimmed by the previous country/cluster focus id.
       if (target.id.startsWith('country:')) {
         beginDrill(() => {
           fitCountryDrill(
