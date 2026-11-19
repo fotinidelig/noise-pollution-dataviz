@@ -144,7 +144,7 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       id: 'germany',
       railLabel: 'Germany',
       year: de.year_label,
-      title: `${dePeople} people must listen to a vacuum cleaner all day — ${de.berlin_share_of_germany_pct}% in Berlin`,
+      title: `In Germany ${dePeople} people must listen to a vacuum cleaner all day — ${de.berlin_share_of_germany_pct}% are in Berlin`,
       questions: [],
       body: [
         `In German cities, about ${hi(dePeople)} people live with long-term day–evening–night averages above ${hiLoud('75 dB')}. Of them, about ${hi(berlinPeople)} — ${hi(`${de.berlin_share_of_germany_pct}%`)} — are in Berlin.`,
