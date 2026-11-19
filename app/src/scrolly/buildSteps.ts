@@ -201,7 +201,7 @@ export function buildSteps(m: StoryMetrics): StoryStep[] {
       id: 'hongkong',
       railLabel: 'Hong Kong',
       year: hk.year,
-      title: 'Hong Kong: ≥1 million people above 70 dB road traffic',
+      title: 'In Hong Kong more than 1 million people are exposed to road traffic higher than 70dBs',
       questions: [],
       body: [
         `UNEP Frontiers 2022: at least ${hi('1 million')} Hong Kong residents live with road traffic above ${hiLoud('70 dB')} — past a ${hiLoud('vacuum cleaner')}.`,

@@ -66,7 +66,7 @@ In **2026**, night noise at **fixed outdoor noise monitoring station 6** sits ar
 
 ### Hong Kong (2020)
 
-Title: **Hong Kong: ≥1 million people above 70 dB road traffic** (UNEP Frontiers 2022).  
+Title: **In Hong Kong more than 1 million people are exposed to road traffic higher than 70dBs** (UNEP Frontiers 2022).  
 On the **2020** Hong Kong **citywide traffic-noise map** (modelled area levels, not one microphone), about **23%** of the mapped territory sits above **70 dB** — roughly **97 km²**.
 
 ### Seoul (2024)
