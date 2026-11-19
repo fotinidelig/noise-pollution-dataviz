@@ -40,8 +40,9 @@
   min-height: 100svh;
   display: flex;
   align-items: center;
-  /* Clear fixed rail + labels (EUROPE / GERMANY / …) under IBM Plex Sans. */
-  padding: 2rem 1.25rem 2rem 7.75rem;
+  justify-content: center;
+  /* Balanced inset so the card sits on the viewport centre; rail overlays left. */
+  padding: 2rem 1.5rem;
   pointer-events: none;
 }
 
@@ -49,14 +50,15 @@
   pointer-events: auto;
   max-width: min(420px, 92vw);
   width: 100%;
+  margin-inline: auto;
   display: flex;
   flex-direction: column;
   gap: 0.55rem;
+  align-items: center;
 }
 
 .scrolly-step--hero .scrolly-step__stack {
   max-width: min(720px, 94vw);
-  align-items: center;
 }
 
 /* Sound ladder: wide enough for quiet→loud markers + play hits. */
@@ -97,11 +99,52 @@
   position: relative;
   pointer-events: auto;
   width: 100%;
-  padding: 1.1rem 1.2rem 1.25rem;
+  padding: 1.1rem 1.2rem 1.55rem;
   background: rgba(3, 5, 10, 0.55);
   border: 1px solid rgba(120, 160, 220, 0.22);
   backdrop-filter: blur(10px);
   box-shadow: 0 0 28px rgba(0, 0, 0, 0.35);
+}
+
+.scrolly-step__next {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-top: 0.85rem;
+  padding: 0.35rem 0 0.1rem;
+  border: 0;
+  background: transparent;
+  color: #9db0cc;
+  cursor: pointer;
+  font: inherit;
+}
+
+.scrolly-step__next:hover,
+.scrolly-step__next:focus-visible {
+  color: #e8f0ff;
+  outline: none;
+}
+
+.scrolly-step__next:focus-visible .scrolly-step__next-chevron {
+  border-color: #4DD4E6;
+  box-shadow: 0 0 10px rgba(77, 212, 230, 0.35);
+}
+
+.scrolly-step__next-chevron {
+  display: block;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-right: 1.5px solid #4DD4E6;
+  border-bottom: 1.5px solid #4DD4E6;
+  transform: rotate(45deg);
+  opacity: 0.75;
+  transition: opacity 0.15s ease, border-color 0.15s ease;
+}
+
+.scrolly-step__next:hover .scrolly-step__next-chevron,
+.scrolly-step__next:focus-visible .scrolly-step__next-chevron {
+  opacity: 1;
 }
 
 .scrolly-hk-colorbar {
@@ -203,13 +246,6 @@
 
 .scrolly-root.is-dismissed .scrolly-steps {
   pointer-events: none;
-}
-
-.scrolly-step--hero {
-  justify-content: center;
-  /* Still leave room for the rail; keep card visually centered. */
-  padding-left: 7.75rem;
-  padding-right: 1.25rem;
 }
 
 .scrolly-step--hero .scrolly-step__card {
@@ -387,12 +423,9 @@
 
 @media (max-width: 720px) {
   .scrolly-step {
-    padding: 1.25rem 0.85rem 1.25rem 3.4rem;
-    align-items: flex-end;
-  }
-
-  .scrolly-step--hero {
-    padding-left: 3.4rem;
+    padding: 1.25rem 0.85rem;
+    align-items: center;
+    justify-content: center;
   }
 
   .scrolly-step__stats {

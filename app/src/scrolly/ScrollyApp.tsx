@@ -77,6 +77,9 @@ export function ScrollyApp() {
       .filter((n): n is HTMLElement => Boolean(n))
     if (!nodes.length) return
 
+    // Activate as soon as a beat starts entering the upper half of the
+    // viewport (not only when deeply centered), so the map flies in parallel
+    // with reading the incoming card.
     const obs = new IntersectionObserver(
       (entries) => {
         const visible = entries
@@ -87,7 +90,11 @@ export function ScrollyApp() {
         const id = (top.target as HTMLElement).dataset.stepId as StoryStepId
         if (id) setActiveId(id)
       },
-      { root: null, threshold: [0.35, 0.55, 0.7], rootMargin: '-10% 0px -35% 0px' },
+      {
+        root: null,
+        threshold: [0.05, 0.12, 0.22, 0.35, 0.5],
+        rootMargin: '0px 0px -48% 0px',
+      },
     )
     for (const n of nodes) obs.observe(n)
     return () => obs.disconnect()
@@ -161,8 +168,9 @@ export function ScrollyApp() {
       />
 
       <div className="scrolly-steps" aria-hidden={dismissed}>
-        {steps.map((step) => {
+        {steps.map((step, index) => {
           const isActiveCard = step.id === active.id && !dismissed
+          const nextStep = steps[index + 1]
           return (
             <section
               key={step.id}
@@ -229,6 +237,17 @@ export function ScrollyApp() {
                         active={isActiveCard}
                         onPlayingChange={setPlayingSound}
                       />
+                    ) : null}
+                    {nextStep ? (
+                      <button
+                        type="button"
+                        className="scrolly-step__next"
+                        aria-label={`Next story: ${nextStep.title}`}
+                        title={`Next: ${nextStep.railLabel}`}
+                        onClick={() => jump(nextStep.id)}
+                      >
+                        <span className="scrolly-step__next-chevron" aria-hidden="true" />
+                      </button>
                     ) : null}
                   </div>
                   {isActiveCard && step.id === 'hongkong' ? (
