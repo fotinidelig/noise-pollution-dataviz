@@ -71,8 +71,8 @@ const EXPLORE_COUNTRY_INNER_COLOR: maplibregl.ExpressionSpecification = [
   'rgba(102, 102, 102, 1)',
 ]
 /**
- * Hover-only intermittent pulse (no always-on rAF).
- * Burst paints ~12fps while phase 0→1, then pauses with zero paint updates.
+ * Intermittent pulse for in-view stacks (burst → pause → burst).
+ * Hover solos one place; layer filter culls off-screen ids (refreshed on rebuild).
  */
 const PULSE_PHASE_STEP = 0.055
 const PULSE_TICK_MS = 80
@@ -83,6 +83,8 @@ const PULSE_STAGGER_PER_RING = 0.035
 const PULSE_BURST_FLOOR = 0.06
 const PULSE_BURST_PEAK = 0.72
 const PULSE_REST_BLUR = 0.2
+/** Slightly tighter than ring rebuild pad — pulse work stays near the viewport. */
+const PULSE_VIEW_PAD_FRAC = 0.1
 const HIT_LAYER = 'aggl-hit'
 const LABEL_LAYER = 'aggl-labels'
 const COUNTRY_HIT_LAYER = 'aggl-country-hit'
@@ -429,10 +431,12 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
   const pulsePhaseRef = useRef(0)
   const pulseRafRef = useRef<number | null>(null)
   const pulsePauseTimerRef = useRef<number | null>(null)
-  /** Hover id currently driving the intermittent burst loop (null = idle). */
-  const pulseAnimIdRef = useRef<string | null>(null)
+  /** Agglomeration ids whose centers are inside the padded viewport. */
+  const pulseVisibleIdsRef = useRef<string[]>([])
+  /** Last pulse layer filter key — skip redundant setFilter. */
+  const pulseFilterKeyRef = useRef<string>('')
   const ringFocusIdRef = useRef<string | null>(null)
-  const syncHoverPulseRef = useRef<() => void>(() => {})
+  const syncPulseRef = useRef<() => void>(() => {})
   const pulseErrorLoggedRef = useRef(false)
 
   const [source, setSource] = useState<NoiseSource>('road')
@@ -514,7 +518,70 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     }
   }
 
-  /** Idle: hide pulse twins — coloured static rings only (no setPaintProperty loop). */
+  const pulseLoopActive = () =>
+    pulseRafRef.current != null || pulsePauseTimerRef.current != null
+
+  /** Ids that should receive the current burst (hover solo, else in-view). */
+  const activePulseIds = (): string[] => {
+    const hoverId = hoveredIdRef.current
+    if (hoverId) return [hoverId]
+    return pulseVisibleIdsRef.current
+  }
+
+  /**
+   * Cull pulse drawing via layer filter — off-screen stacks stay in GeoJSON
+   * but are not painted/animated. Hover always solos to that one id.
+   */
+  const applyPulseFilter = (ids: string[]) => {
+    const map = mapRef.current
+    if (!map || !map.getLayer(RINGS_PULSE_LAYER)) return
+    const key = ids.length === 0 ? '' : [...ids].sort().join('\0')
+    if (key === pulseFilterKeyRef.current) return
+    pulseFilterKeyRef.current = key
+    try {
+      if (ids.length === 0) {
+        map.setFilter(RINGS_PULSE_LAYER, [
+          'all',
+          ['==', ['get', 'role'], 'pulse'],
+          ['literal', false],
+        ])
+      } else if (ids.length === 1) {
+        map.setFilter(RINGS_PULSE_LAYER, [
+          'all',
+          ['==', ['get', 'role'], 'pulse'],
+          ['==', ['to-string', ['get', 'id']], ids[0]],
+        ])
+      } else {
+        map.setFilter(RINGS_PULSE_LAYER, [
+          'all',
+          ['==', ['get', 'role'], 'pulse'],
+          ['in', ['to-string', ['get', 'id']], ['literal', ids]],
+        ])
+      }
+    } catch (err) {
+      if (!pulseErrorLoggedRef.current) {
+        pulseErrorLoggedRef.current = true
+        console.warn('[rings pulse] filter failed', err)
+      }
+    }
+  }
+
+  /** Centers inside padded map bounds → eligible for global intermittent pulse. */
+  const refreshPulseViewport = () => {
+    const map = mapRef.current
+    if (!map) {
+      pulseVisibleIdsRef.current = []
+      return
+    }
+    const box = padMapBounds(map.getBounds(), PULSE_VIEW_PAD_FRAC)
+    const ids: string[] = []
+    for (const t of hoverCacheRef.current.values()) {
+      if (inPadBounds(t.coords[0], t.coords[1], box)) ids.push(t.id)
+    }
+    pulseVisibleIdsRef.current = ids
+  }
+
+  /** Hide crest between bursts (filter can stay). */
   const paintPulseIdle = () => {
     const map = mapRef.current
     if (!map || !map.getLayer(RINGS_PULSE_LAYER)) return
@@ -530,10 +597,10 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
   }
 
   /**
-   * One burst frame for a single hovered agglomeration/country.
-   * Other pulse twins stay at 0; ring_index stagger softens the cascade.
+   * One burst frame for whatever the pulse filter currently includes.
+   * ring_index stagger softens the outward cascade.
    */
-  const paintPulseBurstFrame = (hoverId: string, phase: number) => {
+  const paintPulseBurstFrame = (phase: number) => {
     const map = mapRef.current
     if (!map || !map.getLayer(RINGS_PULSE_LAYER)) return
     const N = RING_PULSE_BUCKETS
@@ -555,26 +622,16 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
 
     try {
       map.setPaintProperty(RINGS_PULSE_LAYER, 'line-opacity', [
-        'case',
-        ['==', ['to-string', ['get', 'id']], hoverId],
-        [
-          'interpolate',
-          ['linear'],
-          ringIdx,
-          ...opacityStops,
-        ],
-        0,
+        'interpolate',
+        ['linear'],
+        ringIdx,
+        ...opacityStops,
       ] as maplibregl.ExpressionSpecification)
       map.setPaintProperty(RINGS_PULSE_LAYER, 'line-blur', [
-        'case',
-        ['==', ['to-string', ['get', 'id']], hoverId],
-        [
-          'interpolate',
-          ['linear'],
-          ringIdx,
-          ...blurStops,
-        ],
-        PULSE_REST_BLUR,
+        'interpolate',
+        ['linear'],
+        ringIdx,
+        ...blurStops,
       ] as maplibregl.ExpressionSpecification)
     } catch (err) {
       if (!pulseErrorLoggedRef.current) {
@@ -584,47 +641,61 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     }
   }
 
-  /** Burst → pause → burst for the hovered id only. CPU idle during pause. */
-  const startHoverPulse = (hoverId: string) => {
+  /** Schedule the next burst after a quiet pause (shared by crest-end + empty view). */
+  const schedulePulseResume = (
+    tick: (now: number) => void,
+    resetPhase: () => void,
+  ) => {
+    pulseRafRef.current = null
+    pulsePauseTimerRef.current = window.setTimeout(() => {
+      pulsePauseTimerRef.current = null
+      if (calmModeRef.current) return
+      resetPhase()
+      const ids = activePulseIds()
+      applyPulseFilter(ids)
+      if (ids.length > 0) paintPulseBurstFrame(0)
+      else paintPulseIdle()
+      pulseRafRef.current = window.requestAnimationFrame(tick)
+    }, PULSE_PAUSE_MS)
+  }
+
+  /** Burst → pause → burst for in-view stacks (or hovered solo). */
+  const startIntermittentPulse = () => {
     stopPulseLoop()
-    pulseAnimIdRef.current = hoverId
     pulsePhaseRef.current = 0
-    paintPulseBurstFrame(hoverId, 0)
+    const ids0 = activePulseIds()
+    applyPulseFilter(ids0)
+    if (ids0.length === 0) paintPulseIdle()
+    else paintPulseBurstFrame(0)
 
     let last = 0
     const tick = (now: number) => {
-      if (pulseAnimIdRef.current !== hoverId || hoveredIdRef.current !== hoverId) {
-        return
-      }
       if (calmModeRef.current) {
         stopPulseLoop()
-        pulseAnimIdRef.current = null
         return
       }
       if (now - last >= PULSE_TICK_MS) {
         last = now
-        pulsePhaseRef.current += PULSE_PHASE_STEP
-        if (pulsePhaseRef.current >= 1) {
-          // End of crest travel — hide twins, wait, then burst again
+        // Filter updates on hover/rebuild via syncPulse — not every paint tick
+        if (activePulseIds().length === 0) {
           paintPulseIdle()
-          pulseRafRef.current = null
-          pulsePauseTimerRef.current = window.setTimeout(() => {
-            pulsePauseTimerRef.current = null
-            if (
-              pulseAnimIdRef.current !== hoverId ||
-              hoveredIdRef.current !== hoverId ||
-              calmModeRef.current
-            ) {
-              return
-            }
-            pulsePhaseRef.current = 0
+          pulsePhaseRef.current = 0
+          schedulePulseResume(tick, () => {
             last = 0
-            paintPulseBurstFrame(hoverId, 0)
-            pulseRafRef.current = window.requestAnimationFrame(tick)
-          }, PULSE_PAUSE_MS)
+            pulsePhaseRef.current = 0
+          })
           return
         }
-        paintPulseBurstFrame(hoverId, pulsePhaseRef.current)
+        pulsePhaseRef.current += PULSE_PHASE_STEP
+        if (pulsePhaseRef.current >= 1) {
+          paintPulseIdle()
+          schedulePulseResume(tick, () => {
+            last = 0
+            pulsePhaseRef.current = 0
+          })
+          return
+        }
+        paintPulseBurstFrame(pulsePhaseRef.current)
       }
       pulseRafRef.current = window.requestAnimationFrame(tick)
     }
@@ -632,44 +703,37 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
   }
 
   /**
-   * Pulse follows pointer hover only (not pin/story focus).
-   * No hover / calm → idle static rings, no continuous paint.
+   * Keep intermittent pulse running for in-view stacks.
+   * Hover updates the filter to solo; unhover restores everyone in view.
    */
-  const syncHoverPulse = () => {
+  const syncPulse = () => {
     if (calmModeRef.current) {
       stopPulseLoop()
-      pulseAnimIdRef.current = null
-      return
-    }
-    const hoverId = hoveredIdRef.current
-    if (!hoverId) {
-      stopPulseLoop()
-      pulseAnimIdRef.current = null
+      pulseFilterKeyRef.current = ''
       paintPulseIdle()
       return
     }
-    const looping =
-      pulseAnimIdRef.current === hoverId &&
-      (pulseRafRef.current != null || pulsePauseTimerRef.current != null)
-    if (looping) return
-    startHoverPulse(hoverId)
+    applyPulseFilter(activePulseIds())
+    if (!pulseLoopActive()) {
+      startIntermittentPulse()
+    }
   }
-  syncHoverPulseRef.current = syncHoverPulse
+  syncPulseRef.current = syncPulse
 
   /** Apply ring/label dimming immediately (skip if focus id unchanged). */
   const applyFocusPaint = (activeId: string | null, force = false) => {
     const map = mapRef.current
     if (!map || !map.getLayer(RINGS_LAYER)) return
     ringFocusIdRef.current = activeId
-    // Pulse tracks hover even when static focus paint is skipped (e.g. pin == cleared hover)
-    syncHoverPulse()
+    // Hover solo / unhover restore — even when static focus paint is skipped
+    syncPulse()
     if (!force && lastPaintedFocusRef.current === activeId) return
     lastPaintedFocusRef.current = activeId
 
     const dimming = Boolean(activeId)
     const id = activeId ?? ''
 
-    // Static rings only — pulse layer is hover-intermittent (syncHoverPulse)
+    // Static rings only — pulse layer is intermittent + filtered (syncPulse)
     map.setPaintProperty(
       RINGS_LAYER,
       'line-opacity',
@@ -1036,13 +1100,14 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     paintBorders(storyLocked)
   }, [storyLocked, mapReady])
 
-  // Hover-only intermittent pulse — idle until pointer focuses an agglomeration
+  // Intermittent pulse for in-view stacks (hover solos via syncPulse)
   useEffect(() => {
     if (!mapReady) return
-    syncHoverPulseRef.current()
+    refreshPulseViewport()
+    syncPulseRef.current()
     return () => {
       stopPulseLoop()
-      pulseAnimIdRef.current = null
+      pulseFilterKeyRef.current = ''
     }
   }, [mapReady])
 
@@ -1143,10 +1208,11 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
       if (map.getLayer(RINGS_PULSE_LAYER)) {
         if (on) {
           stopPulseLoop()
-          pulseAnimIdRef.current = null
+          pulseFilterKeyRef.current = ''
           map.setPaintProperty(RINGS_PULSE_LAYER, 'line-opacity', 0)
         } else {
-          syncHoverPulseRef.current()
+          refreshPulseViewport()
+          syncPulseRef.current()
         }
       }
     }
@@ -1827,6 +1893,8 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
 
     const ringSource = map.getSource(RINGS_SOURCE) as maplibregl.GeoJSONSource
     ringSource.setData({ type: 'FeatureCollection', features: ringFeatures })
+    // Viewport cull for pulse filter (moveend/zoomend → rebuild)
+    refreshPulseViewport()
     // Rings were replaced — force re-apply focus paint so dimming never sticks
     applyFocusPaint(focusIdRef.current, true)
   }
