@@ -104,8 +104,14 @@ function pulseBurstEnvelope(phase: number): number {
   return 1
 }
 
+/** Wide invisible pad — primary hover/click target around each city/cluster. */
+const HIT_PAD_LAYER = 'aggl-hit-pad'
+/** Small cyan center dot (visual only). */
 const HIT_LAYER = 'aggl-hit'
 const LABEL_LAYER = 'aggl-labels'
+/** Wide invisible pad for country centers (overview). */
+const COUNTRY_HIT_PAD_LAYER = 'aggl-country-hit-pad'
+/** Small cyan country center dot (visual only). */
 const COUNTRY_HIT_LAYER = 'aggl-country-hit'
 const COUNTRY_LABEL_LAYER = 'aggl-country-labels'
 /** Matches `rebuildRings` country-view cutoff (`zoom < 5`). */
@@ -991,9 +997,11 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     }
 
     const hitLayers = countryModeRef.current
-      ? [COUNTRY_HIT_LAYER]
-      : [HIT_LAYER]
-    const feats = map.queryRenderedFeatures(point, { layers: hitLayers })
+      ? [COUNTRY_HIT_PAD_LAYER, COUNTRY_HIT_LAYER]
+      : [HIT_PAD_LAYER, HIT_LAYER]
+    const present = hitLayers.filter((id) => map.getLayer(id))
+    if (!present.length) return null
+    const feats = map.queryRenderedFeatures(point, { layers: present })
     if (!feats.length) return null
     return targetFromCacheOrData(idFromHitProps(feats[0].properties ?? {}) ?? '')
   }
@@ -1739,8 +1747,14 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
     countryModeRef.current = on
     const cityVis = on ? 'none' : 'visible'
     const countryVis = on ? 'visible' : 'none'
+    if (map.getLayer(HIT_PAD_LAYER)) {
+      map.setLayoutProperty(HIT_PAD_LAYER, 'visibility', cityVis)
+    }
     if (map.getLayer(HIT_LAYER)) map.setLayoutProperty(HIT_LAYER, 'visibility', cityVis)
     if (map.getLayer(LABEL_LAYER)) map.setLayoutProperty(LABEL_LAYER, 'visibility', cityVis)
+    if (map.getLayer(COUNTRY_HIT_PAD_LAYER)) {
+      map.setLayoutProperty(COUNTRY_HIT_PAD_LAYER, 'visibility', countryVis)
+    }
     if (map.getLayer(COUNTRY_HIT_LAYER)) {
       map.setLayoutProperty(COUNTRY_HIT_LAYER, 'visibility', countryVis)
     }
@@ -2066,8 +2080,31 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
         },
       })
 
-      // Visible ring-center markers (also the primary click/hover target).
+      // Wide invisible pad under the small cyan center (hover/click target).
       // Outer ring arcs remain a hover fallback via RINGS_LAYER.
+      map.addLayer({
+        id: HIT_PAD_LAYER,
+        type: 'circle',
+        source: CITIES_SOURCE,
+        paint: {
+          'circle-radius': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            3,
+            16,
+            7,
+            20,
+            11,
+            24,
+          ],
+          'circle-color': '#00b8cc',
+          // Near-invisible — still queryable; visual marker stays on HIT_LAYER.
+          'circle-opacity': 0.001,
+          'circle-stroke-width': 0,
+        },
+      })
+
       map.addLayer({
         id: HIT_LAYER,
         type: 'circle',
@@ -2118,6 +2155,29 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
           'text-halo-color': 'rgba(3,5,10,0.9)',
           'text-halo-width': 1.4,
           'text-opacity': 0.95,
+        },
+      })
+
+      map.addLayer({
+        id: COUNTRY_HIT_PAD_LAYER,
+        type: 'circle',
+        source: COUNTRIES_SOURCE,
+        layout: { visibility: 'none' },
+        paint: {
+          'circle-radius': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            2,
+            18,
+            5,
+            22,
+            7,
+            26,
+          ],
+          'circle-color': '#00b8cc',
+          'circle-opacity': 0.001,
+          'circle-stroke-width': 0,
         },
       })
 
