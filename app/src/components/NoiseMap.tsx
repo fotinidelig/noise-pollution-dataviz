@@ -73,11 +73,15 @@ const EXPLORE_COUNTRY_INNER_COLOR: maplibregl.ExpressionSpecification = [
 /**
  * Intermittent pulse for in-view stacks (burst → pause → burst).
  * Hover solos one place; layer filter culls off-screen ids (refreshed on rebuild).
+ * Burst envelope fades in/out so the pause doesn’t hard-cut like the old continuous wave.
  */
 const PULSE_PHASE_STEP = 0.055
 const PULSE_TICK_MS = 80
-/** Quiet gap between crest travels (no setPaintProperty). */
-const PULSE_PAUSE_MS = 950
+/** Quiet gap between crest travels (no setPaintProperty once faded out). */
+const PULSE_PAUSE_MS = 850
+/** Fraction of burst phase spent easing opacity up / down. */
+const PULSE_FADE_IN = 0.2
+const PULSE_FADE_OUT = 0.28
 /** Per-ring phase lag for a soft outward cascade. */
 const PULSE_STAGGER_PER_RING = 0.035
 const PULSE_BURST_FLOOR = 0.06
@@ -85,6 +89,21 @@ const PULSE_BURST_PEAK = 0.72
 const PULSE_REST_BLUR = 0.2
 /** Slightly tighter than ring rebuild pad — pulse work stays near the viewport. */
 const PULSE_VIEW_PAD_FRAC = 0.1
+
+/** Smoothstep envelope: 0 at burst edges, 1 in the middle. */
+function pulseBurstEnvelope(phase: number): number {
+  if (phase <= 0 || phase >= 1) return 0
+  if (phase < PULSE_FADE_IN) {
+    const t = phase / PULSE_FADE_IN
+    return t * t * (3 - 2 * t)
+  }
+  if (phase > 1 - PULSE_FADE_OUT) {
+    const t = (1 - phase) / PULSE_FADE_OUT
+    return t * t * (3 - 2 * t)
+  }
+  return 1
+}
+
 const HIT_LAYER = 'aggl-hit'
 const LABEL_LAYER = 'aggl-labels'
 const COUNTRY_HIT_LAYER = 'aggl-country-hit'
@@ -598,11 +617,16 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
 
   /**
    * One burst frame for whatever the pulse filter currently includes.
-   * ring_index stagger softens the outward cascade.
+   * ring_index stagger softens the cascade; envelope fades the whole stack in/out.
    */
   const paintPulseBurstFrame = (phase: number) => {
     const map = mapRef.current
     if (!map || !map.getLayer(RINGS_PULSE_LAYER)) return
+    const env = pulseBurstEnvelope(phase)
+    if (env <= 0.001) {
+      paintPulseIdle()
+      return
+    }
     const N = RING_PULSE_BUCKETS
     const opacityStops: number[] = []
     const blurStops: number[] = []
@@ -610,8 +634,9 @@ export function NoiseMap({ story = null }: NoiseMapProps) {
       let t = i / RING_PULSE_PERIOD - phase - i * PULSE_STAGGER_PER_RING
       t = t - Math.floor(t)
       const soft = Math.sin(t * Math.PI) ** 3
-      opacityStops.push(i, PULSE_BURST_FLOOR + (PULSE_BURST_PEAK - PULSE_BURST_FLOOR) * soft)
-      blurStops.push(i, 0.12 + 0.95 * soft)
+      const crest = PULSE_BURST_FLOOR + (PULSE_BURST_PEAK - PULSE_BURST_FLOOR) * soft
+      opacityStops.push(i, crest * env)
+      blurStops.push(i, PULSE_REST_BLUR + (0.12 + 0.95 * soft - PULSE_REST_BLUR) * env)
     }
 
     const ringIdx = [
