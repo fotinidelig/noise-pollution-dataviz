@@ -17,7 +17,11 @@ export type DbPreview = {
 }
 
 type DbPlayContextValue = {
-  /** When false (leave / Hide / jump), all previews must stop. */
+  /**
+   * When false (Hide / card hidden), all previews must stop and buttons disable.
+   * Not tied to scrolly `activeId` — PLAY works whenever the control is rendered
+   * and the story card is visible (embed IO can leave activeId wrong).
+   */
   active: boolean
   preview: DbPreview | null
   /** Toggle this instance; starting one clears any other. */
@@ -38,7 +42,8 @@ type ProviderProps = {
 
 /**
  * Shared story dB preview bus: one active level, white-noise + parent grain.
- * Clears on `active` false (leave / Hide / jump) — same discipline as SoundScale.
+ * Clears on `active` false (Hide / card hidden). Parent may also clear preview
+ * on real step changes; start/stop is not gated on scrolly `activeId`.
  */
 export function DbPlayProvider({
   active,

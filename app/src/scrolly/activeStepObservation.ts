@@ -70,7 +70,7 @@ export function pickStepClosestToViewportCenter(
   }
 
   // If every step is off-screen (extreme scroll), nearest mid anyway so
-  // activeId (and PLAY gating) never go stale.
+  // activeId (map camera / rail) never goes stale.
   if (!bestId) {
     for (const el of nodes) {
       const rect = el.getBoundingClientRect()

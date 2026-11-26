@@ -224,10 +224,12 @@ export function ScrollyApp() {
     setCardHidden(true)
   }
 
-  // Facts: always-on grain at 75 dB (no DbPlay). Sounds / body DbPlay / calm scatter otherwise.
+  // Facts: always-on grain at 75 dB (no DbPlay). Yield if a body DbPlay preview
+  // is running (embed can leave activeId stuck on hero while the control is visible).
+  // Sounds / body DbPlay / calm scatter otherwise.
   const FACTS_GRAIN_DB = 75
-  const factsGrain = active?.id === 'hero' && !cardHidden
-  const dbPlayGrain = Boolean(dbPreview) && !cardHidden && active?.id !== 'hero'
+  const factsGrain = active?.id === 'hero' && !cardHidden && !dbPreview
+  const dbPlayGrain = Boolean(dbPreview) && !cardHidden
   const soundsGrain =
     Boolean(playingSound) &&
     active?.id === 'sounds' &&
@@ -248,7 +250,8 @@ export function ScrollyApp() {
     if (active?.id !== 'sounds' || cardHidden) setPlayingSound(null)
   }, [active?.id, cardHidden])
 
-  // Any beat change or Hide tears down body dB preview (Facts never hosts one).
+  // Beat change or Hide tears down body dB preview (standalone leave hygiene).
+  // PLAY start itself is not gated on activeId — see dbPlayActive.
   useEffect(() => {
     setDbPreview(null)
   }, [active?.id, cardHidden])
@@ -278,8 +281,10 @@ export function ScrollyApp() {
     }
   }
 
-  // Facts has no DbPlay; elsewhere stop on Hide / leave via active=false.
-  const dbPlayActive = !cardHidden && active?.id !== 'hero'
+  // PLAY whenever a beat control is on screen and the card is not Hidden.
+  // Do not require activeId (embed IO can leave it wrong); Facts has no DbPlay.
+  // Hide still forces active=false → stop. Step change still clears via effect above.
+  const dbPlayActive = !cardHidden
   const soundScaleActive = activeId === 'sounds' && !cardHidden
 
   if (!metrics || !steps.length) {
