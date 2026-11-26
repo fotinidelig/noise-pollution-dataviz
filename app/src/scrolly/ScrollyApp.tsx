@@ -18,6 +18,14 @@ import {
   loudnessRatio,
   type SoundAnchor,
 } from './SoundScale'
+import {
+  EMBED_ROOT_MARGIN,
+  STANDALONE_ROOT_MARGIN,
+  STEP_THRESHOLDS,
+  isDocumentMuchTallerThanViewport,
+  isEmbedLikeContext,
+  pickStepClosestToViewportCenter,
+} from './activeStepObservation'
 import type { StoryMetrics, StoryStepId } from './storyTypes'
 import './scrolly.css'
 
@@ -99,27 +107,68 @@ export function ScrollyApp() {
       .filter((n): n is HTMLElement => Boolean(n))
     if (!nodes.length) return
 
-    // Activate as soon as a beat starts entering the upper half of the
-    // viewport (not only when deeply centered), so the map flies in parallel
-    // with reading the incoming card.
+    // Embed / tall iframe: soften the IO band and keep a midpoint→viewport-center
+    // fallback so activeId (and PLAY) still update when tight -48% under-fires.
+    // Standalone Pages keep the original upper-half rootMargin. root is always
+    // null (viewport) — never document (invalid for IntersectionObserver).
+    const embedLike = isEmbedLikeContext()
+    const rootMargin = embedLike ? EMBED_ROOT_MARGIN : STANDALONE_ROOT_MARGIN
+
+    const applyStandaloneFromIo = (entries: IntersectionObserverEntry[]) => {
+      const visible = entries
+        .filter((e) => e.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)
+      const top = visible[0]
+      if (!top) return
+      const id = (top.target as HTMLElement).dataset.stepId as StoryStepId
+      if (id) setActiveId(id)
+    }
+
+    const syncEmbedFromGeometry = () => {
+      const id = pickStepClosestToViewportCenter(nodes)
+      if (id) setActiveId(id)
+    }
+
+    // Embed: IO (soft margin) only nudges a re-measure; geometry is source of truth
+    // so IO + scroll never fight. Standalone: original upper-half IO ranking.
     const obs = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)
-        const top = visible[0]
-        if (!top) return
-        const id = (top.target as HTMLElement).dataset.stepId as StoryStepId
-        if (id) setActiveId(id)
-      },
+      embedLike
+        ? () => syncEmbedFromGeometry()
+        : applyStandaloneFromIo,
       {
         root: null,
-        threshold: [0.05, 0.12, 0.22, 0.35, 0.5],
-        rootMargin: '0px 0px -48% 0px',
+        threshold: STEP_THRESHOLDS,
+        rootMargin,
       },
     )
     for (const n of nodes) obs.observe(n)
-    return () => obs.disconnect()
+
+    let raf = 0
+    const onScrollOrResize = () => {
+      if (raf) return
+      raf = window.requestAnimationFrame(() => {
+        raf = 0
+        syncEmbedFromGeometry()
+      })
+    }
+
+    if (embedLike) {
+      // Seed activeId immediately; tight IO alone can miss the first paint in a tall iframe.
+      syncEmbedFromGeometry()
+      window.addEventListener('resize', onScrollOrResize)
+      // Internal iframe scroll only when the document is taller than the iframe viewport.
+      // Equal-height embeds (parent scrolls) still get the mount seed so PLAY is not stuck on hero.
+      if (isDocumentMuchTallerThanViewport()) {
+        window.addEventListener('scroll', onScrollOrResize, { passive: true })
+      }
+    }
+
+    return () => {
+      obs.disconnect()
+      if (raf) window.cancelAnimationFrame(raf)
+      window.removeEventListener('scroll', onScrollOrResize)
+      window.removeEventListener('resize', onScrollOrResize)
+    }
   }, [steps])
 
   const onCalmPreviewChange = (next: CalmScatterPreview | null) => {
